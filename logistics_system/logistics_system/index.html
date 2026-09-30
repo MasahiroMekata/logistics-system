@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#222222">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<title>物流システム v0.1</title>
+<style>
+*{box-sizing:border-box} body{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f5f6f8;color:#222}
+header{background:#222;color:#fff;padding:16px 20px} header h1{font-size:20px;margin:0} header small{opacity:.75}
+main{max-width:980px;margin:20px auto;padding:0 14px}.card{background:#fff;border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 1px 5px #0001}
+h2{font-size:18px;margin:0 0 14px}.row{display:flex;gap:10px;flex-wrap:wrap}.field{flex:1;min-width:180px}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}input,select,button{font:inherit}
+input,select{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;background:#fff}
+button{border:0;border-radius:8px;padding:10px 14px;background:#222;color:#fff;cursor:pointer}.secondary{background:#e9eaed;color:#222}.danger{background:#b42318}
+button:disabled{opacity:.45;cursor:not-allowed}
+#preview{max-width:260px;max-height:220px;border:1px solid #ddd;border-radius:8px;margin-top:10px}
+video{width:100%;max-width:480px;border-radius:10px;background:#111}canvas{display:none}
+.status{padding:10px;border-radius:8px;background:#f0f2f5;margin-top:10px;font-size:14px}.ok{background:#e8f7ed}.warn{background:#fff4d6}.err{background:#fdecec}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:9px;border-bottom:1px solid #eee;text-align:left;vertical-align:middle}
+.thumb{width:60px;height:60px;object-fit:contain;border:1px solid #ddd;border-radius:6px;background:#fff}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.empty{color:#777;text-align:center;padding:20px}
+.note{font-size:12px;color:#666;line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+<h1>物流システム v0.1</h1>
+<small>QR画像登録・納品資料PDF作成プロトタイプ</small>
+<div style="margin-top:10px"><button id="installBtn" class="secondary" style="display:none">ホーム画面に追加</button></div>
+</header>
+<main>
+
+<section class="card">
+<h2>1. QRコードを登録</h2>
+<div class="row">
+  <div class="field">
+    <label>店舗名</label><input id="store" placeholder="例：京都○○店">
+  </div>
+  <div class="field">
+    <label>商品名</label><input id="product" placeholder="例：商品A">
+  </div>
+  <div class="field">
+    <label>納品日</label><input id="date" type="date">
+  </div>
+</div>
+<div style="margin-top:14px" class="actions">
+  <button id="cameraBtn">カメラで撮影</button>
+  <label style="display:inline-flex;align-items:center;background:#e9eaed;color:#222;border-radius:8px;padding:10px 14px;cursor:pointer">
+    画像を選択
+    <input id="file" type="file" accept="image/*" style="display:none">
+  </label>
+  <label style="display:inline-flex;align-items:center;background:#e9eaed;color:#222;border-radius:8px;padding:10px 14px;cursor:pointer">
+    端末カメラで撮影
+    <input id="file2" type="file" accept="image/*" capture="environment" style="display:none">
+  </label>
+</div>
+<div id="cameraArea" style="display:none;margin-top:12px">
+  <video id="video" playsinline autoplay></video>
+  <div class="actions" style="margin-top:8px">
+    <button id="shot">撮影してQRを抽出</button><button id="stop" class="secondary">カメラ停止</button>
+  </div>
+</div>
+<canvas id="canvas"></canvas>
+<img id="preview" alt="QRプレビュー" style="display:none">
+<div id="status" class="status">QR画像を撮影または選択してください。</div>
+<div class="actions" style="margin-top:10px">
+  <button id="save" disabled>登録する</button>
+  <button id="clear" class="secondary">入力をクリア</button>
+</div>
+<p class="note">v0.1ではQRコードの内容（URL等）は管理データとして利用せず、既存システムで再利用できる「QR画像」として保存します。画像からQRを検出できた場合、その領域を切り出します。</p>
+</section>
+
+<section class="card">
+<h2>2. 登録済みデータ</h2>
+<div class="row">
+  <div class="field"><label>納品日で絞り込み</label><input id="filterDate" type="date"></div>
+  <div class="field"><label>店舗で絞り込み</label><select id="filterStore"><option value="">すべて</option></select></div>
+</div>
+<div class="actions" style="margin-top:12px">
+<button id="pdf" disabled>A4 PDFを作成</button>
+<button id="clearFilter" class="secondary">絞り込み解除</button>
+<button id="deleteAll" class="danger">全データ削除</button>
+</div>
+<div style="overflow:auto;margin-top:12px">
+<table><thead><tr><th>QR</th><th>店舗</th><th>商品</th><th>納品日</th><th></th></tr></thead>
+<tbody id="list"></tbody></table>
+</div>
+</section>
+
+<section class="card">
+<h2>3. このv0.1でできること</h2>
+<ul>
+<li>スマホカメラまたは画像ファイルからQRコード画像を登録</li>
+<li>QRコードの検出位置を利用して画像を自動切り出し</li>
+<li>店舗名・商品名・納品日を付与</li>
+<li>ブラウザ内にデータを保存（同じ端末・同じブラウザで利用）</li>
+<li>店舗・納品日で絞り込み</li>
+<li>選択したQRをA4縦のPDFに並べて出力</li>
+</ul>
+<p class="note">実運用前には、実際のQR画像で「撮影→切り出し→PDF印刷→既存システムで読み取り」の検証が必要です。また、現状は端末内保存なので、複数人・複数端末での共有はまだ実装していません。</p>
+</section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+let db=[];try{db=JSON.parse(localStorage.getItem("logistics_v01")||"[]")}catch(e){}
+function persist(){try{localStorage.setItem("logistics_v01",JSON.stringify(db))}catch(e){setStatus("端末への保存に失敗しました（容量超過の可能性）。","warn")}}
+let currentImage=null, stream=null;
+
+function setStatus(msg,type=""){ $("status").textContent=msg; $("status").className="status "+type; }
+
+function detectAndCrop(srcCanvas){
+  const ctx=srcCanvas.getContext("2d",{willReadFrequently:true});
+  const img=ctx.getImageData(0,0,srcCanvas.width,srcCanvas.height);
+  const code=window.jsQR(img.data,img.width,img.height,{inversionAttempts:"attemptBoth"});
+  if(!code) return null;
+  const p=[code.location.topLeftCorner,code.location.topRightCorner,code.location.bottomRightCorner,code.location.bottomLeftCorner];
+  const minX=Math.max(0,Math.floor(Math.min(...p.map(x=>x.x))-Math.max(8,srcCanvas.width*.01)));
+  const maxX=Math.min(srcCanvas.width,Math.ceil(Math.max(...p.map(x=>x.x))+Math.max(8,srcCanvas.width*.01)));
+  const minY=Math.max(0,Math.floor(Math.min(...p.map(x=>x.y))-Math.max(8,srcCanvas.height*.01)));
+  const maxY=Math.min(srcCanvas.height,Math.ceil(Math.max(...p.map(x=>x.y))+Math.max(8,srcCanvas.height*.01)));
+  const pad=Math.max(4,Math.round((maxX-minX)*.12));
+  const x=Math.max(0,minX-pad), y=Math.max(0,minY-pad);
+  const w=Math.min(srcCanvas.width-x,(maxX-minX)+pad*2), h=Math.min(srcCanvas.height-y,(maxY-minY)+pad*2);
+  const out=document.createElement("canvas");
+  const side=Math.max(w,h);
+  out.width=side; out.height=side;
+  const o=out.getContext("2d"); o.fillStyle="#fff"; o.fillRect(0,0,side,side);
+  o.drawImage(srcCanvas,x,y,w,h,(side-w)/2,(side-h)/2,w,h);
+  return {canvas:out, decoded:true};
+}
+
+function imageToCanvas(file){
+ return new Promise((resolve,reject)=>{
+   const im=new Image();
+   im.onload=()=>{
+     const max=1800, scale=Math.min(1,max/Math.max(im.width,im.height));
+     const c=$("canvas"); c.width=Math.round(im.width*scale); c.height=Math.round(im.height*scale);
+     c.getContext("2d").drawImage(im,0,0,c.width,c.height); resolve(c);
+   };
+   im.onerror=reject; im.src=URL.createObjectURL(file);
+ });
+}
+
+async function processFile(file){
+ try{
+   const c=await imageToCanvas(file);
+   const result=detectAndCrop(c);
+   if(!result){setStatus("QRコードを検出できませんでした。明るさ・角度・ピントを確認して再撮影してください。","warn");currentImage=null;$("preview").style.display="none";$("save").disabled=true;return;}
+   currentImage=result.canvas.toDataURL("image/png");
+   $("preview").src=currentImage;$("preview").style.display="block";
+   setStatus("QRコードを検出しました。切り出した画像を登録できます。","ok");$("save").disabled=false;
+ }catch(e){setStatus("画像の処理に失敗しました。","err");}
+}
+
+$("file").onchange=e=>{if(e.target.files[0])processFile(e.target.files[0]);};
+$("file2").onchange=e=>{if(e.target.files[0])processFile(e.target.files[0]);};
+
+$("cameraBtn").onclick=async()=>{
+ try{
+   stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+   $("video").srcObject=stream;$("cameraArea").style.display="block";setStatus("QRコードを画面に入れて「撮影してQRを抽出」を押してください。");
+ }catch(e){setStatus("カメラを起動できませんでした。カメラ許可を確認するか、「端末カメラで撮影」を使ってください。","err");}
+};
+$("stop").onclick=()=>stopCamera();
+function stopCamera(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}$("cameraArea").style.display="none";}
+$("shot").onclick=()=>{
+ const v=$("video"), c=$("canvas"); c.width=v.videoWidth;c.height=v.videoHeight;c.getContext("2d").drawImage(v,0,0);
+ const r=detectAndCrop(c);
+ if(!r){setStatus("QRコードを検出できませんでした。QR全体が写るように近づけてください。","warn");return;}
+ currentImage=r.canvas.toDataURL("image/png");$("preview").src=currentImage;$("preview").style.display="block";
+ setStatus("QRコードを検出しました。","ok");$("save").disabled=false;
+};
+
+$("save").onclick=()=>{
+ const store=$("store").value.trim(), product=$("product").value.trim(), date=$("date").value;
+ if(!store||!product||!date||!currentImage){setStatus("店舗名・商品名・納品日・QR画像をすべて入力してください。","warn");return;}
+ db.push({id:Date.now(),store,product,date,image:currentImage});
+ persist(); render(); clearEntry(); setStatus("登録しました。","ok");
+};
+function clearEntry(){$("store").value="";$("product").value="";$("date").value="";currentImage=null;$("preview").style.display="none";$("save").disabled=true;}
+$("clear").onclick=clearEntry;
+
+function stores(){return [...new Set(db.map(x=>x.store))].sort();}
+function filtered(){const d=$("filterDate").value,s=$("filterStore").value;return db.filter(x=>(!d||x.date===d)&&(!s||x.store===s));}
+function render(){
+ const fs=$("filterStore"), old=fs.value; fs.innerHTML='<option value="">すべて</option>'+stores().map(s=>`<option>${esc(s)}</option>`).join("");fs.value=stores().includes(old)?old:"";
+ const rows=filtered(); $("pdf").disabled=rows.length===0;
+ $("list").innerHTML=rows.length?rows.map(x=>`<tr><td><img class="thumb" src="${x.image}"></td><td>${esc(x.store)}</td><td>${esc(x.product)}</td><td>${x.date}</td><td><button class="danger" onclick="removeItem(${x.id})">削除</button></td></tr>`).join(""):'<tr><td colspan="5" class="empty">登録データがありません。</td></tr>';
+}
+window.removeItem=id=>{db=db.filter(x=>x.id!==id);persist();render();};
+$("filterDate").onchange=render;$("filterStore").onchange=render;
+$("clearFilter").onclick=()=>{$("filterDate").value="";$("filterStore").value="";render();};
+$("deleteAll").onclick=()=>{if(confirm("登録データをすべて削除しますか？")){db=[];persist();render();}};
+
+function txtImg(t,px,bold){const c=document.createElement("canvas"),x=c.getContext("2d"),f=(bold?"bold ":"")+px+'px -apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif';x.font=f;const w=Math.ceil(x.measureText(t).width)+4,h=Math.ceil(px*1.4);c.width=w;c.height=h;x.font=f;x.fillStyle="#fff";x.fillRect(0,0,w,h);x.fillStyle="#000";x.textBaseline="middle";x.fillText(t,2,h/2);return{d:c.toDataURL("image/png"),w,h};}
+function put(doc,t,px,bold,x,y,center){const i=txtImg(t,px,bold);let k=0.07;if(i.w*k>180)k=180/i.w;const w=i.w*k,h=i.h*k;doc.addImage(i.d,"PNG",center?105-w/2:x,y,w,h);return h;}
+$("pdf").onclick=async()=>{
+ const rows=filtered(); if(!rows.length)return;
+ const groups={}; rows.forEach(r=>{(groups[r.store+"|"+r.date]=groups[r.store+"|"+r.date]||[]).push(r);});
+ const {jsPDF}=window.jspdf, doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+ let firstPage=true;
+ const head=(g,cont)=>{put(doc,g[0].store+(cont?"（続き）":""),90,true,0,12,true);put(doc,"納品日： "+g[0].date,60,false,0,22,true);return 34;};
+ Object.values(groups).forEach(g=>{
+   if(!firstPage)doc.addPage(); firstPage=false;
+   let y=head(g,false); const x=15,qr=42;
+   g.forEach(r=>{
+     if(y+58>285){doc.addPage();y=head(g,true);}
+     put(doc,r.product,60,true,x,y,false);
+     doc.addImage(r.image,"PNG",x,y+8,qr,qr);
+     y+=58;
+   });
+ });
+ const first=rows[0], name=("納品資料_"+(Object.keys(groups).length>1?"複数店舗":first.store)+"_"+(Object.keys(groups).length>1?"":first.date)).replace(/[\\/:*?"<>|]/g,"_").replace(/_$/,"")+".pdf";
+ try{
+   const dl=window.claude&&await window.claude.use("downloads");
+   if(dl){await dl.save({filename:name,data:doc.output("blob")});setStatus("PDFを作成しました。","ok");}
+   else{doc.save(name);}
+ }catch(e){setStatus(e&&e.code==="declined"?"保存をキャンセルしました。":"PDFの保存に失敗しました。","warn");}
+};
+
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+render();
+</script>
+<script>
+let deferredPrompt;
+window.addEventListener("beforeinstallprompt", e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  const b=document.getElementById("installBtn");
+  if(b)b.style.display="inline-block";
+});
+document.getElementById("installBtn")?.addEventListener("click", async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt=null;
+  document.getElementById("installBtn").style.display="none";
+});
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.error));
+}
+</script>
+</body>
+</html>
