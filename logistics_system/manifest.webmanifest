@@ -1,0 +1,23 @@
+{
+  "name": "物流システム v0.2",
+  "short_name": "物流システム",
+  "description": "QR画像を管理し、納品用A4 PDFを作成する物流業務支援PWA",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f6f8",
+  "theme_color": "#222222",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
