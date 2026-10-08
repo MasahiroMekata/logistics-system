@@ -11,9 +11,10 @@
  *
  * ブラウザからは text/plain でPOSTされるため、CORSの事前リクエストを避けられます。
  */
+
 const CONFIG = {
-  TRANSFER_TOKEN: 'CHANGE_ME_TO_A_LONG_RANDOM_TOKEN',
-  DEFAULT_TO: 'CHANGE_ME@example.com',
+  TRANSFER_TOKEN: 'MekaQR_2026_10_08_X7kP92mQa8Ls4Tn6',
+  DEFAULT_TO: 'mekameka28g@gmail.com',
   SUBJECT_PREFIX: '物流システム QRデータ'
 };
 
