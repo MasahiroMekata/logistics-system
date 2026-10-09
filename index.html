@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#222">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>物流システム v4</title>
+<title>物流システム v5</title>
 <link rel="manifest" href="manifest.webmanifest">
 <style>
 *{box-sizing:border-box}
@@ -29,7 +29,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .row{display:flex;gap:10px;flex-wrap:wrap}.field{flex:1;min-width:190px}
 label{font-size:13px;font-weight:700;display:block;margin-bottom:5px}
 input,select,button{font:inherit} input,select{width:100%;padding:10px;border:1px solid #cfd3d8;border-radius:8px;background:#fff}
-.actions,.toolbar,.bulk{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.actions,.toolbar,.bulkFields,.applyActions{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.bulkFields .field{flex:1;min-width:190px}
+.applyActions{margin-top:10px;align-items:stretch}
+.applyActions button{flex:1;min-width:190px}
 .status{padding:10px;border-radius:8px;background:#eef0f2;margin-top:10px;font-size:14px}
 .ok{background:#e8f7ed}.warn{background:#fff4d6}.err{background:#fdecec}
 .note{font-size:12px;color:#666;line-height:1.65}.count{font-size:13px;color:#555;margin-left:auto}
@@ -54,7 +57,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 </style>
 </head>
 <body>
-<header><h1>物流システム v4</h1><small>スマホQR登録 → Gmail一方向移行 → PC情報付与 → A4印刷</small></header>
+<header><h1>物流システム v5</h1><small>スマホでQRコード登録 → QRコードの送信 → PCでラベル付与 → A印刷</small></header>
 <div class="wrap">
 
 <div class="nav">
@@ -78,7 +81,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 
 <section id="scan" class="page active">
   <div class="card">
-    <h2>手順1：QRコードを登録</h2>
+    <h2>手順1：QRコード登録</h2>
     <p class="note">QR全体が白い枠内に入り、正面からまっすぐ写っている場合のみ登録します。小さい・はみ出す・傾く・遠近で歪むQRは保存しません。同じQRは重複登録しません。画像アップロードによる追加機能はありません。</p>
     <div class="actions">
       <button id="startScan">連続スキャン開始</button>
@@ -92,7 +95,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
   </div>
 
   <div class="card">
-    <h2>手順2：登録したQRコードを確認</h2>
+    <h2>手順2：登録したQRコード確認</h2>
     <p class="note">QRは1つずつ選択できます。複数選択・全選択してから削除や送信を行えます。</p>
     <div class="actions">
       <button id="selectPendingAll" class="secondary">全選択</button>
@@ -104,7 +107,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
   </div>
 
   <div class="card transferCard">
-    <h2>手順3：QRコードを送信</h2>
+    <h2>手順3：QRコード送信</h2>
     <p class="note">手順2で選択したQRコードを、指定したGmailアドレスへ送信します。全件送りたい場合は手順2で「全選択」してください。</p>
     <button id="sendSelected">QRコードを送信</button>
     <span id="transferStatus" class="count"></span>
@@ -114,28 +117,30 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 <section id="manage" class="page">
   <div class="card">
     <h2>手順4：QRコード読込</h2>
-    <p class="note">Gmailで受信したQR画像をPCへ保存し、複数ファイルをまとめて選択して一括追加できます。すでに登録済みの同じQRは追加しません。</p>
+    <p class="note">Gmailで受信したURL一覧（.txt）をPCへ保存し、一括読み込みします。URLからQRコード画像を再生成します。同じURLは重複登録しません。</p>
     <label style="display:inline-flex;align-items:center;background:#222;color:#fff;border-radius:8px;padding:10px 14px;cursor:pointer">
-      QR画像を一括読込
-      <input id="pcImportImages" type="file" accept="image/png,image/jpeg,image/webp" multiple style="display:none">
+      URL一覧を一括読込
+      <input id="pcImportImages" type="file" accept=".txt,.csv,text/plain,text/csv" multiple style="display:none">
     </label>
     <div id="pcImportStatus" class="status">PCへ保存したQR画像を選択してください。</div>
   </div>
 
   <div class="card">
-    <h2>手順5：QRコード一覧 / ラベルの付与</h2>
-    <div class="bulk">
+    <h2>手順5：ラベルの付与</h2>
+    <div class="bulkFields">
       <div class="field dateField" id="dateWrap"><label>納品日</label><input id="bulkDate" type="date" aria-label="納品日を選択"><span class="datePlaceholder">納品日を選択</span></div>
-      <div class="field"><label>ホール名</label><div class="storeSuggestWrap"><input id="bulkHall" autocomplete="off" placeholder="ホール名を入力・検索・選択"><div id="hallSuggestions" class="storeSuggest"></div></div></div>
+      <div class="field"><label>本店名</label><select id="bulkMain"><option value="">本店名を選択</option></select></div><div class="field"><label>ホール名</label><select id="bulkHall"><option value="">先に本店名を選択</option></select></div>
       <div class="field"><label>商品名</label><input id="bulkProduct" list="productList" placeholder="商品名を入力"><datalist id="productList"></datalist></div>
+    </div>
+    <div class="applyActions">
       <button id="applyDate">選択QRに納品日を付与</button>
       <button id="applyHall">選択QRにホール名を付与</button>
       <button id="applyProduct">選択QRに商品名を付与</button>
     </div>
-    <div class="actions" style="margin-top:12px"><button id="selectAll">表示中を全選択</button><button id="unselectAll" class="secondary">選択解除</button><button id="deleteSelected" class="danger">選択QR削除</button><span id="manageCount" class="count"></span></div>
+    <div class="actions" style="margin-top:12px"><button id="selectAll">全選択</button><button id="unselectAll" class="secondary">選択解除</button><button id="deleteSelected" class="danger">選択QR削除</button><span id="manageCount" class="count"></span></div>
   </div>
-  <div class="card tablewrap">
-    <table><thead><tr><th><input id="headCheck" type="checkbox"></th><th>QR</th><th>納品日</th><th>ホール</th><th>商品</th><th>状態</th><th>操作</th></tr></thead><tbody id="manageBody"></tbody></table>
+  <div class="card">
+    <div id="manageBody" class="qrgrid"></div>
   </div>
 </section>
 
@@ -143,14 +148,14 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
   <div class="card">
     <h2>手順6：印刷するQRコード選択</h2>
     <div class="toolbar">
-      <div class="field"><label>納品日（必須）</label><input id="printDate" type="date"></div>
       <div class="field"><label>ホール名（必須）</label><select id="printHall"><option value="">ホール名を選択</option></select></div>
+      <div class="field"><label>納品予定日（PDF見出し）</label><input id="printDate" type="date"></div>
       <div class="field"><label>1ページあたり</label><select id="perPage"><option value="4">4個（2列×2行）</option><option value="6">6個（2列×3行）</option></select></div>
     </div>
-    <div class="actions" style="margin-top:12px"><button id="refreshPrint">対象を表示</button><button id="selectPrintAll" class="secondary">対象を全選択</button><button id="unselectPrintAll" class="secondary">選択解除</button><span id="printCount" class="count"></span></div>
+    <div class="actions" style="margin-top:12px"><button id="refreshPrint">対象を表示</button><button id="selectPrintAll" class="secondary">全選択</button><button id="unselectPrintAll" class="secondary">選択解除</button><span id="printCount" class="count"></span></div>
   </div>
-  <div class="card tablewrap">
-    <table><thead><tr><th><input id="printHeadCheck" type="checkbox"></th><th>QR</th><th>納品日</th><th>ホール</th><th>商品</th></tr></thead><tbody id="printBody"></tbody></table>
+  <div class="card">
+    <div id="printBody" class="qrgrid"></div>
   </div>
 
   <div class="card">
@@ -166,7 +171,10 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
     <p class="note">PDF作成後のQRを一時的に履歴として管理します。</p>
     <div class="actions"><button id="restorePrinted" class="secondary">選択を未印刷に戻す</button><button id="deletePrinted" class="danger">選択を完全削除</button></div>
   </div>
-  <div class="card tablewrap"><table><thead><tr><th><input id="printedHead" type="checkbox"></th><th>QR</th><th>納品日</th><th>ホール</th><th>商品</th><th>印刷日時</th></tr></thead><tbody id="printedBody"></tbody></table></div>
+  <div class="card">
+    <div class="actions" style="margin-bottom:12px"><button id="selectPrintedAll">全選択</button><button id="unselectPrintedAll" class="secondary">選択解除</button><button id="deletePrinted" class="danger">選択QR削除</button><span id="printedCount" class="count"></span></div>
+    <div id="printedBody" class="qrgrid"></div>
+  </div>
 </section>
 
 <section id="settings" class="page">
@@ -181,9 +189,9 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
     <button id="saveTransferSettings">移行設定を保存</button><div id="transferConfigStatus" class="status">未設定</div>
   </div>
   <div class="card settings">
-    <h2>ホールマスタ</h2>
-    <p class="note">1行に1ホール。例えば「京」と入力すると京都東ホール・京都西ホールなどを候補表示できます。</p>
-    <textarea id="hallMaster"></textarea><button id="saveSettings">ホールリストを保存</button>
+    <h2>本店名・ホールマスタ</h2>
+    <p class="note">1行に「本店名,ホール名」を入力してください。同じ本店名に複数ホールを登録できます。例：DM,京都東店</p>
+    <textarea id="hallMaster" placeholder="DM,京都東店&#10;DM,京都西店&#10;ABC,大阪中央店"></textarea><button id="saveSettings">本店名・ホールリストを保存</button>
   </div>
   <div class="card">
     <h2>データ管理</h2>
@@ -194,6 +202,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 const KEY='logistics_v4_data', HALLKEY='logistics_v4_halls', PRODUCTKEY='logistics_v4_products', CFGKEY='logistics_v4_transfer', SESSIONKEY='logistics_v4_session';
@@ -201,11 +210,15 @@ let data=JSON.parse(localStorage.getItem(KEY)||'[]');
 let selected=new Set(), pendingSelected=new Set(), printSelected=new Set(), printedSelected=new Set();
 let sessionIds=new Set(JSON.parse(sessionStorage.getItem(SESSIONKEY)||'[]'));
 let stream=null,scanTimer=null,candidateRaw='',candidateCount=0,cooldownUntil=0,scanBusy=false;
-const defaultHalls=['京都東ホール','京都西ホール','大阪ホール','滋賀ホール'];
+const defaultHalls=[{main:'DM',hall:'京都東店'},{main:'DM',hall:'京都西店'},{main:'大阪本店',hall:'大阪ホール'},{main:'滋賀本店',hall:'滋賀ホール'}];
+function hallEntries(){const raw=JSON.parse(localStorage.getItem(HALLKEY)||'null'); if(!raw)return defaultHalls; return raw.map(x=>typeof x==='string'?{main:'未分類',hall:x}:x)}
+function mainNames(){return [...new Set(hallEntries().map(x=>x.main))].sort()}
+function hallsFor(main){return hallEntries().filter(x=>x.main===main).map(x=>x.hall).sort()}
+function hallLabel(x){return [x.main,x.hall].filter(Boolean).join('／')}
 
 function save(){localStorage.setItem(KEY,JSON.stringify(data))}
 function saveSession(){sessionStorage.setItem(SESSIONKEY,JSON.stringify([...sessionIds]))}
-function halls(){return JSON.parse(localStorage.getItem(HALLKEY)||'null')||defaultHalls}
+function halls(){return hallEntries().map(x=>x.hall)}
 function products(){return [...new Set([...JSON.parse(localStorage.getItem(PRODUCTKEY)||'[]'),...data.map(x=>x.product).filter(Boolean)])]}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function dateLabel(d){if(!d)return '';const [y,m,day]=d.split('-');return `${y}年${Number(m)}月${Number(day)}日`}
@@ -239,7 +252,7 @@ function cropQR(c,code){
 function addQR(image,raw,session=true){
  const key='qr:'+raw;if(data.some(x=>x.qrKey===key))return false;
  const id=crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random());
- data.push({id,qrKey:key,image,date:'',hall:'',product:'',status:'unprinted',createdAt:new Date().toISOString()});
+ data.push({id,qrKey:key,url:raw,image,date:'',mainName:'',hall:'',product:'',status:'unprinted',createdAt:new Date().toISOString()});
  if(session){sessionIds.add(id);saveSession()}save();return true
 }
 async function startScan(){
@@ -275,57 +288,51 @@ async function sendSelected(){
  const rows=data.filter(x=>pendingSelected.has(x.id));if(!rows.length)return alert('送信するQRを選択してください。');
  const c=cfg();if(!c.url||!c.to||!c.token)return alert('共通設定でGAS URL・送信先Gmail・転送トークンを設定してください。');
  const max=8*1024*1024;let batches=[],cur=[],size=0;
- for(const r of rows){const s=r.image.length*0.75;if(cur.length&&size+s>max){batches.push(cur);cur=[];size=0}cur.push(r);size+=s}if(cur.length)batches.push(cur);
+ for(const r of rows){const s=String(r.url||'').length*2+8;if(cur.length&&size+s>max){batches.push(cur);cur=[];size=0}cur.push(r);size+=s}if(cur.length)batches.push(cur);
  try{
-  for(let i=0;i<batches.length;i++){const payload={token:c.token,to:c.to,date:new Date().toISOString().slice(0,10),batchId:`v4-${Date.now()}-${i+1}`,images:batches[i].map((r,j)=>({name:`QR_${String(j+1).padStart(3,'0')}.png`,mime:'image/png',base64:dataUrlBase64(r.image)}))};$('transferStatus').textContent=`送信中 ${i+1}/${batches.length}`;await fetch(c.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})}
-  $('transferStatus').textContent=`送信完了：${rows.length}枚`;rows.forEach(r=>{sessionIds.delete(r.id);pendingSelected.delete(r.id)});saveSession();renderPending();status('QRコードを送信しました。PC側でGmail添付画像を読み込んでください。','ok')
+  for(let i=0;i<batches.length;i++){const payload={token:c.token,to:c.to,date:new Date().toISOString().slice(0,10),batchId:`v5-${Date.now()}-${i+1}`,urls:batches[i].map(r=>r.url)};$('transferStatus').textContent=`送信中 ${i+1}/${batches.length}`;await fetch(c.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})}
+  $('transferStatus').textContent=`送信完了：URL ${rows.length}件`;rows.forEach(r=>{sessionIds.delete(r.id);pendingSelected.delete(r.id)});saveSession();renderPending();status('URL一覧を送信しました。PC側でGmail添付のURL一覧（.txt）を読み込んでください。','ok')
  }catch(e){$('transferStatus').textContent='送信失敗';alert('送信に失敗しました。設定と通信状態を確認してください。')}
 }
 $('sendSelected').onclick=sendSelected;
 
-function fileCanvas(file){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);URL.revokeObjectURL(im.src);res(c)};im.onerror=rej;im.src=URL.createObjectURL(file)})}
+function makeQrDataUrl(url){return new Promise((resolve,reject)=>{try{const q=qrcode(0,'M');q.addData(url);q.make();const n=q.getModuleCount(),scale=12,quiet=4,size=(n+quiet*2)*scale,c=document.createElement('canvas');c.width=size;c.height=size;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);ctx.fillStyle='#000';for(let r=0;r<n;r++)for(let col=0;col<n;col++)if(q.isDark(r,col))ctx.fillRect((col+quiet)*scale,(r+quiet)*scale,scale,scale);resolve(c.toDataURL('image/png'))}catch(e){reject(e)}})}
 async function importImages(files){
  const arr=[...files];let add=0,dup=0,bad=0;$('pcImportStatus').textContent=`読み込み中… 0/${arr.length}`;
- for(let i=0;i<arr.length;i++){try{const c=await fileCanvas(arr[i]),code=decodeCanvas(c);if(!code){bad++;continue}if(addQR(cropQR(c,code),code.data,false))add++;else dup++}catch(e){bad++}$('pcImportStatus').textContent=`読み込み中… ${i+1}/${arr.length}`}
- $('pcImportStatus').textContent=`読み込み完了：追加 ${add}件 / 重複 ${dup}件 / 読み取り不可 ${bad}件`;renderManage()
+ for(let i=0;i<arr.length;i++){try{const txt=await arr[i].text(),urls=txt.split(/[\r\n,]+/).map(x=>x.trim()).filter(x=>/^https?:\/\//i.test(x));if(!urls.length){bad++;continue}for(const url of urls){try{if(data.some(x=>x.qrKey==='qr:'+url)){dup++;continue}const image=await makeQrDataUrl(url);if(addQR(image,url,false))add++;else dup++}catch(e){bad++}}}catch(e){bad++}$('pcImportStatus').textContent=`読み込み中… ${i+1}/${arr.length}`}
+ $('pcImportStatus').textContent=`読み込み完了：追加 ${add}件 / 重複 ${dup}件 / 読み取り不可 ${bad}件`;$('pcImportStatus').className='status ok';renderManage()
 }
 $('pcImportImages').onchange=async e=>{await importImages(e.target.files);e.target.value=''}
 
 function renderManage(){
- const rows=data.filter(x=>x.status==='unprinted');$('manageCount').textContent=`表示 ${rows.length}件`;
- $('manageBody').innerHTML=rows.length?rows.map(x=>`<tr><td><input class="mcheck" data-id="${x.id}" type="checkbox" ${selected.has(x.id)?'checked':''}></td><td><img class="thumb" src="${x.image}"></td><td>${x.date||'<span class="pill">未設定</span>'}</td><td>${esc(x.hall)||'<span class="pill">未設定</span>'}</td><td>${esc(x.product)||'<span class="pill">未設定</span>'}</td><td>${x.status==='printed'?'印刷済み':'未印刷'}</td><td><button class="danger" data-del="${x.id}">削除</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty">QRコードがありません。</td></tr>';
+ const rows=data.filter(x=>x.status==='unprinted');$('manageCount').textContent=`今回 ${rows.length}件 / 選択 ${rows.filter(x=>selected.has(x.id)).length}件`;
+ $('manageBody').innerHTML=rows.length?rows.map(x=>`<div class="qritem"><input class="mcheck check" data-id="${x.id}" type="checkbox" ${selected.has(x.id)?'checked':''}><img src="${x.image}"><div class="note">納品日：${x.date?dateLabel(x.date):'未設定'}</div><div class="note">本店：${esc(x.mainName)||'未設定'}</div><div class="note">ホール：${esc(x.hall)||'未設定'}</div><div class="note">商品：${esc(x.product)||'未設定'}</div></div>`).join(''):'<div class="empty">QRコードがありません。</div>';
  document.querySelectorAll('.mcheck').forEach(e=>e.onchange=()=>e.checked?selected.add(e.dataset.id):selected.delete(e.dataset.id));
- document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{data=data.filter(x=>x.id!==b.dataset.del);selected.delete(b.dataset.del);save();renderManage();renderPending()})
 }
 $('selectAll').onclick=()=>{data.filter(x=>x.status==='unprinted').forEach(x=>selected.add(x.id));renderManage()}
 $('unselectAll').onclick=()=>{selected.clear();renderManage()}
-$('headCheck').onchange=e=>{data.filter(x=>x.status==='unprinted').forEach(x=>e.target.checked?selected.add(x.id):selected.delete(x.id));renderManage()}
 function bulk(field,id){const val=$(id).value.trim();if(!val)return alert('値を入力してください。');const rows=data.filter(x=>selected.has(x.id)&&x.status==='unprinted');if(!rows.length)return alert('対象QRを選択してください。');rows.forEach(x=>x[field]=val);if(field==='product'){const p=products();if(!p.includes(val)){p.push(val);localStorage.setItem(PRODUCTKEY,JSON.stringify(p))}}save();renderManage();renderPending();renderLists()}
-$('applyDate').onclick=()=>bulk('date','bulkDate');$('applyHall').onclick=()=>bulk('hall','bulkHall');$('applyProduct').onclick=()=>bulk('product','bulkProduct');
+$('applyDate').onclick=()=>bulk('date','bulkDate');$('applyHall').onclick=()=>{const h=$('bulkHall').value,m=$('bulkMain').value;if(!m||!h)return alert('本店名とホール名を選択してください。');const rows=data.filter(x=>selected.has(x.id)&&x.status==='unprinted');if(!rows.length)return alert('対象QRを選択してください。');rows.forEach(x=>{x.mainName=m;x.hall=h});save();renderManage();renderPending();renderLists()};$('applyProduct').onclick=()=>bulk('product','bulkProduct');
 $('deleteSelected').onclick=()=>{const ids=[...selected];if(!ids.length)return alert('削除するQRを選択してください。');if(confirm(`${ids.length}件を削除しますか？`)){data=data.filter(x=>!ids.includes(x.id));selected.clear();save();renderManage();renderPending()}}
 
-function renderHallSuggest(){
- const q=$('bulkHall').value.trim().toLowerCase(),box=$('hallSuggestions');if(!q){box.classList.remove('show');box.innerHTML='';return}
- const ms=halls().filter(x=>x.toLowerCase().includes(q));box.innerHTML=ms.length?ms.map(x=>`<div class="storeSuggestItem" data-hall="${esc(x)}">${esc(x)}</div>`).join(''):'<div class="storeSuggestItem">一致するホールがありません</div>';box.classList.add('show');
- box.querySelectorAll('[data-hall]').forEach(e=>e.onmousedown=ev=>{ev.preventDefault();$('bulkHall').value=e.dataset.hall;box.classList.remove('show')})
-}
-$('bulkHall').oninput=renderHallSuggest;$('bulkHall').onfocus=renderHallSuggest;$('bulkHall').onblur=()=>setTimeout(()=>$('hallSuggestions').classList.remove('show'),150)
+function fillMainSelect(){const sel=$('bulkMain'),old=sel.value;sel.innerHTML='<option value="">本店名を選択</option>'+mainNames().map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(mainNames().includes(old))sel.value=old;fillHallSelect()}
+function fillHallSelect(){const m=$('bulkMain').value,sel=$('bulkHall'),old=sel.value;sel.innerHTML='<option value="">ホール名を選択</option>'+hallsFor(m).map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(hallsFor(m).includes(old))sel.value=old}
+$('bulkMain').onchange=fillHallSelect;
 function renderLists(){$('productList').innerHTML=products().map(x=>`<option value="${esc(x)}">`).join('')}
 $('bulkDate').onchange=()=>$('dateWrap').classList.toggle('hasValue',!!$('bulkDate').value);
 
-function printRows(){const d=$('printDate').value,h=$('printHall').value;return data.filter(x=>x.status==='unprinted'&&x.date===d&&h&&x.hall===h)}
+function printRows(){const h=$('printHall').value;return data.filter(x=>x.status==='unprinted'&&h&&x.hall===h)}
 function refreshPrint(){
- const old=$('printHall').value,d=$('printDate').value,hs=[...new Set(data.filter(x=>x.status==='unprinted'&&x.date===d).map(x=>x.hall).filter(Boolean))].sort();
+ const old=$('printHall').value,hs=[...new Set(data.filter(x=>x.status==='unprinted').map(x=>x.hall).filter(Boolean))].sort();
  $('printHall').innerHTML='<option value="">ホール名を選択</option>'+hs.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(hs.includes(old))$('printHall').value=old;
- const rows=printRows(),sel=rows.filter(x=>printSelected.has(x.id)).length;$('printCount').textContent=d&&$('printHall').value?`対象 ${rows.length}件 / 選択 ${sel}件`:'納品日とホール名を選択してください';
- $('printBody').innerHTML=rows.length?rows.map(x=>`<tr><td><input class="pcheck" data-id="${x.id}" type="checkbox" ${printSelected.has(x.id)?'checked':''}></td><td><img class="thumb" src="${x.image}"></td><td>${x.date}</td><td>${esc(x.hall)}</td><td>${esc(x.product)}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">納品日とホール名（必須）を選択してください。</td></tr>';
+ const rows=printRows(),sel=rows.filter(x=>printSelected.has(x.id)).length;$('printCount').textContent=$('printHall').value?`対象 ${rows.length}件 / 選択 ${sel}件`:'ホール名を選択してください';
+ $('printBody').innerHTML=rows.length?rows.map(x=>`<div class="qritem"><input class="pcheck check" data-id="${x.id}" type="checkbox" ${printSelected.has(x.id)?'checked':''}><img src="${x.image}"><div class="note">納品日：${x.date?dateLabel(x.date):'未設定'}</div><div class="note">本店：${esc(x.mainName)||'未設定'}</div><div class="note">ホール：${esc(x.hall)}</div><div class="note">商品：${esc(x.product)||'未設定'}</div></div>`).join(''):'<div class="empty">ホール名を選択してください。</div>';
  document.querySelectorAll('.pcheck').forEach(e=>e.onchange=()=>{e.checked?printSelected.add(e.dataset.id):printSelected.delete(e.dataset.id);refreshPrint()});$('makePdf').disabled=!rows.some(x=>printSelected.has(x.id))
 }
-$('refreshPrint').onclick=()=>{if(!$('printDate').value)return alert('納品日を選択してください。');if(!$('printHall').value)return alert('ホール名を選択してください。');refreshPrint()}
-$('printDate').onchange=refreshPrint;$('printHall').onchange=refreshPrint
-$('selectPrintAll').onclick=()=>{if(!$('printDate').value||!$('printHall').value)return alert('納品日とホール名を選択してください。');printRows().forEach(x=>printSelected.add(x.id));refreshPrint()}
+$('refreshPrint').onclick=()=>{if(!$('printHall').value)return alert('ホール名を選択してください。');refreshPrint()}
+$('printHall').onchange=refreshPrint;$('printDate').onchange=refreshPrint
+$('selectPrintAll').onclick=()=>{if(!$('printHall').value)return alert('ホール名を選択してください。');printRows().forEach(x=>printSelected.add(x.id));refreshPrint()}
 $('unselectPrintAll').onclick=()=>{printRows().forEach(x=>printSelected.delete(x.id));refreshPrint()}
-$('printHeadCheck').onchange=e=>{if(!$('printDate').value||!$('printHall').value)return alert('納品日とホール名を選択してください。');printRows().forEach(x=>e.target.checked?printSelected.add(x.id):printSelected.delete(x.id));refreshPrint()}
 
 async function loadImage(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src})}
 async function makePdf(){
@@ -334,8 +341,8 @@ async function makePdf(){
  const PW=1240,PH=1754,margin=36,gap=14,header=170,cellW=(PW-margin*2-gap)/2,cellH=(PH-header-margin-gap*(rpp-1))/rpp;
  for(let start=0;start<rows.length;start+=per){
   if(start)doc.addPage();const cv=document.createElement('canvas');cv.width=PW;cv.height=PH;const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,PW,PH);ctx.fillStyle='#111';ctx.textAlign='center';
-  ctx.font='bold 52px sans-serif';ctx.fillText(dateLabel($('printDate').value),PW/2,58);
-  ctx.font='bold 42px sans-serif';ctx.fillText($('printHall').value,PW/2,116);
+  const titleDate=$('printDate').value||rows[start].date||'';ctx.font='bold 52px sans-serif';ctx.fillText($('printHall').value,PW/2,58);
+  ctx.font='bold 42px sans-serif';ctx.fillText(dateLabel(titleDate),PW/2,116);
   for(let j=0;j<Math.min(per,rows.length-start);j++){
    const r=rows[start+j],col=j%2,row=Math.floor(j/2),x=margin+col*(cellW+gap),y=header+row*(cellH+gap);
    ctx.strokeStyle='#888';ctx.lineWidth=2;ctx.strokeRect(x,y,cellW,cellH);
@@ -345,32 +352,34 @@ async function makePdf(){
   }
   doc.addImage(cv.toDataURL('image/jpeg',.95),'JPEG',0,0,210,297)
  }
- doc.save(`納品資料_${$('printDate').value}_${$('printHall').value}.pdf`);
- const now=new Date().toISOString();rows.forEach(x=>{x.status='printed';x.printedAt=now;printSelected.delete(x.id)});save();renderManage();refreshPrint();renderPrinted();alert(`${rows.length}件を印刷済みに移動しました。`)
+ const now=new Date().toISOString(),batchId='batch-'+now+'-'+Math.random().toString(36).slice(2,8);doc.save(`納品資料_${$('printHall').value}_${dateLabel($('printDate').value||rows[0].date)}.pdf`);rows.forEach(x=>{x.status='printed';x.printedAt=now;x.printBatchId=batchId;x.printSelectedHall=x.hall;printSelected.delete(x.id)});
+ const batches=[...new Set(data.filter(x=>x.status==='printed'&&x.hall===$('printHall').value).sort((a,b)=>(a.printedAt||'').localeCompare(b.printedAt||'')).map(x=>x.printBatchId||('legacy-'+x.printedAt)))];while(batches.length>2){const old=batches.shift();data=data.filter(x=>!(x.status==='printed'&&x.hall===$('printHall').value&&(x.printBatchId||('legacy-'+x.printedAt))===old))}save();renderManage();refreshPrint();renderPrinted();alert(`${rows.length}件を印刷済みに移動しました。ホールごとに直近2回分のPDF履歴を保持します。`);
 }
 $('makePdf').onclick=makePdf;
 
 function renderPrinted(){
  const rows=data.filter(x=>x.status==='printed').sort((a,b)=>(b.printedAt||'').localeCompare(a.printedAt||''));
- $('printedBody').innerHTML=rows.length?rows.map(x=>`<tr><td><input class="prcheck" data-id="${x.id}" type="checkbox" ${printedSelected.has(x.id)?'checked':''}></td><td><img class="thumb" src="${x.image}"></td><td>${x.date}</td><td>${esc(x.hall)}</td><td>${esc(x.product)}</td><td>${x.printedAt?new Date(x.printedAt).toLocaleString('ja-JP'):''}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">印刷済みデータはありません。</td></tr>';
- document.querySelectorAll('.prcheck').forEach(e=>e.onchange=()=>e.checked?printedSelected.add(e.dataset.id):printedSelected.delete(e.dataset.id))
+ $('printedCount').textContent=`印刷済み ${rows.length}件 / 選択 ${rows.filter(x=>printedSelected.has(x.id)).length}件`;
+ $('printedBody').innerHTML=rows.length?rows.map(x=>`<div class="qritem"><input class="prcheck check" data-id="${x.id}" type="checkbox" ${printedSelected.has(x.id)?'checked':''}><img src="${x.image}"><div class="note">納品日：${x.date?dateLabel(x.date):'未設定'}</div><div class="note">本店：${esc(x.mainName)||'未設定'}</div><div class="note">ホール：${esc(x.hall)||'未設定'}</div><div class="note">商品：${esc(x.product)||'未設定'}</div><div class="note">印刷：${x.printedAt?new Date(x.printedAt).toLocaleString('ja-JP'):''}</div></div>`).join(''):'<div class="empty">印刷済みデータはありません。</div>';
+ document.querySelectorAll('.prcheck').forEach(e=>e.onchange=()=>e.checked?printedSelected.add(e.dataset.id):printedSelected.delete(e.dataset.id));
 }
-$('printedHead').onchange=e=>{data.filter(x=>x.status==='printed').forEach(x=>e.target.checked?printedSelected.add(x.id):printedSelected.delete(x.id));renderPrinted()}
+$('selectPrintedAll').onclick=()=>{data.filter(x=>x.status==='printed').forEach(x=>printedSelected.add(x.id));renderPrinted()}
+$('unselectPrintedAll').onclick=()=>{printedSelected.clear();renderPrinted()}
 $('restorePrinted').onclick=()=>{data.filter(x=>printedSelected.has(x.id)).forEach(x=>{x.status='unprinted';delete x.printedAt});printedSelected.clear();save();renderPrinted();renderManage()}
 $('deletePrinted').onclick=()=>{if(!printedSelected.size)return;if(confirm(`${printedSelected.size}件を完全削除しますか？`)){data=data.filter(x=>!printedSelected.has(x.id));printedSelected.clear();save();renderPrinted()}}
 
 function loadSettings(){
  const c=cfg();$('gasUrl').value=c.url||'';$('transferTo').value=c.to||'';$('transferToken').value=c.token||'';
- $('transferConfigStatus').textContent=c.url&&c.to&&c.token?'Gmail移行設定済み':'未設定';$('hallMaster').value=halls().join('\n');renderLists()
+ $('transferConfigStatus').textContent=c.url&&c.to&&c.token?'Gmail移行設定済み':'未設定';$('hallMaster').value=hallEntries().map(x=>`${x.main},${x.hall}`).join('\n');fillMainSelect();renderLists()
 }
 $('saveTransferSettings').onclick=()=>{localStorage.setItem(CFGKEY,JSON.stringify({url:$('gasUrl').value.trim(),to:$('transferTo').value.trim(),token:$('transferToken').value.trim()}));loadSettings()}
-$('saveSettings').onclick=()=>{const a=$('hallMaster').value.split(/\n/).map(x=>x.trim()).filter(Boolean);localStorage.setItem(HALLKEY,JSON.stringify([...new Set(a)]));loadSettings();alert('ホールリストを保存しました。')}
-$('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({data,halls:halls(),products:products()},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='logistics_v4_backup.json';a.click();URL.revokeObjectURL(a.href)}
+$('saveSettings').onclick=()=>{const a=$('hallMaster').value.split(/\n/).map(x=>x.split(',').map(v=>v.trim())).filter(x=>x.length>=2&&x[0]&&x[1]).map(x=>({main:x[0],hall:x.slice(1).join(',')}));if(!a.length)return alert('「本店名,ホール名」の形式で1行以上入力してください。');localStorage.setItem(HALLKEY,JSON.stringify(a));loadSettings();alert('本店名・ホールリストを保存しました。')}
+$('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({data,halls:hallEntries(),products:products()},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='logistics_v4_backup.json';a.click();URL.revokeObjectURL(a.href)}
 $('importData').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const o=JSON.parse(await f.text());if(Array.isArray(o.data))data=o.data;if(Array.isArray(o.halls))localStorage.setItem(HALLKEY,JSON.stringify(o.halls));if(Array.isArray(o.products))localStorage.setItem(PRODUCTKEY,JSON.stringify(o.products));save();loadSettings();renderPending();renderManage();refreshPrint();renderPrinted();alert('バックアップを読み込みました。')}catch(err){alert('バックアップの読み込みに失敗しました。')}e.target.value=''}
 $('wipeAll').onclick=()=>{if(confirm('QRデータをすべて削除しますか？')){data=[];selected.clear();pendingSelected.clear();printSelected.clear();printedSelected.clear();sessionIds.clear();saveSession();save();renderPending();renderManage();refreshPrint();renderPrinted()}}
 
-sessionIds=new Set([...sessionIds].filter(id=>data.some(x=>x.id===id)));saveSession();loadSettings();renderPending();renderManage();refreshPrint();renderPrinted();
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?ver=4').catch(()=>{}));
+data=data.map(x=>({...x,url:x.url||String(x.qrKey||'').replace(/^qr:/,''),mainName:x.mainName||''}));save();sessionIds=new Set([...sessionIds].filter(id=>data.some(x=>x.id===id)));saveSession();loadSettings();renderPending();renderManage();refreshPrint();renderPrinted();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?ver=5').catch(()=>{}));
 </script>
 </body>
 </html>
