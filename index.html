@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#222">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>物流システム v5.4</title>
+<title>物流システム v5.5</title>
 <link rel="manifest" href="manifest.webmanifest">
 <style>
 *{box-sizing:border-box}
@@ -62,6 +62,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 .urlRow input[type=checkbox]{width:22px;height:22px;margin:0;padding:0}
 .urlIndex{color:#666;font-weight:600;text-align:right;font-size:13px}
 .urlText{overflow-wrap:anywhere;word-break:normal;font-size:14px;line-height:1.5;min-width:0}
+.urlRow.noTag{grid-template-columns:28px 34px minmax(0,1fr)}.sentTime{display:block;margin-top:2px;font-size:12px;color:#14663a;font-weight:600}
 .tag{font-size:11px;padding:2px 7px;border-radius:99px;background:#eee;color:#555;white-space:nowrap}.tag.sent{background:#d9f2e0;color:#14663a}
 .transferCard{border:2px solid #d9e7ff}.settings textarea{width:100%;min-height:150px;border:1px solid #ccc;border-radius:8px;padding:10px;font:inherit}
 .storeSuggestWrap{position:relative}.storeSuggest{display:none;position:absolute;left:0;right:0;top:100%;z-index:40;background:#fff;border:1px solid #cfd3d8;border-radius:0 0 8px 8px;box-shadow:0 5px 14px #0002;max-height:260px;overflow:auto}
@@ -72,20 +73,20 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 </style>
 </head>
 <body>
-<header><h1>物流システム v5.4</h1></header>
+<header><h1>物流システム v5.5</h1></header>
 <div class="wrap">
 
 <div class="nav">
   <div class="navGroup">
     <div class="navTitle">スマホ作業</div>
-    <div class="navButtons"><button class="navBtn active" data-page="scan">① QR連続読み込み</button></div>
+    <div class="navButtons"><button class="navBtn active" data-page="scan">① QR連続読み込み</button><button class="navBtn" data-page="sent">② 送信済み</button></div>
   </div>
   <div class="navGroup">
     <div class="navTitle">PC作業</div>
     <div class="navButtons">
-      <button class="navBtn" data-page="manage">② 情報付与</button>
-      <button class="navBtn" data-page="print">③ 印刷準備</button>
-      <button class="navBtn" data-page="printed">④ 印刷済み</button>
+      <button class="navBtn" data-page="manage">③ 情報付与</button>
+      <button class="navBtn" data-page="print">④ 印刷準備</button>
+      <button class="navBtn" data-page="printed">⑤ 印刷済み</button>
     </div>
   </div>
   <div class="navGroup">
@@ -124,10 +125,8 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
     <p class="note">行のどこをタップしても選択／解除できます。送信したいURLを選んでください（新しい順）。</p>
     <div class="actions">
       <button id="selectPendingAll" class="secondary">全選択</button>
-      <button id="selectPendingUnsent" class="secondary">未送信のみ選択</button>
       <button id="unselectPendingAll" class="secondary">選択解除</button>
       <button id="deletePendingSelected" class="danger">選択URL削除</button>
-      <button id="clearSentFromList" class="secondary">送信済みを一覧から外す</button>
     </div>
     <div style="margin-top:8px"><span id="scanCount" class="count" style="margin-left:0"></span></div>
     <div id="pendingGrid" class="urlList" style="margin-top:8px"></div>
@@ -135,15 +134,30 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 
   <div class="card transferCard">
     <h2>手順3：URL送信</h2>
-    <p class="note">手順2で選択したURLをTXTファイルにまとめ、指定したGmailアドレスへメール送信します。GASの応答を確認できた場合のみ「送信済み」にします。</p>
+    <p class="note">手順2で選択したURLをTXTファイルにまとめ、指定したGmailアドレスへメール送信します。GASの応答を確認できたURLだけ、手順2の一覧から「② 送信済み」へ移します。</p>
     <div class="actions"><button id="sendSelected">URLをTXT形式で送信</button><button id="testGasStep3" class="secondary">GAS接続テスト</button></div>
     <div id="transferStatus" class="status" style="display:none"></div>
   </div>
 </section>
 
+<section id="sent" class="page">
+  <div class="card">
+    <h2>手順4：送信済みURL確認</h2>
+    <p class="note">メールで送信したURLの履歴です（新しい順）。履歴は日付が変わると自動でクリアされます。メールが届かなかった場合などは、選択して「手順2に戻す」を押すと再送信できます。</p>
+    <div class="actions">
+      <button id="selectSentAll" class="secondary">全選択</button>
+      <button id="unselectSentAll" class="secondary">選択解除</button>
+      <button id="restoreSent">選択URLを手順2に戻す</button>
+    </div>
+    <div style="margin-top:8px"><span id="sentCount" class="count" style="margin-left:0"></span></div>
+    <div id="sentStatus" class="status" style="display:none"></div>
+    <div id="sentGrid" class="urlList" style="margin-top:8px"></div>
+  </div>
+</section>
+
 <section id="manage" class="page">
   <div class="card">
-    <h2>手順4：QRコード読込</h2>
+    <h2>手順5：QRコード読込</h2>
     <p class="note">Gmailで受信したURL一覧（.txt）をPCへ保存し、一括読み込みします。URLからQRコード画像を再生成します。同じURLは重複登録しません。</p>
     <label style="display:inline-flex;align-items:center;background:#222;color:#fff;border-radius:8px;padding:10px 14px;cursor:pointer">
       URL一覧を一括読込
@@ -153,7 +167,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
   </div>
 
   <div class="card">
-    <h2>手順5：ラベルの付与</h2>
+    <h2>手順6：ラベルの付与</h2>
     <div class="bulkFields">
       <div class="field dateField" id="dateWrap"><label>納品日</label><input id="bulkDate" type="date" aria-label="納品日を選択"><span class="datePlaceholder">納品日を選択</span></div>
       <div class="field"><label>本店名</label><select id="bulkMain"><option value="">本店名を選択</option></select></div><div class="field"><label>ホール名</label><select id="bulkHall"><option value="">先に本店名を選択</option></select></div>
@@ -173,7 +187,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 
 <section id="print" class="page">
   <div class="card">
-    <h2>手順6：印刷するQRコード選択</h2>
+    <h2>手順7：印刷するQRコード選択</h2>
     <div class="toolbar">
       <div class="field"><label>納品予定日（PDF見出し）</label><input id="printDate" type="date"></div>
       <div class="field"><label>ホール名（必須）</label><select id="printHall"><option value="">ホール名を選択</option></select></div>
@@ -186,7 +200,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
   </div>
 
   <div class="card">
-    <h2>手順7：PDF作成</h2>
+    <h2>手順8：PDF作成</h2>
     <p class="note">A4縦。ページ上部に納品日・ホール名を大きく表示します。QRコードは印刷可能な範囲でできる限り大きく配置し、その下に商品名を表示します。ホール名はQRごとには繰り返しません。4個または6個配置、複数ページに自動対応します。</p>
     <button id="makePdf" disabled>A4 PDFを作成</button>
   </div>
@@ -194,7 +208,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 
 <section id="printed" class="page">
   <div class="card">
-    <h2>④ 印刷済み</h2>
+    <h2>⑤ 印刷済み</h2>
     <p class="note">PDF作成後のQRを一時的に履歴として管理します。</p>
     <div class="actions"><button id="restorePrinted" class="secondary">選択を未印刷に戻す</button><button id="deletePrinted" class="danger">選択を完全削除</button></div>
   </div>
@@ -251,7 +265,7 @@ function products(){return [...new Set([...JSON.parse(localStorage.getItem(PRODU
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function dateLabel(d){if(!d)return '';const [y,m,day]=d.split('-');return `${y}年${Number(m)}月${Number(day)}日`}
 function cfg(){return JSON.parse(localStorage.getItem(CFGKEY)||'{}')}
-function showPage(id){if(id!=='scan'&&scanning)stopScan();document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.navBtn').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==='manage')renderManage();if(id==='print')refreshPrint();if(id==='printed')renderPrinted()}
+function showPage(id){if(id!=='scan'&&scanning)stopScan();document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.navBtn').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==='sent')renderSent();if(id==='manage')renderManage();if(id==='print')refreshPrint();if(id==='printed')renderPrinted()}
 document.querySelectorAll('.navBtn').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
 
 function status(msg,type=''){const e=$('scanStatus');e.textContent=msg;e.className='status scanStatusBig '+type}
@@ -263,7 +277,7 @@ function addQR(image,raw,session=true){
 }
 function registerScan(raw){
  const ex=data.find(x=>x.qrKey==='qr:'+raw);
- if(ex){if(sessionIds.has(ex.id))return ex.sentAt?'sent':'dup';sessionIds.add(ex.id);saveSession();return 'relist'}
+ if(ex){if(sessionIds.has(ex.id))return 'dup';purgeSent();if(ex.sentAt)return 'sent';sessionIds.add(ex.id);saveSession();return 'relist'}
  addQR('',raw,true);return 'new'
 }
 function urlHtml(u){return esc(String(u||'').replace(/([\/?&=#])/g,'$1\u200b'))}
@@ -382,10 +396,8 @@ function renderPending(){
  updatePendingCount()
 }
 $('selectPendingAll').onclick=()=>{pendingRows().forEach(x=>pendingSelected.add(x.id));renderPending()}
-$('selectPendingUnsent').onclick=()=>{pendingSelected.clear();pendingRows().filter(x=>!x.sentAt).forEach(x=>pendingSelected.add(x.id));renderPending()}
 $('unselectPendingAll').onclick=()=>{pendingSelected.clear();renderPending()}
 $('deletePendingSelected').onclick=()=>{const ids=[...pendingSelected];if(!ids.length)return alert('削除するURLを選択してください。');if(confirm(`${ids.length}件を削除しますか？`)){data=data.filter(x=>!ids.includes(x.id));ids.forEach(id=>{sessionIds.delete(id);pendingSelected.delete(id)});saveSession();save();renderPending();renderManage()}}
-$('clearSentFromList').onclick=()=>{const ids=pendingRows().filter(x=>x.sentAt).map(x=>x.id);if(!ids.length)return alert('送信済みのURLはありません。');ids.forEach(id=>{sessionIds.delete(id);pendingSelected.delete(id)});saveSession();renderPending()}
 
 function tstatus(msg,type=''){const e=$('transferStatus');e.style.display='block';e.textContent=msg;e.className='status '+type}
 function localDate(){return new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)}
@@ -416,16 +428,38 @@ async function sendSelected(){
  for(let i=0;i<batches.length;i++){
   tstatus(`送信中 ${i+1}/${batches.length} …（そのままお待ちください）`,'warn');
   const b=batches[i],res=await postGas(c.url,{token:c.token,to:c.to,date:localDate(),batchId:`v5-${Date.now()}-${i+1}`,urls:b.map(r=>r.url)});
-  if(res.ok){ok+=b.length;const t=new Date().toISOString();b.forEach(r=>{r.sentAt=t;pendingSelected.delete(r.id)})}
+  if(res.ok){ok+=b.length;const t=new Date().toISOString();b.forEach(r=>{r.sentAt=t;sessionIds.delete(r.id);pendingSelected.delete(r.id)});saveSession()}
   else if(res.unconfirmed){unconf+=b.length}
   else{fail=explainErr(res);break}
  }
  save();renderPending();btn.disabled=false;
  if(fail)tstatus(`送信失敗：${fail}${ok?`（${ok}件は送信済み）`:''}`,'err');
  else if(unconf)tstatus(`${ok?ok+'件は送信確認済み。':''}${unconf}件は送信要求を出しましたが、GASの応答を確認できませんでした。メールが届いたか確認してください（届いていなければ「GAS接続テスト」を実行）。再送すると二重に届く場合があります。`,'warn');
- else tstatus(`送信完了：${ok}件（GAS応答を確認済み）。${c.to} 宛のメールを確認してください。`,'ok')
+ else tstatus(`送信完了：${ok}件（GAS応答を確認済み）。${c.to} 宛のメールを確認してください。送信したURLは「② 送信済み」で確認できます。`,'ok')
 }
 $('sendSelected').onclick=sendSelected;
+let sentSelected=new Set();
+function dayKey(d){const t=new Date(d);return `${t.getFullYear()}-${t.getMonth()+1}-${t.getDate()}`}
+function fmtSent(iso){const t=new Date(iso),p=n=>String(n).padStart(2,'0');return `${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()} ${p(t.getHours())}:${p(t.getMinutes())}:${p(t.getSeconds())}`}
+function purgeSent(){const today=dayKey(Date.now());let ch=false;data.forEach(x=>{if(x.sentAt&&dayKey(x.sentAt)!==today){delete x.sentAt;ch=true}});if(ch)save();return ch}
+function sentRows(){return data.filter(x=>x.sentAt).sort((a,b)=>b.sentAt.localeCompare(a.sentAt))}
+function updateSentCount(){const rows=sentRows(),k=rows.filter(x=>sentSelected.has(x.id)).length;$('sentCount').textContent=`本日送信 ${rows.length}件 / 選択 ${k}件`;$('restoreSent').textContent=k?`選択した ${k}件を手順2に戻す`:'選択URLを手順2に戻す'}
+function renderSent(){
+ purgeSent();
+ const rows=sentRows(),n=rows.length;
+ sentSelected.forEach(id=>{if(!rows.some(x=>x.id===id))sentSelected.delete(id)});
+ $('sentGrid').innerHTML=n?rows.map((x,i)=>`<label class="urlRow noTag ${sentSelected.has(x.id)?'sel':''}"><input class="sentCheck" data-id="${x.id}" type="checkbox" ${sentSelected.has(x.id)?'checked':''}><span class="urlIndex">${n-i}</span><span class="urlText">${urlHtml(x.url)}<span class="sentTime">送信：${fmtSent(x.sentAt)}</span></span></label>`).join(''):'<div class="empty">本日送信したURLはここに表示されます。</div>';
+ document.querySelectorAll('.sentCheck').forEach(e=>e.onchange=()=>{e.checked?sentSelected.add(e.dataset.id):sentSelected.delete(e.dataset.id);e.closest('.urlRow').classList.toggle('sel',e.checked);updateSentCount()});
+ updateSentCount()
+}
+$('selectSentAll').onclick=()=>{sentRows().forEach(x=>sentSelected.add(x.id));renderSent()}
+$('unselectSentAll').onclick=()=>{sentSelected.clear();renderSent()}
+$('restoreSent').onclick=()=>{
+ const rows=sentRows().filter(x=>sentSelected.has(x.id));if(!rows.length)return alert('手順2に戻すURLを選択してください。');
+ rows.forEach(x=>{delete x.sentAt;sessionIds.add(x.id);sentSelected.delete(x.id)});saveSession();save();renderSent();renderPending();
+ const e=$('sentStatus');e.style.display='block';e.className='status ok';e.textContent=`${rows.length}件を手順2に戻しました。「① QR連続読み込み」で再送信できます。`
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){purgeSent();if($('sent').classList.contains('active'))renderSent()}});
 async function testGas(target){
  const c=cfg(),out=target==='step3'?{set:(m,t)=>tstatus(m,t)}:{set:(m,t)=>{const e=$('transferConfigStatus');e.textContent=m;e.className='status '+t}};
  const urlIn=target==='step3'?c.url:($('gasUrl').value.trim()||c.url);
@@ -522,8 +556,8 @@ $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({data,halls:hal
 $('importData').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const o=JSON.parse(await f.text());if(Array.isArray(o.data))data=o.data;if(Array.isArray(o.halls))localStorage.setItem(HALLKEY,JSON.stringify(o.halls));if(Array.isArray(o.products))localStorage.setItem(PRODUCTKEY,JSON.stringify(o.products));save();loadSettings();renderPending();renderManage();refreshPrint();renderPrinted();alert('バックアップを読み込みました。')}catch(err){alert('バックアップの読み込みに失敗しました。')}e.target.value=''}
 $('wipeAll').onclick=()=>{if(confirm('QRデータをすべて削除しますか？')){data=[];selected.clear();pendingSelected.clear();printSelected.clear();printedSelected.clear();sessionIds.clear();saveSession();save();renderPending();renderManage();refreshPrint();renderPrinted()}}
 
-data=data.map(x=>({...x,url:x.url||String(x.qrKey||'').replace(/^qr:/,''),mainName:x.mainName||''}));save();sessionIds=new Set([...sessionIds].filter(id=>data.some(x=>x.id===id)));saveSession();loadSettings();renderPending();renderManage();refreshPrint();renderPrinted();
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?ver=54').catch(()=>{}));
+data=data.map(x=>({...x,url:x.url||String(x.qrKey||'').replace(/^qr:/,''),mainName:x.mainName||''}));save();purgeSent();sessionIds=new Set([...sessionIds].filter(id=>{const x=data.find(y=>y.id===id);return x&&!x.sentAt}));saveSession();loadSettings();renderPending();renderSent();renderManage();refreshPrint();renderPrinted();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?ver=55').catch(()=>{}));
 </script>
 </body>
 </html>
