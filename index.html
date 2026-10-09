@@ -48,7 +48,7 @@ input,select,button{font:inherit} input,select{width:100%;padding:10px;border:1p
 th,td{padding:8px;border-bottom:1px solid #eee;text-align:left;vertical-align:middle}
 th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1px solid #ddd;border-radius:6px}
 .pill{display:inline-block;padding:4px 8px;border-radius:99px;background:#eee;font-size:12px}.empty{text-align:center;color:#777;padding:28px}
-.transferCard{border:2px solid #d9e7ff}.settings textarea{width:100%;min-height:150px;border:1px solid #ccc;border-radius:8px;padding:10px;font:inherit}
+.urlList{display:flex;flex-direction:column;gap:6px}.urlRow{display:grid;grid-template-columns:24px 34px minmax(0,1fr);gap:8px;align-items:start;padding:10px;border:1px solid #ddd;border-radius:8px;background:#fff}.urlIndex{color:#666;font-weight:600}.urlText{overflow-wrap:anywhere;word-break:break-word;font-size:14px;line-height:1.5}.transferCard{border:2px solid #d9e7ff}.settings textarea{width:100%;min-height:150px;border:1px solid #ccc;border-radius:8px;padding:10px;font:inherit}
 .storeSuggestWrap{position:relative}.storeSuggest{display:none;position:absolute;left:0;right:0;top:100%;z-index:40;background:#fff;border:1px solid #cfd3d8;border-radius:0 0 8px 8px;box-shadow:0 5px 14px #0002;max-height:260px;overflow:auto}
 .storeSuggest.show{display:block}.storeSuggestItem{padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer}
 .dateField{position:relative}.dateField input{position:relative;z-index:1}.datePlaceholder{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#9aa0a6;pointer-events:none;z-index:2}
@@ -57,13 +57,13 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 </style>
 </head>
 <body>
-<header><h1>物流システム v5</h1><small>スマホでQRコード登録 → QRコードの送信 → PCでラベル付与 → A印刷</small></header>
+<header><h1>物流システム v5.2</h1></header>
 <div class="wrap">
 
 <div class="nav">
   <div class="navGroup">
     <div class="navTitle">スマホ作業</div>
-    <div class="navButtons"><button class="navBtn active" data-page="scan">① QR連続登録</button></div>
+    <div class="navButtons"><button class="navBtn active" data-page="scan">① QR連続読み込み</button></div>
   </div>
   <div class="navGroup">
     <div class="navTitle">PC作業</div>
@@ -81,8 +81,8 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 
 <section id="scan" class="page active">
   <div class="card">
-    <h2>手順1：QRコード登録</h2>
-    <p class="note">QR全体が白い枠内に入り、正面からまっすぐ写っている場合のみ登録します。小さい・はみ出す・傾く・遠近で歪むQRは保存しません。同じQRは重複登録しません。画像アップロードによる追加機能はありません。</p>
+    <h2>手順1：QRコード読込</h2>
+    <p class="note">QRコードを読み取り、取得したURLを保存します。QRの画像や写真は保存しません。QR全体が枠内に入り、正面からまっすぐ写っている場合のみ読み込みます。同じURLは重複登録しません。</p>
     <div class="actions">
       <button id="startScan">連続スキャン開始</button>
       <button id="stopScan" class="secondary" disabled>停止</button>
@@ -95,21 +95,21 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
   </div>
 
   <div class="card">
-    <h2>手順2：登録したQRコード確認</h2>
-    <p class="note">QRは1つずつ選択できます。複数選択・全選択してから削除や送信を行えます。</p>
+    <h2>手順2：読み込んだURL確認</h2>
+    <p class="note">読み込んだURLを一覧で確認できます。個別選択・全選択して送信対象を指定できます。</p>
     <div class="actions">
       <button id="selectPendingAll" class="secondary">全選択</button>
       <button id="unselectPendingAll" class="secondary">選択解除</button>
       <button id="deletePendingSelected" class="danger">選択QR削除</button>
       <span id="scanCount" class="count"></span>
     </div>
-    <div id="pendingGrid" class="qrgrid" style="margin-top:12px"></div>
+    <div id="pendingGrid" class="urlList" style="margin-top:12px"></div>
   </div>
 
   <div class="card transferCard">
-    <h2>手順3：QRコード送信</h2>
-    <p class="note">手順2で選択したQRコードを、指定したGmailアドレスへ送信します。全件送りたい場合は手順2で「全選択」してください。</p>
-    <button id="sendSelected">QRコードを送信</button>
+    <h2>手順3：URL送信</h2>
+    <p class="note">手順2で選択したURLをTXTファイルにまとめ、指定したGmailアドレスへメール送信します。全件送りたい場合は手順2で「全選択」してください。</p>
+    <button id="sendSelected">URLをTXT形式で送信</button>
     <span id="transferStatus" class="count"></span>
   </div>
 </section>
@@ -122,7 +122,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
       URL一覧を一括読込
       <input id="pcImportImages" type="file" accept=".txt,.csv,text/plain,text/csv" multiple style="display:none">
     </label>
-    <div id="pcImportStatus" class="status">PCへ保存したQR画像を選択してください。</div>
+    <div id="pcImportStatus" class="status">PCへ保存したURL一覧（.txt）を選択してください。</div>
   </div>
 
   <div class="card">
@@ -267,7 +267,7 @@ function scanLoop(){
   if(!code||!quality(code,c)){candidateRaw='';candidateCount=0;$('scanBadge').textContent='条件確認中';scanBusy=false;return}
   if(code.data===candidateRaw)candidateCount++;else{candidateRaw=code.data;candidateCount=1}
   $('scanBadge').textContent=`安定確認 ${Math.min(3,candidateCount)}/3`;
-  if(candidateCount>=3){const ok=addQR(cropQR(c,code),code.data,true);status(ok?'QRを登録しました。次のQRを枠内に入れてください。':'同じQRは登録済みです。','ok');candidateRaw='';candidateCount=0;cooldownUntil=Date.now()+1200;renderPending()}
+  if(candidateCount>=3){const ok=addQR('',code.data,true);status(ok?'URLを保存しました。次のQRを枠内に入れてください。':'同じURLは登録済みです。','ok');candidateRaw='';candidateCount=0;cooldownUntil=Date.now()+1200;renderPending()}
   scanBusy=false
  },180)
 }
@@ -277,7 +277,7 @@ $('startScan').onclick=startScan;$('stopScan').onclick=stopScan;
 function renderPending(){
  const rows=[...sessionIds].map(id=>data.find(x=>x.id===id)).filter(Boolean).reverse();
  $('scanCount').textContent=`今回 ${rows.length}件`;
- $('pendingGrid').innerHTML=rows.length?rows.map(x=>`<div class="qritem"><input class="pendingCheck check" data-id="${x.id}" type="checkbox" ${pendingSelected.has(x.id)?'checked':''}><img src="${x.image}"><div class="note">${x.date||'納品日未設定'}</div><div class="note">${x.hall||'ホール未設定'}</div><div class="note">${x.product||'商品未設定'}</div></div>`).join(''):'<div class="empty">今回登録したQRはここに表示されます。</div>';
+ $('pendingGrid').innerHTML=rows.length?rows.map((x,i)=>`<div class="urlRow"><input class="pendingCheck check" data-id="${x.id}" type="checkbox" ${pendingSelected.has(x.id)?'checked':''}><span class="urlIndex">${i+1}.</span><span class="urlText">${esc(x.url||'')}</span></div>`).join(''):'<div class="empty">今回読み込んだURLはここに表示されます。</div>';
  document.querySelectorAll('.pendingCheck').forEach(e=>e.onchange=()=>e.checked?pendingSelected.add(e.dataset.id):pendingSelected.delete(e.dataset.id))
 }
 $('selectPendingAll').onclick=()=>{sessionIds.forEach(id=>{if(data.some(x=>x.id===id))pendingSelected.add(id)});renderPending()}
@@ -291,7 +291,7 @@ async function sendSelected(){
  for(const r of rows){const s=String(r.url||'').length*2+8;if(cur.length&&size+s>max){batches.push(cur);cur=[];size=0}cur.push(r);size+=s}if(cur.length)batches.push(cur);
  try{
   for(let i=0;i<batches.length;i++){const payload={token:c.token,to:c.to,date:new Date().toISOString().slice(0,10),batchId:`v5-${Date.now()}-${i+1}`,urls:batches[i].map(r=>r.url)};$('transferStatus').textContent=`送信中 ${i+1}/${batches.length}`;await fetch(c.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})}
-  $('transferStatus').textContent=`送信完了：URL ${rows.length}件`;rows.forEach(r=>{sessionIds.delete(r.id);pendingSelected.delete(r.id)});saveSession();renderPending();status('URL一覧を送信しました。PC側でGmail添付のURL一覧（.txt）を読み込んでください。','ok')
+  $('transferStatus').textContent=`送信完了：URL ${rows.length}件`;rows.forEach(r=>{sessionIds.delete(r.id);pendingSelected.delete(r.id)});saveSession();renderPending();status('URL一覧をTXT形式で送信しました。PC側でGmail添付のURL一覧（.txt）を読み込んでください。','ok')
  }catch(e){$('transferStatus').textContent='送信失敗';alert('送信に失敗しました。設定と通信状態を確認してください。')}
 }
 $('sendSelected').onclick=sendSelected;
