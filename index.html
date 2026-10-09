@@ -264,10 +264,12 @@ function scanLoop(){
   if(!stream||scanBusy||Date.now()<cooldownUntil)return;const v=$('video');if(v.readyState<2||!v.videoWidth)return;scanBusy=true;
   const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);
   const code=decodeCanvas(c);
-  if(!code||!quality(code,c)){candidateRaw='';candidateCount=0;$('scanBadge').textContent='条件確認中';scanBusy=false;return}
-  if(code.data===candidateRaw)candidateCount++;else{candidateRaw=code.data;candidateCount=1}
-  $('scanBadge').textContent=`安定確認 ${Math.min(3,candidateCount)}/3`;
-  if(candidateCount>=3){const ok=addQR('',code.data,true);status(ok?'URLを保存しました。次のQRを枠内に入れてください。':'同じURLは登録済みです。','ok');candidateRaw='';candidateCount=0;cooldownUntil=Date.now()+1200;renderPending()}
+  if(!code||!code.data){candidateRaw='';candidateCount=0;$('scanBadge').textContent='QRを探しています';scanBusy=false;return}
+  // URLを読み取れたら画角・傾き・サイズ・連続フレーム数を問わず保存する。
+  const ok=addQR('',code.data,true);
+  status(ok?'URLを保存しました。次のQRをカメラに向けてください。':'同じURLは登録済みです。','ok');
+  $('scanBadge').textContent=ok?'URL読取成功':'重複URL';
+  candidateRaw='';candidateCount=0;cooldownUntil=Date.now()+1200;renderPending();
   scanBusy=false
  },180)
 }
