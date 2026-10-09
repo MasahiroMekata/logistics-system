@@ -1,6 +1,6 @@
 {
-  "name": "物流システム v5",
-  "short_name": "物流v4",
+  "name": "物流システム v5.4",
+  "short_name": "物流v5",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f4f5f7",

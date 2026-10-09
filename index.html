@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#222">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>物流システム v5</title>
+<title>物流システム v5.4</title>
 <link rel="manifest" href="manifest.webmanifest">
 <style>
 *{box-sizing:border-box}
@@ -36,11 +36,19 @@ input,select,button{font:inherit} input,select{width:100%;padding:10px;border:1p
 .status{padding:10px;border-radius:8px;background:#eef0f2;margin-top:10px;font-size:14px}
 .ok{background:#e8f7ed}.warn{background:#fff4d6}.err{background:#fdecec}
 .note{font-size:12px;color:#666;line-height:1.65}.count{font-size:13px;color:#555;margin-left:auto}
-.camera{width:100%;max-width:650px;background:#111;border-radius:12px;overflow:hidden;position:relative}
-.camera video{width:100%;display:block;aspect-ratio:4/3;object-fit:cover}
-.scanBadge{position:absolute;top:10px;left:10px;background:#fff;color:#222;padding:6px 9px;border-radius:99px;font-size:12px}
-.scanFrame{position:absolute;inset:20%;border:3px solid #fff;border-radius:12px;pointer-events:none;box-shadow:0 0 0 9999px #0004}
-.scanGuide{position:absolute;left:12%;right:12%;bottom:12px;text-align:center;color:#fff;font-size:12px;text-shadow:0 1px 3px #000}
+.camera{width:100%;max-width:650px;margin-top:12px;border-radius:12px;overflow:hidden;background:#111}
+.camStage{position:relative;background:#000}
+.camStage video{width:100%;height:auto;max-height:68vh;display:block;object-fit:contain;background:#000}
+.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.scanBadge{position:absolute;top:10px;left:10px;background:#fff;color:#222;padding:6px 10px;border-radius:99px;font-size:13px;font-weight:700;max-width:68%}
+.scanBadge.hit{background:#2ecc71;color:#fff}.scanBadge.dup{background:#f5a623;color:#fff}.scanBadge.bad{background:#e5484d;color:#fff}
+.scanLive{position:absolute;top:10px;right:10px;background:#000a;color:#fff;padding:6px 10px;border-radius:99px;font-size:13px;font-weight:700}
+.scanBanner{position:absolute;left:10px;right:10px;top:52px;padding:12px;border-radius:10px;text-align:center;font-weight:800;font-size:16px;color:#fff;opacity:0;transform:translateY(-6px);transition:.15s;pointer-events:none}
+.scanBanner.show{opacity:1;transform:none}.scanBanner.ok{background:#1f9d55}.scanBanner.dup{background:#d98a0b}.scanBanner.bad{background:#c53030}
+.liveText{position:absolute;left:8px;right:8px;bottom:8px;color:#fff;background:#000a;border-radius:8px;padding:6px 8px;font-size:12px;line-height:1.4;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.liveText:empty{display:none}
+.camTools{display:none;gap:10px;align-items:center;padding:8px 10px;background:#1b1b1b;color:#fff;font-size:13px}.camTools button{padding:6px 12px}.camTools label{display:flex;align-items:center;gap:8px;flex:1;margin:0;font-weight:400}
+.scanStatusBig{font-size:15px;font-weight:700}
 .qrgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
 .qritem{border:1px solid #ddd;border-radius:10px;padding:8px;background:#fff;position:relative}
 .qritem img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff}.check{position:absolute;top:7px;left:7px;width:20px;height:20px;z-index:2}
@@ -48,7 +56,14 @@ input,select,button{font:inherit} input,select{width:100%;padding:10px;border:1p
 th,td{padding:8px;border-bottom:1px solid #eee;text-align:left;vertical-align:middle}
 th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1px solid #ddd;border-radius:6px}
 .pill{display:inline-block;padding:4px 8px;border-radius:99px;background:#eee;font-size:12px}.empty{text-align:center;color:#777;padding:28px}
-.urlList{display:flex;flex-direction:column;gap:6px}.urlRow{display:grid;grid-template-columns:24px 34px minmax(0,1fr);gap:8px;align-items:start;padding:10px;border:1px solid #ddd;border-radius:8px;background:#fff}.urlIndex{color:#666;font-weight:600}.urlText{overflow-wrap:anywhere;word-break:break-word;font-size:14px;line-height:1.5}.transferCard{border:2px solid #d9e7ff}.settings textarea{width:100%;min-height:150px;border:1px solid #ccc;border-radius:8px;padding:10px;font:inherit}
+.urlList{display:flex;flex-direction:column;gap:6px;max-height:55vh;overflow:auto;-webkit-overflow-scrolling:touch}
+.urlRow{display:grid;grid-template-columns:28px 34px minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;margin:0;font-weight:400}
+.urlRow.sel{background:#eef5ff;border-color:#7aa7ff}
+.urlRow input[type=checkbox]{width:22px;height:22px;margin:0;padding:0}
+.urlIndex{color:#666;font-weight:600;text-align:right;font-size:13px}
+.urlText{overflow-wrap:anywhere;word-break:normal;font-size:14px;line-height:1.5;min-width:0}
+.tag{font-size:11px;padding:2px 7px;border-radius:99px;background:#eee;color:#555;white-space:nowrap}.tag.sent{background:#d9f2e0;color:#14663a}
+.transferCard{border:2px solid #d9e7ff}.settings textarea{width:100%;min-height:150px;border:1px solid #ccc;border-radius:8px;padding:10px;font:inherit}
 .storeSuggestWrap{position:relative}.storeSuggest{display:none;position:absolute;left:0;right:0;top:100%;z-index:40;background:#fff;border:1px solid #cfd3d8;border-radius:0 0 8px 8px;box-shadow:0 5px 14px #0002;max-height:260px;overflow:auto}
 .storeSuggest.show{display:block}.storeSuggestItem{padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer}
 .dateField{position:relative}.dateField input{position:relative;z-index:1}.datePlaceholder{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#9aa0a6;pointer-events:none;z-index:2}
@@ -57,7 +72,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 </style>
 </head>
 <body>
-<header><h1>物流システム v5.2</h1></header>
+<header><h1>物流システム v5.4</h1></header>
 <div class="wrap">
 
 <div class="nav">
@@ -82,35 +97,47 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
 <section id="scan" class="page active">
   <div class="card">
     <h2>手順1：QRコード読込</h2>
-    <p class="note">QRコードを読み取り、取得したURLを保存します。QRの画像や写真は保存しません。QR全体が枠内に入り、正面からまっすぐ写っている場合のみ読み込みます。同じURLは重複登録しません。</p>
+    <p class="note">「連続スキャン開始」を押してQRコードをカメラに向けてください。画面全体から自動で検出し、読み取れたURLだけを保存します（画像は保存しません）。検出中は緑の枠、保存すると画面上部の表示・音・振動でお知らせします。同じURLは重複登録しません。</p>
     <div class="actions">
       <button id="startScan">連続スキャン開始</button>
       <button id="stopScan" class="secondary" disabled>停止</button>
     </div>
-    <div id="cameraBox" class="camera" style="display:none;margin-top:12px">
-      <video id="video" playsinline autoplay></video><div class="scanBadge" id="scanBadge">待機中</div>
-      <div class="scanFrame"></div><div class="scanGuide">QR全体を枠内に入れて、スマホを正面に向けてください</div>
+    <div id="cameraBox" class="camera" style="display:none">
+      <div class="camStage">
+        <video id="video" playsinline muted autoplay></video>
+        <svg id="overlay" class="overlay" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="scanBadge" id="scanBadge">準備中</div>
+        <div class="scanLive" id="scanLive">今回 0件</div>
+        <div class="scanBanner" id="scanBanner"></div>
+        <div class="liveText" id="liveText"></div>
+      </div>
+      <div class="camTools" id="camTools">
+        <button id="torchBtn" class="secondary" style="display:none">ライトON</button>
+        <label id="zoomWrap" style="display:none">拡大<input id="zoomRange" type="range" min="1" max="3" step="0.1" value="1"></label>
+      </div>
     </div>
     <div id="scanStatus" class="status">まだQRコードは登録されていません。</div>
   </div>
 
   <div class="card">
     <h2>手順2：読み込んだURL確認</h2>
-    <p class="note">読み込んだURLを一覧で確認できます。個別選択・全選択して送信対象を指定できます。</p>
+    <p class="note">行のどこをタップしても選択／解除できます。送信したいURLを選んでください（新しい順）。</p>
     <div class="actions">
       <button id="selectPendingAll" class="secondary">全選択</button>
+      <button id="selectPendingUnsent" class="secondary">未送信のみ選択</button>
       <button id="unselectPendingAll" class="secondary">選択解除</button>
-      <button id="deletePendingSelected" class="danger">選択QR削除</button>
-      <span id="scanCount" class="count"></span>
+      <button id="deletePendingSelected" class="danger">選択URL削除</button>
+      <button id="clearSentFromList" class="secondary">送信済みを一覧から外す</button>
     </div>
-    <div id="pendingGrid" class="urlList" style="margin-top:12px"></div>
+    <div style="margin-top:8px"><span id="scanCount" class="count" style="margin-left:0"></span></div>
+    <div id="pendingGrid" class="urlList" style="margin-top:8px"></div>
   </div>
 
   <div class="card transferCard">
     <h2>手順3：URL送信</h2>
-    <p class="note">手順2で選択したURLをTXTファイルにまとめ、指定したGmailアドレスへメール送信します。全件送りたい場合は手順2で「全選択」してください。</p>
-    <button id="sendSelected">URLをTXT形式で送信</button>
-    <span id="transferStatus" class="count"></span>
+    <p class="note">手順2で選択したURLをTXTファイルにまとめ、指定したGmailアドレスへメール送信します。GASの応答を確認できた場合のみ「送信済み」にします。</p>
+    <div class="actions"><button id="sendSelected">URLをTXT形式で送信</button><button id="testGasStep3" class="secondary">GAS接続テスト</button></div>
+    <div id="transferStatus" class="status" style="display:none"></div>
   </div>
 </section>
 
@@ -186,7 +213,7 @@ th{background:#f7f7f8}.thumb{width:64px;height:64px;object-fit:contain;border:1p
       <div class="field"><label>送信先Gmail</label><input id="transferTo" type="email" placeholder="example@gmail.com"></div>
       <div class="field"><label>転送トークン</label><input id="transferToken" type="password" placeholder="GAS側と同じ文字列"></div>
     </div>
-    <button id="saveTransferSettings">移行設定を保存</button><div id="transferConfigStatus" class="status">未設定</div>
+    <div class="actions"><button id="saveTransferSettings">移行設定を保存</button><button id="testGas" class="secondary">GAS接続テスト</button></div><div id="transferConfigStatus" class="status">未設定</div>
   </div>
   <div class="card settings">
     <h2>本店名・ホールマスタ</h2>
@@ -208,8 +235,9 @@ const $=id=>document.getElementById(id);
 const KEY='logistics_v4_data', HALLKEY='logistics_v4_halls', PRODUCTKEY='logistics_v4_products', CFGKEY='logistics_v4_transfer', SESSIONKEY='logistics_v4_session';
 let data=JSON.parse(localStorage.getItem(KEY)||'[]');
 let selected=new Set(), pendingSelected=new Set(), printSelected=new Set(), printedSelected=new Set();
-let sessionIds=new Set(JSON.parse(sessionStorage.getItem(SESSIONKEY)||'[]'));
-let stream=null,scanTimer=null,candidateRaw='',candidateCount=0,cooldownUntil=0,scanBusy=false;
+let sessionIds=new Set(JSON.parse(localStorage.getItem(SESSIONKEY)||'[]'));
+let stream=null,track=null,rafId=0,detector=null,useNative=false,scanning=false,scanBusy=false,lastRun=0,missCount=0,lastHitAt=0,torchOn=false,audioCtx=null,bannerTimer=0,rateCount=0,rateShown=0,rateTime=0;
+const recent=new Map(),work=document.createElement('canvas'),wctx=work.getContext('2d',{willReadFrequently:true});
 const defaultHalls=[{main:'DM',hall:'京都東店'},{main:'DM',hall:'京都西店'},{main:'大阪本店',hall:'大阪ホール'},{main:'滋賀本店',hall:'滋賀ホール'}];
 function hallEntries(){const raw=JSON.parse(localStorage.getItem(HALLKEY)||'null'); if(!raw)return defaultHalls; return raw.map(x=>typeof x==='string'?{main:'未分類',hall:x}:x)}
 function mainNames(){return [...new Set(hallEntries().map(x=>x.main))].sort()}
@@ -217,86 +245,199 @@ function hallsFor(main){return hallEntries().filter(x=>x.main===main).map(x=>x.h
 function hallLabel(x){return [x.main,x.hall].filter(Boolean).join('／')}
 
 function save(){localStorage.setItem(KEY,JSON.stringify(data))}
-function saveSession(){sessionStorage.setItem(SESSIONKEY,JSON.stringify([...sessionIds]))}
+function saveSession(){localStorage.setItem(SESSIONKEY,JSON.stringify([...sessionIds]))}
 function halls(){return hallEntries().map(x=>x.hall)}
 function products(){return [...new Set([...JSON.parse(localStorage.getItem(PRODUCTKEY)||'[]'),...data.map(x=>x.product).filter(Boolean)])]}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function dateLabel(d){if(!d)return '';const [y,m,day]=d.split('-');return `${y}年${Number(m)}月${Number(day)}日`}
 function cfg(){return JSON.parse(localStorage.getItem(CFGKEY)||'{}')}
-function showPage(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.navBtn').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==='manage')renderManage();if(id==='print')refreshPrint();if(id==='printed')renderPrinted()}
+function showPage(id){if(id!=='scan'&&scanning)stopScan();document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.navBtn').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==='manage')renderManage();if(id==='print')refreshPrint();if(id==='printed')renderPrinted()}
 document.querySelectorAll('.navBtn').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
 
-function status(msg,type=''){const e=$('scanStatus');e.textContent=msg;e.className='status '+type}
-function decodeCanvas(c){const ctx=c.getContext('2d',{willReadFrequently:true}),im=ctx.getImageData(0,0,c.width,c.height);return window.jsQR(im.data,im.width,im.height,{inversionAttempts:'dontInvert'})}
-function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
-function angle(a,b){return Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI}
-function norm(a){while(a>90)a-=180;while(a<-90)a+=180;return a}
-function quality(code,c){
- const p=[code.location.topLeftCorner,code.location.topRightCorner,code.location.bottomRightCorner,code.location.bottomLeftCorner],tl=p[0],tr=p[1],br=p[2],bl=p[3];
- const w1=dist(tl,tr),w2=dist(bl,br),h1=dist(tl,bl),h2=dist(tr,br),w=(w1+w2)/2,h=(h1+h2)/2;
- if(Math.min(w,h)<Math.min(c.width,c.height)*.22)return false;
- const xs=p.map(q=>q.x),ys=p.map(q=>q.y);
- if(Math.min(...xs)<c.width*.2||Math.max(...xs)>c.width*.8||Math.min(...ys)<c.height*.2||Math.max(...ys)>c.height*.8)return false;
- if(Math.max(w1,w2)/Math.max(1,Math.min(w1,w2))>1.06||Math.max(h1,h2)/Math.max(1,Math.min(h1,h2))>1.06)return false;
- if(Math.max(Math.abs(norm(angle(tl,tr))),Math.abs(norm(angle(bl,br))))>3)return false;
- if(Math.max(Math.abs(norm(angle(tl,bl)-90)),Math.abs(norm(angle(tr,br)-90)))>3)return false;
- return true
-}
-function cropQR(c,code){
- const p=[code.location.topLeftCorner,code.location.topRightCorner,code.location.bottomRightCorner,code.location.bottomLeftCorner];
- const minX=Math.max(0,Math.floor(Math.min(...p.map(x=>x.x)))),maxX=Math.min(c.width,Math.ceil(Math.max(...p.map(x=>x.x))));
- const minY=Math.max(0,Math.floor(Math.min(...p.map(x=>x.y)))),maxY=Math.min(c.height,Math.ceil(Math.max(...p.map(x=>x.y))));
- const pad=Math.round(Math.max(maxX-minX,maxY-minY)*.08),x=Math.max(0,minX-pad),y=Math.max(0,minY-pad),w=Math.min(c.width-x,(maxX-minX)+pad*2),h=Math.min(c.height-y,(maxY-minY)+pad*2);
- const out=document.createElement('canvas'),size=Math.max(w,h);out.width=size;out.height=size;const ctx=out.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);ctx.drawImage(c,x,y,w,h,(size-w)/2,(size-h)/2,w,h);return out.toDataURL('image/png')
-}
+function status(msg,type=''){const e=$('scanStatus');e.textContent=msg;e.className='status scanStatusBig '+type}
 function addQR(image,raw,session=true){
  const key='qr:'+raw;if(data.some(x=>x.qrKey===key))return false;
  const id=crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random());
  data.push({id,qrKey:key,url:raw,image,date:'',mainName:'',hall:'',product:'',status:'unprinted',createdAt:new Date().toISOString()});
  if(session){sessionIds.add(id);saveSession()}save();return true
 }
-async function startScan(){
- try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});$('video').srcObject=stream;$('cameraBox').style.display='block';$('startScan').disabled=true;$('stopScan').disabled=false;$('scanBadge').textContent='QR検出中';scanLoop()}
- catch(e){status('カメラを起動できませんでした。HTTPSとカメラ許可を確認してください。','err')}
+function registerScan(raw){
+ const ex=data.find(x=>x.qrKey==='qr:'+raw);
+ if(ex){if(sessionIds.has(ex.id))return ex.sentAt?'sent':'dup';sessionIds.add(ex.id);saveSession();return 'relist'}
+ addQR('',raw,true);return 'new'
 }
-function scanLoop(){
- clearInterval(scanTimer);scanTimer=setInterval(()=>{
-  if(!stream||scanBusy||Date.now()<cooldownUntil)return;const v=$('video');if(v.readyState<2||!v.videoWidth)return;scanBusy=true;
-  const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);
-  const code=decodeCanvas(c);
-  if(!code||!code.data){candidateRaw='';candidateCount=0;$('scanBadge').textContent='QRを探しています';scanBusy=false;return}
-  // URLを読み取れたら画角・傾き・サイズ・連続フレーム数を問わず保存する。
-  const ok=addQR('',code.data,true);
-  status(ok?'URLを保存しました。次のQRをカメラに向けてください。':'同じURLは登録済みです。','ok');
-  $('scanBadge').textContent=ok?'URL読取成功':'重複URL';
-  candidateRaw='';candidateCount=0;cooldownUntil=Date.now()+1200;renderPending();
-  scanBusy=false
- },180)
-}
-function stopScan(){clearInterval(scanTimer);scanTimer=null;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$('video').srcObject=null;$('cameraBox').style.display='none';$('startScan').disabled=false;$('stopScan').disabled=true}
-$('startScan').onclick=startScan;$('stopScan').onclick=stopScan;
+function urlHtml(u){return esc(String(u||'').replace(/([\/?&=#])/g,'$1\u200b'))}
+function beep(f=1100,d=.09){try{if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=f;g.gain.value=.15;o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d)}catch(e){}}
+function banner(type,msg){const b=$('scanBanner');b.textContent=msg;b.className='scanBanner show '+type;clearTimeout(bannerTimer);bannerTimer=setTimeout(()=>b.classList.remove('show'),1800)}
+function badge(type,msg){const b=$('scanBadge');b.textContent=msg;b.className='scanBadge '+type}
 
-function renderPending(){
- const rows=[...sessionIds].map(id=>data.find(x=>x.id===id)).filter(Boolean).reverse();
- $('scanCount').textContent=`今回 ${rows.length}件`;
- $('pendingGrid').innerHTML=rows.length?rows.map((x,i)=>`<div class="urlRow"><input class="pendingCheck check" data-id="${x.id}" type="checkbox" ${pendingSelected.has(x.id)?'checked':''}><span class="urlIndex">${i+1}.</span><span class="urlText">${esc(x.url||'')}</span></div>`).join(''):'<div class="empty">今回読み込んだURLはここに表示されます。</div>';
- document.querySelectorAll('.pendingCheck').forEach(e=>e.onchange=()=>e.checked?pendingSelected.add(e.dataset.id):pendingSelected.delete(e.dataset.id))
+async function initDetector(){
+ detector=null;useNative=false;
+ if('BarcodeDetector' in window){try{const f=await BarcodeDetector.getSupportedFormats();if(f.includes('qr_code')){detector=new BarcodeDetector({formats:['qr_code']});useNative=true}}catch(e){}}
 }
-$('selectPendingAll').onclick=()=>{sessionIds.forEach(id=>{if(data.some(x=>x.id===id))pendingSelected.add(id)});renderPending()}
-$('unselectPendingAll').onclick=()=>{pendingSelected.clear();renderPending()}
-$('deletePendingSelected').onclick=()=>{const ids=[...pendingSelected];if(!ids.length)return alert('削除するQRを選択してください。');if(confirm(`${ids.length}件を削除しますか？`)){data=data.filter(x=>!ids.includes(x.id));ids.forEach(id=>{sessionIds.delete(id);pendingSelected.delete(id)});saveSession();save();renderPending();renderManage()}}
-function dataUrlBase64(s){return s.split(',')[1]||''}
-async function sendSelected(){
- const rows=data.filter(x=>pendingSelected.has(x.id));if(!rows.length)return alert('送信するQRを選択してください。');
- const c=cfg();if(!c.url||!c.to||!c.token)return alert('共通設定でGAS URL・送信先Gmail・転送トークンを設定してください。');
- const max=8*1024*1024;let batches=[],cur=[],size=0;
- for(const r of rows){const s=String(r.url||'').length*2+8;if(cur.length&&size+s>max){batches.push(cur);cur=[];size=0}cur.push(r);size+=s}if(cur.length)batches.push(cur);
+function setupTrackControls(){
+ const caps=(track&&track.getCapabilities&&track.getCapabilities())||{};
+ if(caps.focusMode&&caps.focusMode.includes('continuous'))track.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{});
+ torchOn=false;$('torchBtn').textContent='ライトON';$('torchBtn').style.display=caps.torch?'':'none';
+ if(caps.zoom){const z=$('zoomRange');z.min=caps.zoom.min;z.max=caps.zoom.max;z.step=caps.zoom.step||0.1;z.value=(track.getSettings&&track.getSettings().zoom)||caps.zoom.min;$('zoomWrap').style.display=''}else $('zoomWrap').style.display='none';
+ $('camTools').style.display=(caps.torch||caps.zoom)?'flex':'none'
+}
+$('torchBtn').onclick=async()=>{if(!track)return;torchOn=!torchOn;try{await track.applyConstraints({advanced:[{torch:torchOn}]});$('torchBtn').textContent=torchOn?'ライトOFF':'ライトON'}catch(e){torchOn=false}}
+$('zoomRange').oninput=e=>{if(track)track.applyConstraints({advanced:[{zoom:Number(e.target.value)}]}).catch(()=>{})}
+
+async function startScan(){
+ if(scanning)return;
+ try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume()}catch(e){}
  try{
-  for(let i=0;i<batches.length;i++){const payload={token:c.token,to:c.to,date:new Date().toISOString().slice(0,10),batchId:`v5-${Date.now()}-${i+1}`,urls:batches[i].map(r=>r.url)};$('transferStatus').textContent=`送信中 ${i+1}/${batches.length}`;await fetch(c.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})}
-  $('transferStatus').textContent=`送信完了：URL ${rows.length}件`;rows.forEach(r=>{sessionIds.delete(r.id);pendingSelected.delete(r.id)});saveSession();renderPending();status('URL一覧をTXT形式で送信しました。PC側でGmail添付のURL一覧（.txt）を読み込んでください。','ok')
- }catch(e){$('transferStatus').textContent='送信失敗';alert('送信に失敗しました。設定と通信状態を確認してください。')}
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false})
+ }catch(e){status('カメラを起動できませんでした。HTTPSで開いているか、カメラの許可を確認してください。','err');return}
+ track=stream.getVideoTracks()[0];
+ const v=$('video');v.srcObject=stream;try{await v.play()}catch(e){}
+ await initDetector();setupTrackControls();
+ $('cameraBox').style.display='block';$('startScan').disabled=true;$('stopScan').disabled=false;
+ scanning=true;missCount=0;lastHitAt=0;rateCount=0;rateShown=0;rateTime=performance.now();recent.clear();
+ $('scanLive').textContent=`今回 ${sessionIds.size}件`;badge('','探索中');
+ status(useNative?'スキャン中（高速モード）。QRコードをカメラに向けてください。':'スキャン中。QRコードをカメラに向けてください。');
+ rafId=requestAnimationFrame(tick)
+}
+function stopScan(){
+ scanning=false;cancelAnimationFrame(rafId);
+ if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}track=null;
+ $('video').srcObject=null;$('cameraBox').style.display='none';$('overlay').innerHTML='';$('liveText').textContent='';
+ $('startScan').disabled=false;$('stopScan').disabled=true
+}
+$('startScan').onclick=startScan;$('stopScan').onclick=stopScan;
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&scanning)stopScan()});
+
+function tryJsQR(v,sx,sy,sw,sh,maxW){
+ const sc=Math.min(1,maxW/sw),w=Math.max(1,Math.round(sw*sc)),h=Math.max(1,Math.round(sh*sc));
+ work.width=w;work.height=h;wctx.drawImage(v,sx,sy,sw,sh,0,0,w,h);
+ const im=wctx.getImageData(0,0,w,h),code=window.jsQR(im.data,w,h,{inversionAttempts:'attemptBoth'});
+ if(!code||!code.data)return null;
+ const L=code.location,pts=[L.topLeftCorner,L.topRightCorner,L.bottomRightCorner,L.bottomLeftCorner].map(p=>({x:sx+p.x/sc,y:sy+p.y/sc}));
+ return {data:code.data,points:pts}
+}
+async function detectFrame(v){
+ if(useNative){
+  const codes=await detector.detect(v);
+  return codes.filter(c=>c.rawValue).map(c=>{let pts=c.cornerPoints;if(!pts||pts.length<4){const b=c.boundingBox;pts=[{x:b.x,y:b.y},{x:b.x+b.width,y:b.y},{x:b.x+b.width,y:b.y+b.height},{x:b.x,y:b.y+b.height}]}return {data:c.rawValue,points:pts}})
+ }
+ // jsQR: 1回に1パス。全体→中央60%→中央40%(等倍)の順に切り替えて小さなQRも拾う。
+ const vw=v.videoWidth,vh=v.videoHeight,pass=missCount%3;let r=null;
+ if(pass===0)r=tryJsQR(v,0,0,vw,vh,800);
+ else if(pass===1){const cw=vw*.6,ch=vh*.6;r=tryJsQR(v,(vw-cw)/2,(vh-ch)/2,cw,ch,800)}
+ else{const cw=vw*.4,ch=vh*.4;r=tryJsQR(v,(vw-cw)/2,(vh-ch)/2,cw,ch,800)}
+ return r?[r]:[]
+}
+function drawOverlay(list,v){
+ const svg=$('overlay'),vw=v.videoWidth,vh=v.videoHeight;
+ if(svg.dataset.w!==String(vw)||svg.dataset.h!==String(vh)){svg.setAttribute('viewBox',`0 0 ${vw} ${vh}`);svg.dataset.w=vw;svg.dataset.h=vh}
+ const sw=Math.max(3,Math.round(vw/180)),col={ok:'46,204,113',dup:'245,166,35',bad:'229,72,77'};
+ svg.innerHTML=list.map(f=>{const c=col[f.state]||col.ok;return `<polygon points="${f.points.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ')}" fill="rgba(${c},.25)" stroke="rgb(${c})" stroke-width="${sw}" stroke-linejoin="round"/>`}).join('')
+}
+function handleFound(list,v){
+ const now=Date.now();let changed=false;
+ for(const f of list){
+  const raw=String(f.data).trim(),last=recent.get(raw);recent.set(raw,now);
+  if(last&&now-last<2500){f.state=recent.get('state:'+raw)||'ok';continue}
+  if(!/^https?:\/\/\S+$/i.test(raw)){f.state='bad';recent.set('state:'+raw,'bad');badge('bad','URL以外のQR');banner('bad','URL以外のQRです（保存しません）');status('URL以外のQRを検出しました：'+raw.slice(0,60),'warn');beep(300,.2);continue}
+  const r=registerScan(raw);
+  if(r==='new'||r==='relist'){f.state='ok';recent.set('state:'+raw,'ok');changed=true;badge('hit','保存しました');banner('ok',`✓ 保存しました（今回 ${sessionIds.size}件目）`);status(`URLを保存しました（今回 ${sessionIds.size}件）。次のQRをカメラに向けてください。`,'ok');beep(1200,.09);if(navigator.vibrate)navigator.vibrate(60)}
+  else{f.state='dup';recent.set('state:'+raw,'dup');badge('dup','登録済み');banner('dup',r==='sent'?'送信済みのURLです':'登録済みのURLです');status(r==='sent'?'このURLは送信済みです。':'同じURLは登録済みです。','warn');beep(500,.12)}
+ }
+ drawOverlay(list,v);
+ $('liveText').textContent='読取：'+String(list[0].data).trim();
+ if(changed){$('scanLive').textContent=`今回 ${sessionIds.size}件`;renderPending()}
+}
+async function tick(ts){
+ if(!scanning)return;
+ rafId=requestAnimationFrame(tick);
+ if(scanBusy||ts-lastRun<90)return;
+ const v=$('video');if(v.readyState<2||!v.videoWidth)return;
+ scanBusy=true;lastRun=ts;
+ try{
+  const list=await detectFrame(v);rateCount++;
+  if(ts-rateTime>=1000){rateShown=Math.round(rateCount*1000/(ts-rateTime));rateCount=0;rateTime=ts}
+  if(list.length){missCount=0;lastHitAt=Date.now();handleFound(list,v)}
+  else{
+   missCount++;drawOverlay([],v);
+   if(Date.now()-lastHitAt>900){$('liveText').textContent='';badge('','探索中 ('+rateShown+'回/秒)')}
+  }
+ }catch(e){}
+ scanBusy=false
+}
+
+function pendingRows(){return [...sessionIds].map(id=>data.find(x=>x.id===id)).filter(Boolean)}
+function updatePendingCount(){
+ const rows=pendingRows(),sel=rows.filter(x=>pendingSelected.has(x.id)).length;
+ $('scanCount').textContent=`全 ${rows.length}件 / 選択 ${sel}件`;
+ $('sendSelected').textContent=sel?`選択した ${sel}件のURLをTXTで送信`:'URLをTXT形式で送信';
+ $('scanLive').textContent=`今回 ${rows.length}件`
+}
+function renderPending(){
+ const rows=pendingRows().reverse(),n=rows.length;
+ pendingSelected.forEach(id=>{if(!sessionIds.has(id))pendingSelected.delete(id)});
+ $('pendingGrid').innerHTML=n?rows.map((x,i)=>`<label class="urlRow ${pendingSelected.has(x.id)?'sel':''}"><input class="pendingCheck" data-id="${x.id}" type="checkbox" ${pendingSelected.has(x.id)?'checked':''}><span class="urlIndex">${n-i}</span><span class="urlText">${urlHtml(x.url)}</span><span class="tag ${x.sentAt?'sent':''}">${x.sentAt?'送信済み':'未送信'}</span></label>`).join(''):'<div class="empty">今回読み込んだURLはここに表示されます。</div>';
+ document.querySelectorAll('.pendingCheck').forEach(e=>e.onchange=()=>{e.checked?pendingSelected.add(e.dataset.id):pendingSelected.delete(e.dataset.id);e.closest('.urlRow').classList.toggle('sel',e.checked);updatePendingCount()});
+ updatePendingCount()
+}
+$('selectPendingAll').onclick=()=>{pendingRows().forEach(x=>pendingSelected.add(x.id));renderPending()}
+$('selectPendingUnsent').onclick=()=>{pendingSelected.clear();pendingRows().filter(x=>!x.sentAt).forEach(x=>pendingSelected.add(x.id));renderPending()}
+$('unselectPendingAll').onclick=()=>{pendingSelected.clear();renderPending()}
+$('deletePendingSelected').onclick=()=>{const ids=[...pendingSelected];if(!ids.length)return alert('削除するURLを選択してください。');if(confirm(`${ids.length}件を削除しますか？`)){data=data.filter(x=>!ids.includes(x.id));ids.forEach(id=>{sessionIds.delete(id);pendingSelected.delete(id)});saveSession();save();renderPending();renderManage()}}
+$('clearSentFromList').onclick=()=>{const ids=pendingRows().filter(x=>x.sentAt).map(x=>x.id);if(!ids.length)return alert('送信済みのURLはありません。');ids.forEach(id=>{sessionIds.delete(id);pendingSelected.delete(id)});saveSession();renderPending()}
+
+function tstatus(msg,type=''){const e=$('transferStatus');e.style.display='block';e.textContent=msg;e.className='status '+type}
+function localDate(){return new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)}
+async function fetchTimeout(url,opt,ms){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),ms);try{return await fetch(url,{...opt,signal:ac.signal})}finally{clearTimeout(t)}}
+async function postGas(url,payload){
+ let r;
+ try{r=await fetchTimeout(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),redirect:'follow'},45000)}
+ catch(e){return navigator.onLine?{unconfirmed:true}:{ok:false,error:'offline'}}
+ const t=await r.text();let j=null;try{j=JSON.parse(t)}catch(e){}
+ return j||{ok:false,error:'non-json'}
+}
+function explainErr(res){
+ const e=String(res.error||'');
+ if(e==='unauthorized')return '転送トークンがGAS側(Code.gs)と一致していません。共通設定とCode.gsのTRANSFER_TOKENを確認してください。';
+ if(e==='invalid recipient')return '送信先Gmailの形式が正しくありません。';
+ if(e==='offline')return 'オフラインです。通信状態を確認してください。';
+ if(e==='non-json')return 'GASから想定外の応答が返りました。「アクセスできるユーザー：全員」で、新バージョンとして再デプロイしたか確認してください。';
+ if(/permission|authori|権限|承認/i.test(e))return 'GASの承認が未完了です。Apps ScriptエディタでauthorizeOnceを1回実行して承認し、再デプロイしてください。';
+ return 'GASエラー：'+e
+}
+async function sendSelected(){
+ const rows=pendingRows().filter(x=>pendingSelected.has(x.id));
+ if(!rows.length)return alert('送信するURLを手順2で選択してください。');
+ const c=cfg();if(!c.url||!c.to||!c.token)return alert('共通設定でGAS URL・送信先Gmail・転送トークンを設定してください。');
+ const btn=$('sendSelected');btn.disabled=true;
+ const per=1000,batches=[];for(let i=0;i<rows.length;i+=per)batches.push(rows.slice(i,i+per));
+ let ok=0,unconf=0,fail='';
+ for(let i=0;i<batches.length;i++){
+  tstatus(`送信中 ${i+1}/${batches.length} …（そのままお待ちください）`,'warn');
+  const b=batches[i],res=await postGas(c.url,{token:c.token,to:c.to,date:localDate(),batchId:`v5-${Date.now()}-${i+1}`,urls:b.map(r=>r.url)});
+  if(res.ok){ok+=b.length;const t=new Date().toISOString();b.forEach(r=>{r.sentAt=t;pendingSelected.delete(r.id)})}
+  else if(res.unconfirmed){unconf+=b.length}
+  else{fail=explainErr(res);break}
+ }
+ save();renderPending();btn.disabled=false;
+ if(fail)tstatus(`送信失敗：${fail}${ok?`（${ok}件は送信済み）`:''}`,'err');
+ else if(unconf)tstatus(`${ok?ok+'件は送信確認済み。':''}${unconf}件は送信要求を出しましたが、GASの応答を確認できませんでした。メールが届いたか確認してください（届いていなければ「GAS接続テスト」を実行）。再送すると二重に届く場合があります。`,'warn');
+ else tstatus(`送信完了：${ok}件（GAS応答を確認済み）。${c.to} 宛のメールを確認してください。`,'ok')
 }
 $('sendSelected').onclick=sendSelected;
+async function testGas(target){
+ const c=cfg(),out=target==='step3'?{set:(m,t)=>tstatus(m,t)}:{set:(m,t)=>{const e=$('transferConfigStatus');e.textContent=m;e.className='status '+t}};
+ const urlIn=target==='step3'?c.url:($('gasUrl').value.trim()||c.url);
+ if(!urlIn)return out.set('GAS WebアプリURLが未設定です。共通設定で入力して保存してください。','warn');
+ out.set('接続確認中…','warn');
+ try{
+  const r=await fetchTimeout(urlIn,{method:'GET',redirect:'follow'},15000),t=(await r.text()).trim();
+  if(/logistics-system/.test(t))out.set(/v5\.4/.test(t)?`接続OK：${t}`:`接続はできましたが旧バージョンのGASが動いています（${t}）。Code.gsを更新し「新バージョン」としてデプロイし直してください。`,/v5\.4/.test(t)?'ok':'warn');
+  else out.set('応答がGASのものではありません。URLが「…/exec」か、アクセスできるユーザーが「全員」かを確認してください。','err')
+ }catch(e){out.set('接続できませんでした（URL誤り・オフライン・アクセス権の可能性）。','err')}
+}
+$('testGasStep3').onclick=()=>testGas('step3');$('testGas').onclick=()=>testGas('settings');
 
 function makeQrDataUrl(url){return new Promise((resolve,reject)=>{try{const q=qrcode(0,'M');q.addData(url);q.make();const n=q.getModuleCount(),scale=12,quiet=4,size=(n+quiet*2)*scale,c=document.createElement('canvas');c.width=size;c.height=size;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);ctx.fillStyle='#000';for(let r=0;r<n;r++)for(let col=0;col<n;col++)if(q.isDark(r,col))ctx.fillRect((col+quiet)*scale,(r+quiet)*scale,scale,scale);resolve(c.toDataURL('image/png'))}catch(e){reject(e)}})}
 async function importImages(files){
@@ -382,7 +523,7 @@ $('importData').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{co
 $('wipeAll').onclick=()=>{if(confirm('QRデータをすべて削除しますか？')){data=[];selected.clear();pendingSelected.clear();printSelected.clear();printedSelected.clear();sessionIds.clear();saveSession();save();renderPending();renderManage();refreshPrint();renderPrinted()}}
 
 data=data.map(x=>({...x,url:x.url||String(x.qrKey||'').replace(/^qr:/,''),mainName:x.mainName||''}));save();sessionIds=new Set([...sessionIds].filter(id=>data.some(x=>x.id===id)));saveSession();loadSettings();renderPending();renderManage();refreshPrint();renderPrinted();
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?ver=5').catch(()=>{}));
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?ver=54').catch(()=>{}));
 </script>
 </body>
 </html>
