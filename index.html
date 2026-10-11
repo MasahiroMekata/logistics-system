@@ -685,7 +685,7 @@
       align-items: stretch
     }
 
-    .dateInputRow > input[type="text"] {
+    .dateInputRow>input[type="text"] {
       flex: 1;
       min-width: 0
     }
@@ -849,7 +849,7 @@
           <button id="applyHall">選択QRにホール名を付与</button>
           <button id="applyProduct">選択QRに商品名を付与</button>
         </div>
-        <div class="toolbar" style="margin-top:12px">
+        <div class="toolbar" style="margin-top:60px">
           <div class="field"><label>未入力の項目で絞り込み</label><select id="manageMissing">
               <option value="">すべて表示</option>
               <option value="date">納品日が未入力</option>
@@ -877,7 +877,7 @@
     <section id="print" class="page">
       <div class="card">
         <h2>手順7：印刷するQRコード選択</h2>
-        <p class="note">納品日・ホール名で絞り込めます。絞り込みは任意です。表示されたQRコードから印刷対象を選択してください。</p>
+        <p class="note">納品日 / ホール名で絞り込めます。絞り込みは任意です。表示されたQRコードから印刷対象を選択してください。</p>
         <div class="toolbar">
           <div class="field"><label>納品日で絞り込み</label><select id="printDate">
               <option value="">すべて表示</option>
@@ -904,9 +904,10 @@
 
     <section id="printed" class="page">
       <div class="card">
-        
+
         <h2>手順8：印刷済みQRコード確認</h2>
-        <p class="note">PDF作成後のQRコードをホール名ごとに分けて保管しています。<br>特定のQRコードを選択して手順7に戻すことで再びQRコードをPDFに含めることができます。<br>納品日とホール名で絞り込めます。</p>
+        <p class="note">
+          PDF作成後のQRコードをホール名ごとに分けて保管しています。<br>特定のQRコードを選択して手順7に戻すことで再びQRコードをPDFに含めることができます。<br>納品日とホール名で絞り込めます。</p>
         <div class="toolbar">
           <div class="field"><label>納品日</label><select id="printedDate">
               <option value="">すべて表示</option>
@@ -930,7 +931,7 @@
     <section id="settings" class="page">
       <div class="card settings">
         <h2>Google Apps Script / 送信先メールアドレス設定</h2>
-        <p class="note">スマホからPCへメールを自動送信するために必要な設定です。<br>Google Apps Script（GAS）のURL・転送トークン・送信先メールアドレスを設定してください。</p>
+        <p class="note">スマホからPCへメールを自動送信するために必要な設定です。<br>Google Apps Script（GAS）のURL / 転送トークン / 送信先メールアドレスを設定してください。</p>
         <div class="row">
           <div class="field"><label>Google Apps Script URL</label><input id="gasUrl" type="url"
               placeholder="https://script.google.com/.../.../exec"></div>
@@ -977,7 +978,7 @@
     function missingLibs() {const m = []; if (typeof window.jsQR !== 'function') m.push('QR読取用(jsQR)'); if (!window.jspdf) m.push('PDF作成用(jsPDF)'); if (typeof window.qrcode !== 'function') m.push('QR生成用(qrcode-generator)'); return m}
     function checkLibs() {
       const m = missingLibs(), el = $('libWarn');
-      if (!m.length) {el.style.display = 'none'; return}
+      if (!m.length) {el.style.display = 'none'; return }
       el.style.display = 'block';
       el.innerHTML = `<span>必要なプログラム部品を読み込めませんでした：${m.join('、')}。通信状態を確認して「再読み込み」を押してください。読み込めるまで、該当する機能は使えません。</span><button id="libReload">再読み込み</button>`;
       $('libReload').onclick = () => location.reload()
@@ -1027,7 +1028,7 @@
       if (scanning) return;
       try {audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume()} catch (e) { }
       await initDetector();
-      if (!useNative && typeof window.jsQR !== 'function') {checkLibs(); status('QR読取用の部品(jsQR)を読み込めていないため、スキャンできません。通信状態を確認して再読み込みしてください。', 'err'); return}
+      if (!useNative && typeof window.jsQR !== 'function') {checkLibs(); status('QR読取用の部品(jsQR)を読み込めていないため、スキャンできません。通信状態を確認して再読み込みしてください。', 'err'); return }
       try {
         stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: {ideal: 'environment'}, width: {ideal: 1920}, height: {ideal: 1080}}, audio: false})
       } catch (e) {status('カメラを起動できませんでした。HTTPSで開いているか、カメラの許可を確認してください。', 'err'); return }
@@ -1147,7 +1148,7 @@
     async function sendSelected() {
       const rows = pendingRows().filter(x => pendingSelected.has(x.id));
       if (!rows.length) return alert('送信するURLを手順2で選択してください。');
-      const c = cfg(); if (!c.url || !c.to || !c.token) return alert('共通設定でGAS URL・送信先Gmail・転送トークンを設定してください。');
+      const c = cfg(); if (!c.url || !c.to || !c.token) return alert('共通設定でGAS URL / 送信先Gmail / 転送トークンを設定してください。');
       const btn = $('sendSelected'); btn.disabled = true;
       const per = 1000, batches = []; for (let i = 0; i < rows.length; i += per)batches.push(rows.slice(i, i + per));
       let ok = 0, unconf = 0, fail = '';
@@ -1203,19 +1204,25 @@
           }
         };
       const urlIn = target === 'step3' ? c.url : ($('gasUrl').value.trim() || c.url);
-      if (!urlIn) return out.set('GAS WebアプリURLが未設定です。共通設定で入力して保存してください。', 'warn');
+      if (!urlIn) return out.set('GAS WebアプリURLが未設定です。設定で入力して保存してください。', 'warn');
       out.set('接続確認中…', 'warn');
       try {
         const r = await fetchTimeout(urlIn, {method: 'GET', redirect: 'follow'}, 15000), t = (await r.text()).trim();
-        if (/logistics-system/.test(t)) out.set(/v6\.0/.test(t) ? `接続OK：${t}` : `接続はできましたが旧バージョンのGASが動いています（${t}）。Code.gsを更新し「新バージョン」としてデプロイし直してください。`, /v6\.0/.test(t) ? 'ok' : 'warn');
-        else out.set('応答がGASのものではありません。URLが「…/exec」か、アクセスできるユーザーが「全員」かを確認してください。', 'err')
-      } catch (e) {out.set('接続できませんでした（URL誤り・オフライン・アクセス権の可能性）。', 'err')}
+        const isV6 = /^qr-regen-print v6\.0 URL transfer endpoint is running\.$/.test(t);
+        if (isV6) {
+          out.set(`接続OK：${t}`, 'ok');
+        } else if (/^qr-regen-print v\d/.test(t)) {
+          out.set(`接続はできましたが、想定外のバージョンです（${t}）。`, 'warn');
+        } else {
+          out.set('応答がGASのものではありません。URLとデプロイ設定を確認してください。', 'err');
+        }
+      } catch (e) {out.set('接続できませんでした（URL誤り / オフライン / アクセス権の可能性）。', 'err')}
     }
     $('testGasStep3').onclick = () => testGas('step3'); $('testGas').onclick = () => testGas('settings');
 
     function makeQrDataUrl(url) {return new Promise((resolve, reject) => {try {const q = qrcode(0, 'M'); q.addData(url); q.make(); const n = q.getModuleCount(), scale = 12, quiet = 4, size = (n + quiet * 2) * scale, c = document.createElement('canvas'); c.width = size; c.height = size; const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size); ctx.fillStyle = '#000'; for (let r = 0; r < n; r++)for (let col = 0; col < n; col++)if (q.isDark(r, col)) ctx.fillRect((col + quiet) * scale, (r + quiet) * scale, scale, scale); resolve(c.toDataURL('image/png'))} catch (e) {reject(e)} })}
     async function importImages(files) {
-      if (typeof window.qrcode !== 'function') {checkLibs(); $('pcImportStatus').textContent = 'QR生成用の部品(qrcode-generator)を読み込めていません。通信状態を確認して再読み込みしてください。'; $('pcImportStatus').className = 'status err'; return}
+      if (typeof window.qrcode !== 'function') {checkLibs(); $('pcImportStatus').textContent = 'QR生成用の部品(qrcode-generator)を読み込めていません。通信状態を確認して再読み込みしてください。'; $('pcImportStatus').className = 'status err'; return }
       const arr = [...files]; let add = 0, dup = 0, bad = 0; $('pcImportStatus').textContent = `読み込み中… 0/${arr.length}`;
       for (let i = 0; i < arr.length; i++) {try {const txt = await arr[i].text(), urls = txt.split(/[\r\n,]+/).map(x => x.trim()).filter(x => /^https?:\/\//i.test(x)); if (!urls.length) {bad++; continue} for (const url of urls) {try {if (data.some(x => x.qrKey === 'qr:' + url)) {dup++; continue} const image = await makeQrDataUrl(url); if (addQR(image, url, false)) add++; else dup++} catch (e) {bad++} } } catch (e) {bad++} $('pcImportStatus').textContent = `読み込み中… ${i + 1}/${arr.length}`}
       $('pcImportStatus').textContent = `読み込み完了：追加 ${add}件 / 重複 ${dup}件 / 読み取り不可 ${bad}件`; $('pcImportStatus').className = 'status ok'; renderManage()
@@ -1265,8 +1272,8 @@
     });
     $('openBulkDate').onclick = () => {
       const picker = $('bulkDate');
-      try { if (picker.showPicker) picker.showPicker(); else picker.click(); }
-      catch (_) { picker.click(); }
+      try {if (picker.showPicker) picker.showPicker(); else picker.click();}
+      catch (_) {picker.click();}
     };
     $('bulkDate').addEventListener('change', () => {
       const value = $('bulkDate').value;
@@ -1288,7 +1295,7 @@
       save(); afterLabelChange();
     }
     $('applyDate').onclick = () => bulk('date', 'bulkDate'); $('applyMain').onclick = () => bulk('mainName', 'bulkMain'); $('applyHall').onclick = () => {if (!$('bulkHall').value) return alert('ホール名を選択してください。（先に本店名を選ぶと、ホール名の候補が表示されます）'); bulk('hall', 'bulkHall')}; $('applyProduct').onclick = () => bulk('product', 'bulkProduct');
-    $('clearLabels').onclick = () => {const rows = manageRows().filter(x => selected.has(x.id)); if (!rows.length) return alert('ラベルを消去するQRコードを選択してください。'); if (!confirm(`選択した${rows.length}件のQRコードについて、納品日・本店名・ホール名・商品名をすべて消去します。よろしいですか？`)) return; rows.forEach(x => {x.date = ''; x.mainName = ''; x.hall = ''; x.product = ''}); save(); afterLabelChange()};
+    $('clearLabels').onclick = () => {const rows = manageRows().filter(x => selected.has(x.id)); if (!rows.length) return alert('ラベルを消去するQRコードを選択してください。'); if (!confirm(`選択した${rows.length}件のQRコードについて、納品日 / 本店名 / ホール名 / 商品名をすべて消去します。よろしいですか？`)) return; rows.forEach(x => {x.date = ''; x.mainName = ''; x.hall = ''; x.product = ''}); save(); afterLabelChange()};
     $('deleteSelected').onclick = () => {const ids = manageRows().filter(x => selected.has(x.id)).map(x => x.id); if (!ids.length) return alert('削除するQRを選択してください。'); if (confirm(`${ids.length}件を削除しますか？`)) {data = data.filter(x => !ids.includes(x.id)); ids.forEach(id => selected.delete(id)); save(); renderManage(); renderPending()} }
 
     function fillMainSelect() {const sel = $('bulkMain'), old = sel.value; sel.innerHTML = '<option value="">本店名を選択</option>' + mainNames().map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join(''); if (mainNames().includes(old)) sel.value = old; fillHallSelect()}
@@ -1386,7 +1393,7 @@
       const cfgOk = !!(c.url && c.to && c.token), cfgText = cfgOk ? 'Gmail移行設定済み' : '未設定'; for (const id of ['transferConfigStatus', 'transferConfigStatusStep3']) {$(id).textContent = cfgText; $(id).className = 'status ' + (cfgOk ? 'ok' : '')} $('hallMaster').value = hallEntries().map(x => `${x.main},${x.hall}`).join('\n'); fillMainSelect(); renderLists()
     }
     $('saveTransferSettings').onclick = () => {localStorage.setItem(CFGKEY, JSON.stringify({url: $('gasUrl').value.trim(), to: $('transferTo').value.trim(), token: $('transferToken').value.trim()})); loadSettings()}
-    $('saveSettings').onclick = () => {const a = $('hallMaster').value.split(/\n/).map(x => x.split(',').map(v => v.trim())).filter(x => x.length >= 2 && x[0] && x[1]).map(x => ({main: x[0], hall: x.slice(1).join(',')})); if (!a.length) return alert('「本店名,ホール名」の形式で1行以上入力してください。'); localStorage.setItem(HALLKEY, JSON.stringify(a)); loadSettings(); alert('本店名・ホールリストを保存しました。')}
+    $('saveSettings').onclick = () => {const a = $('hallMaster').value.split(/\n/).map(x => x.split(',').map(v => v.trim())).filter(x => x.length >= 2 && x[0] && x[1]).map(x => ({main: x[0], hall: x.slice(1).join(',')})); if (!a.length) return alert('「本店名,ホール名」の形式で1行以上入力してください。'); localStorage.setItem(HALLKEY, JSON.stringify(a)); loadSettings(); alert('本店名 / ホール名リストを保存しました。')}
     $('exportData').onclick = () => {const blob = new Blob([JSON.stringify({data, halls: hallEntries(), products: products()}, null, 2)], {type: 'application/json'}), a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'logistics_v4_backup.json'; a.click(); URL.revokeObjectURL(a.href)}
     $('importData').onchange = async e => {const f = e.target.files[0]; if (!f) return; try {const o = JSON.parse(await f.text()); if (Array.isArray(o.data)) data = o.data; if (Array.isArray(o.halls)) localStorage.setItem(HALLKEY, JSON.stringify(o.halls)); if (Array.isArray(o.products)) localStorage.setItem(PRODUCTKEY, JSON.stringify(o.products)); save(); loadSettings(); renderPending(); renderManage(); refreshPrint(); renderPrinted(); alert('バックアップを読み込みました。')} catch (err) {alert('バックアップの読み込みに失敗しました。')} e.target.value = ''}
     $('wipeAll').onclick = () => {if (confirm('QRデータをすべて削除しますか？')) {data = []; selected.clear(); pendingSelected.clear(); printSelected.clear(); printedSelected.clear(); sessionIds.clear(); saveSession(); save(); renderPending(); renderManage(); refreshPrint(); renderPrinted()} }
