@@ -937,7 +937,7 @@
               placeholder="https://script.google.com/.../.../exec"></div>
           <div class="field"><label>転送トークン</label><input id="transferToken" type="password"
               placeholder="システム管理者に問い合わせてください"></div>
-          <div class="field"><label>送信先Gmail</label><input id="transferTo" type="email" placeholder="example@gmail.com">
+          <div class="field"><label>送信先Mail</label><input id="transferTo" type="email" placeholder="example@gmail.com">
           </div>
         </div>
         <div class="actions"><button id="saveTransferSettings">移行設定を保存</button><button id="testGas"
@@ -1139,7 +1139,7 @@
     function explainErr(res) {
       const e = String(res.error || '');
       if (e === 'unauthorized') return '転送トークンがGAS側(Code.gs)と一致していません。共通設定とCode.gsのTRANSFER_TOKENを確認してください。';
-      if (e === 'invalid recipient') return '送信先Gmailの形式が正しくありません。';
+      if (e === 'invalid recipient') return '送信先Mailの形式が正しくありません。';
       if (e === 'offline') return 'オフラインです。通信状態を確認してください。';
       if (e === 'non-json') return 'GASから想定外の応答が返りました。「アクセスできるユーザー：全員」で、新バージョンとして再デプロイしたか確認してください。';
       if (/permission|authori|権限|承認/i.test(e)) return 'GASの承認が未完了です。Apps ScriptエディタでauthorizeOnceを1回実行して承認し、再デプロイしてください。';
@@ -1148,7 +1148,7 @@
     async function sendSelected() {
       const rows = pendingRows().filter(x => pendingSelected.has(x.id));
       if (!rows.length) return alert('送信するURLを手順2で選択してください。');
-      const c = cfg(); if (!c.url || !c.to || !c.token) return alert('共通設定でGAS URL / 送信先Gmail / 転送トークンを設定してください。');
+      const c = cfg(); if (!c.url || !c.to || !c.token) return alert('共通設定でGAS URL / 送信先Mail / 転送トークンを設定してください。');
       const btn = $('sendSelected'); btn.disabled = true;
       const per = 1000, batches = []; for (let i = 0; i < rows.length; i += per)batches.push(rows.slice(i, i + per));
       let ok = 0, unconf = 0, fail = '';
@@ -1390,7 +1390,7 @@
 
     function loadSettings() {
       const c = cfg(); $('gasUrl').value = c.url || ''; $('transferTo').value = c.to || ''; $('transferToken').value = c.token || '';
-      const cfgOk = !!(c.url && c.to && c.token), cfgText = cfgOk ? 'Gmail移行設定済み' : '未設定'; for (const id of ['transferConfigStatus', 'transferConfigStatusStep3']) {$(id).textContent = cfgText; $(id).className = 'status ' + (cfgOk ? 'ok' : '')} $('hallMaster').value = hallEntries().map(x => `${x.main},${x.hall}`).join('\n'); fillMainSelect(); renderLists()
+      const cfgOk = !!(c.url && c.to && c.token), cfgText = cfgOk ? 'Mail移行設定済み' : '未設定'; for (const id of ['transferConfigStatus', 'transferConfigStatusStep3']) {$(id).textContent = cfgText; $(id).className = 'status ' + (cfgOk ? 'ok' : '')} $('hallMaster').value = hallEntries().map(x => `${x.main},${x.hall}`).join('\n'); fillMainSelect(); renderLists()
     }
     $('saveTransferSettings').onclick = () => {localStorage.setItem(CFGKEY, JSON.stringify({url: $('gasUrl').value.trim(), to: $('transferTo').value.trim(), token: $('transferToken').value.trim()})); loadSettings()}
     $('saveSettings').onclick = () => {const a = $('hallMaster').value.split(/\n/).map(x => x.split(',').map(v => v.trim())).filter(x => x.length >= 2 && x[0] && x[1]).map(x => ({main: x[0], hall: x.slice(1).join(',')})); if (!a.length) return alert('「本店名,ホール名」の形式で1行以上入力してください。'); localStorage.setItem(HALLKEY, JSON.stringify(a)); loadSettings(); alert('本店名 / ホール名リストを保存しました。')}
