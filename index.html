@@ -427,14 +427,14 @@
 
     .qrgrid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 10px
     }
 
     .qritem {
       border: 1px solid #ddd;
       border-radius: 10px;
-      padding: 8px;
+      padding: 36px 8px 8px;
       background: #fff;
       position: relative
     }
@@ -443,13 +443,15 @@
       width: 100%;
       aspect-ratio: 1;
       object-fit: contain;
-      background: #fff
+      background: #fff;
+      image-rendering: pixelated
     }
 
+    /* チェックボックスはQR画像に重ならないよう、カード上部の専用行に置く */
     .check {
       position: absolute;
-      top: 7px;
-      left: 7px;
+      top: 8px;
+      left: 8px;
       width: 20px;
       height: 20px;
       z-index: 2
