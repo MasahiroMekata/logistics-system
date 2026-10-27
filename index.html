@@ -808,6 +808,155 @@
       opacity: 0;
       pointer-events: none
     }
+
+    /* ===== v6.1 改善 ===== */
+    /* 削除ボタンを右端へ寄せるための余白（最低40pxは空ける） */
+    .spacer {
+      flex: 1 1 40px
+    }
+
+    /* 確認ダイアログ */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: #0006;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px
+    }
+
+    .modal[hidden] {
+      display: none
+    }
+
+    .modalBox {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 10px 30px #0004
+    }
+
+    .modalBox h3 {
+      margin: 0 0 10px;
+      font-size: 17px
+    }
+
+    .modalBox p {
+      margin: 0 0 18px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #444;
+      white-space: pre-line
+    }
+
+    .modalActions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end
+    }
+
+    /* ラベル付与の操作欄（PC画面では上部に固定） */
+    .labelBarHead {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px
+    }
+
+    .labelBarHead h2 {
+      margin: 0
+    }
+
+    /* 見出し行に置く小さな操作（使い方・印刷設定）。高さを増やさないための配置 */
+    .helpBtn {
+      padding: 6px 10px;
+      font-size: 12px
+    }
+
+    .helpBox {
+      margin: 0 0 10px;
+      padding: 8px 12px;
+      background: #f7f7f8;
+      border-radius: 8px
+    }
+
+    .helpBox[hidden] {
+      display: none
+    }
+
+    .inlineFilter {
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .inlineFilter label {
+      margin: 0;
+      font-size: 12px;
+      white-space: nowrap
+    }
+
+    .inlineFilter select {
+      width: auto;
+      padding: 8px
+    }
+
+    /* 手順7・手順9の「選択操作」の行：ボタンの位置と幅を揃える */
+    .selRow {
+      align-items: center
+    }
+
+    .selRow > button:first-child {
+      min-width: 170px
+    }
+
+    .barActions.mixed button {
+      flex: 0 0 auto
+    }
+
+    .barActions.mixed .spacer {
+      flex: 1 1 20px
+    }
+
+    .barActions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px
+    }
+
+    .barActions button {
+      flex: 1 1 auto;
+      padding: 10px 12px;
+      font-size: 13px
+    }
+
+    /* ボタンの段。右寄せの段は、ボタンを引き伸ばさず右端に置く */
+    .barActions.end {
+      justify-content: flex-end
+    }
+
+    .barActions.end button {
+      flex: 0 0 auto
+    }
+
+    @media (min-width: 900px) {
+      #labelBar,
+      #printBar,
+      #printedBar {
+        position: sticky;
+        top: var(--hdrH, 52px);
+        z-index: 15;
+        box-shadow: 0 4px 12px #00000026;
+        max-height: 50vh;
+        overflow-y: auto
+      }
+    }
   </style>
 </head>
 
@@ -816,6 +965,13 @@
     <h1>物流管理支援システム v6.1</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
+  <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
+    <div class="modalBox">
+      <h3 id="confirmTitle"></h3>
+      <p id="confirmBody"></p>
+      <div class="modalActions"><button id="confirmCancel" class="secondary">キャンセル</button><button id="confirmOk" class="danger">削除する</button></div>
+    </div>
+  </div>
   <div class="wrap">
     <div id="libWarn" class="libWarn" style="display:none"></div>
 
@@ -873,6 +1029,7 @@
         <div class="actions">
           <button id="selectPendingAll" class="secondary">全選択</button>
           <button id="unselectPendingAll" class="secondary">選択解除</button>
+          <span class="spacer"></span>
           <button id="deletePendingSelected" class="danger">選択URL削除</button>
         </div>
         <div style="margin-top:8px"><span id="scanCount" class="count" style="margin-left:0"></span></div>
@@ -923,8 +1080,11 @@
         <div id="pcImportStatus" class="status">まだURLは読み込まれていません。</div>
       </div>
 
-      <div class="card">
-        <h2>手順6：ラベルの付与</h2>
+      <div class="card" id="labelBar">
+        <div class="labelBarHead"><h2>手順6：ラベルの付与</h2><button type="button" class="secondary helpBtn" data-help="manageHelp">使い方</button><span id="manageCount" class="count"></span></div>
+        <div id="manageHelp" class="note helpBox" hidden>
+          ここには、付与が完了していないQRコードが表示されます。「付与完了にする」を押したQRコードは、④ 印刷準備に移動します。<br>本社名とホール名は、セットで付与されます。ホール名を先に選ぶと、対応する本社名が自動で入力されます。本社名を先に選ぶと、その本社のホールだけを選べます。
+        </div>
         <div class="bulkFields">
           <div class="field dateField" id="dateWrap">
             <label>納品日</label>
@@ -946,59 +1106,48 @@
               id="productList"></datalist></div>
         </div>
         <div id="hallLinkStatus" class="status" style="display:none"></div>
-        <div class="applyActions">
-          <button id="applyDate">選択QRに納品日を付与</button>
-          <button id="applyMain">選択QRに本社名を付与</button>
-          <button id="applyHall">選択QRにホール名を付与</button>
-          <button id="applyProduct">選択QRに商品名を付与</button>
+        <div class="barActions">
+          <button id="applyDate">納品日を付与</button>
+          <button id="applyLocation">本社名・ホール名を付与</button>
+          <button id="applyProduct">商品名を付与</button>
         </div>
-        <p class="note">
-          本社名・ホール名はどちらから選んでも構いません。<br>ホール名を選ぶと、対応する本社名が入力欄に自動で入力されます。<br>組み合わせが矛盾するQRコードができる場合は、確認のうえ、本社名の更新またはホール名の解除を行います。
-        </p>
-        <div class="actions" style="margin-top:12px">
-          <button id="markDone" class="success">選択QRを付与完了にする</button>
+        <div class="barActions">
+          <button id="markDone" class="success">付与完了にする</button>
           <button id="selectAll" class="secondary">全選択</button>
           <button id="unselectAll" class="secondary">選択解除</button>
         </div>
-        <div class="toolbar" style="margin-top:60px">
-          <div class="field"><label>未入力の項目で絞り込み</label><select id="manageMissing">
+      </div>
+      <div class="card">
+        <div class="barActions mixed" style="margin:0 0 12px">
+          <div class="inlineFilter"><label for="manageMissing">未入力の項目で絞り込み</label><select id="manageMissing">
               <option value="">すべて表示</option>
               <option value="date">納品日が未入力</option>
               <option value="main">本社名が未入力</option>
               <option value="hall">ホール名が未入力</option>
               <option value="product">商品名が未入力</option>
             </select></div>
-          <div class="field"><label>QRコードの生成日で絞り込み</label><select id="manageImported">
+          <div class="inlineFilter"><label for="manageImported">QRコードの生成日で絞り込み</label><select id="manageImported">
               <option value="">すべて表示</option>
             </select></div>
-        </div>
-        <div class="actions" style="margin-top:12px">
-          <button id="unmarkDone" class="secondary">選択QRの付与完了を解除</button>
-          <button id="deleteSelected" class="danger">選択QR削除</button>
+          <span class="spacer"></span>
           <button id="clearLabels" class="danger">選択QRのラベルを消去</button>
+          <button id="deleteSelected" class="danger">選択QR削除</button>
         </div>
-
-      </div>
-      <div class="card">
-        <div style="margin-bottom:10px"><span id="manageCount" class="count" style="margin-left:0"></span></div>
         <div id="manageBody" class="qrgrid"></div>
       </div>
     </section>
 
     <section id="print" class="page">
-      <div class="card">
-        <h2>手順7：印刷するQRコード選択</h2>
-        <p class="note">
-          検索条件を選ぶと、条件に一致するQRコードが自動で表示されます（「検索」ボタンで、現在の条件を再検索することもできます）。<br>条件は1つだけでも、組み合わせても指定でき、複数指定した場合はすべてに一致するものを表示します<br>登録済み（未印刷）のQRコードをすべて確認したいときは「全件表示」を押してください。
-        </p>
+      <div class="card" id="printBar">
+        <div class="labelBarHead"><h2>手順7：印刷するQRコード選択</h2><button type="button" class="secondary helpBtn" data-help="printHelp">使い方</button><span id="printCount" class="count"></span></div>
+        <div id="printHelp" class="note helpBox" hidden>
+          ここには、③で「付与完了」にしたQRコードだけが表示されます。<br>検索条件を選んで「検索」を押すと、条件に一致するQRコードが表示されます。条件は1つだけでも、組み合わせても指定でき、複数指定した場合はすべてに一致するものを表示します。<br>付与完了のQRコードをすべて確認したいときは「全件表示」を押してください。<br>間違えて付与完了にしたQRコードは、選択して「付与未完了にする」を押すと、③に戻ります。<br>印刷するQRコードを選んだら、一覧の最下部の「手順8」で、印刷設定とA4 PDF作成を行います。
+        </div>
         <div class="toolbar">
           <div class="field"><label>納品日</label><select id="printDate">
               <option value="">指定しない</option>
             </select></div>
-          <div class="field"><label>本社名</label><select id="printMain">
-              <option value="">指定しない</option>
-            </select></div>
-          <div class="field"><label>ホール名</label><select id="printHall">
+          <div class="field"><label>本社名・ホール名</label><select id="printLoc">
               <option value="">指定しない</option>
             </select></div>
           <div class="field"><label>商品名</label><select id="printProduct">
@@ -1008,57 +1157,83 @@
               <option value="">指定しない</option>
             </select></div>
         </div>
-        <div class="actions" style="margin-top:12px">
+        <div class="barActions">
           <button id="searchPrint">検索</button>
           <button id="showAllPrint" class="secondary">全件表示</button>
           <button id="clearPrintSearch" class="secondary">条件をクリア</button>
         </div>
-        <div class="toolbar" style="margin-top:60px">
-          <div class="field"><label>印刷設定：1ページあたりのQRコード数</label><select id="perPage">
-              <option value="4">4個（2行×2列）</option>
-              <option value="6">6個（3行×2列）</option>
-            </select></div>
-        </div>
-        <div class="actions" style="margin-top:12px">
-          <button id="makePdf" disabled>A4 PDF作成</button>
+        <div id="printCondNote" class="status warn" style="display:none"></div>
+        <div class="toolbar selRow" style="margin-top:10px">
+          <button id="backToLabel" class="secondary">付与未完了にする</button>
           <button id="selectPrintAll" class="secondary">全選択</button>
           <button id="unselectPrintAll" class="secondary">選択解除</button>
+          <div class="inlineFilter" style="margin-left:auto;flex-wrap:wrap">
+            <label for="shipDateText">納品日の一括変更（選択したQRだけ）</label>
+            <div class="dateInputRow">
+              <input id="shipDateText" type="text" placeholder="YYYY/MM/DD" inputmode="numeric" aria-label="変更後の納品日を入力" style="width:140px">
+              <div class="datePickerWrap">
+                <button type="button" id="openShipDate" class="secondary">カレンダー</button>
+                <input id="shipDate" type="date" aria-label="カレンダーから変更後の納品日を選択">
+              </div>
+            </div>
+            <button id="changePrintDate">選択QRの納品日を一括変更</button>
+          </div>
         </div>
       </div>
       <div class="card">
-        <div style="margin-bottom:10px"><span id="printCount" class="count" style="margin-left:0"></span></div>
-        <div id="printCriteria" class="note" style="margin-bottom:10px"></div>
         <div id="printBody" class="qrgrid"></div>
+      </div>
+      <div class="card" id="printRun">
+        <h2>手順8：QRコードの印刷</h2>
+        <p id="printRunInfo" class="note" style="margin-bottom:10px"></p>
+        <div class="toolbar">
+          <div class="field"><label>印刷設定：1ページあたりのQRコード数</label><select id="perPage">
+              <option value="4">4個（2行×2列）</option>
+              <option value="6" selected>6個（3行×2列）</option>
+            </select></div>
+          <button id="makePdf" disabled>A4 PDF作成</button>
+        </div>
       </div>
     </section>
 
     <section id="printed" class="page">
-      <div class="card">
-
-        <h2>手順8：印刷済みQRコード確認</h2>
-        <p class="note">
-          PDF作成後のQRコードをホール名ごとに分けて保管しています。<br>特定のQRコードを選択して手順7に戻すことで再びQRコードをPDFに含めることができます。<br>納品日とホール名で絞り込めます。</p>
+      <div class="card" id="printedBar">
+        <div class="labelBarHead"><h2>手順9：印刷済みQRコード確認</h2><button type="button" class="secondary helpBtn" data-help="printedHelp">使い方</button><span id="printedCount" class="count"></span></div>
+        <div id="printedHelp" class="note helpBox" hidden>
+          PDF作成後のQRコードをホール名ごとに分けて保管しています。<br>特定のQRコードを選択して手順7に戻すことで再びQRコードをPDFに含めることができます。<br>納品日・本社名・ホール名・商品名・取り込み日時から条件を選んで「検索」を押すと、条件に一致するQRコードが表示されます。すべて確認したいときは「全件表示」を押してください。
+        </div>
         <div class="toolbar">
           <div class="field"><label>納品日</label><select id="printedDate">
-              <option value="">すべて表示</option>
+              <option value="">指定しない</option>
             </select></div>
-          <div class="field"><label>ホール名</label><select id="printedHall">
-              <option value="">すべて表示</option>
+          <div class="field"><label>本社名・ホール名</label><select id="printedLoc">
+              <option value="">指定しない</option>
+            </select></div>
+          <div class="field"><label>商品名</label><select id="printedProduct">
+              <option value="">指定しない</option>
+            </select></div>
+          <div class="field"><label>取り込み日時（件数）</label><select id="printedBatch">
+              <option value="">指定しない</option>
             </select></div>
         </div>
-        <div class="actions" style="margin-top:12px">
-          <button id="restorePrinted">手順7に戻す</button>
+        <div class="barActions">
+          <button id="searchPrinted">検索</button>
+          <button id="showAllPrinted" class="secondary">全件表示</button>
+          <button id="clearPrinted" class="secondary">条件をクリア</button>
+        </div>
+        <div id="printedCondNote" class="status warn" style="display:none"></div>
+        <div class="toolbar selRow" style="margin-top:10px">
+          <button id="restorePrinted" class="secondary">手順7に戻す</button>
           <button id="selectPrintedAll" class="secondary">全選択</button>
           <button id="unselectPrintedAll" class="secondary">選択解除</button>
         </div>
       </div>
       <div class="card">
-        <div style="margin-bottom:10px"><span id="printedCount" class="count" style="margin-left:0"></span></div>
         <div id="printedBody"></div>
       </div>
     </section>
 
-    <section id="settings" class="page">
+      <section id="settings" class="page">
       <div class="card settings">
         <h2>Google Apps Script / 送信先メールアドレス設定</h2>
         <p class="note">スマホからPCへメールを自動送信するために必要な設定です。<br>Google Apps Script（GAS）のURL / 転送トークン / 送信先メールアドレスを設定してください。</p>
@@ -1073,6 +1248,17 @@
         <div class="actions"><button id="saveTransferSettings">移行設定を保存</button><button id="testGas"
             class="secondary">GAS接続テスト</button></div>
         <div id="transferConfigStatus" class="status">未設定</div>
+      </div>
+      <div class="card settings">
+        <h2>D1保存（サーバーへの自動バックアップ）</h2>
+        <p class="note">この端末のデータは、今まで通りブラウザに保存されます。トークンを設定すると、変更のたびに Cloudflare D1 にも自動で保存されます。<br>未設定の場合は、この端末のブラウザにだけ保存します（D1には送りません）。QRコード画像は保存せず、URLなどの情報を保存します。</p>
+        <div class="row">
+          <div class="field"><label>D1保存用トークン</label><input id="d1Token" type="password" autocomplete="off"
+              placeholder="システム管理者に問い合わせてください"></div>
+        </div>
+        <div class="actions"><button id="saveD1Settings">D1設定を保存</button><button id="syncD1Now"
+            class="secondary">今すぐD1に保存</button><button id="checkD1" class="secondary">D1の件数を確認</button></div>
+        <div id="d1Status" class="status">未設定（この端末のブラウザにだけ保存）</div>
       </div>
       <div class="card settings">
         <h2>本社名 / ホール名設定</h2>
@@ -1091,7 +1277,7 @@
         <h2>データ管理</h2>
         <div class="actions"><button id="exportData" class="secondary">バックアップを書き出す</button><label
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
-              style="display:none"></label><button id="wipeAll" class="danger">全データ削除</button></div>
+              style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
     </section>
   </div>
@@ -1129,6 +1315,7 @@
     let flashIds = new Set();
     // 保存。失敗（ブラウザの保存容量不足など）したら false を返す
     function save(quiet) {
+      scheduleD1(); // D1へも保存（トークン未設定なら何もしない）
       try {localStorage.setItem(KEY, JSON.stringify(data)); return true}
       catch (e) {if (!quiet) toast('保存できませんでした。ブラウザの保存容量が不足している可能性があります。バックアップを書き出し、不要なQRを削除してください。', 'err'); return false}
     }
@@ -1141,6 +1328,23 @@
     }
     // 既存データ（付与完了状態・取り込み情報がないもの）を補完する。assignmentCompleted の既定値は false。
     function normRec(x) {return {...x, url: x.url || String(x.qrKey || '').replace(/^qr:/, ''), mainName: x.mainName || '', assignmentCompleted: x.assignmentCompleted === true}}
+    // 作業状態：付与未完了（③に表示）／付与完了（④に表示）／印刷済み（⑤に表示）。データは削除せず、状態で表示先を分ける
+    const isWorking = x => x.status === 'unprinted' && !x.assignmentCompleted;
+    const isReady = x => x.status === 'unprinted' && x.assignmentCompleted === true;
+    // ホール名だけが設定されて本社名が空のQRを補修する（ホールが1つの本社にだけ属する場合のみ）。補修した件数を返す
+    function repairMainNames() {let n = 0; data.forEach(x => {if (x.hall && !x.mainName) {const m = mainsOfHall(x.hall); if (m.length === 1) {x.mainName = m[0]; n++}}}); return n}
+    const DEL_NOTE = '削除すると、データが一覧から表示されなくなります。\n必要なデータを誤って削除しないよう、操作前に確認してください。';
+    // 確認ダイアログ。「実行する」なら true を返す（初期位置は誤操作を防ぐため「キャンセル」）
+    function askConfirm({title, body, ok = '削除する', danger = true}) {
+      return new Promise(resolve => {
+        const m = $('confirmModal'), okB = $('confirmOk'), cancelB = $('confirmCancel');
+        $('confirmTitle').textContent = title; $('confirmBody').textContent = body; okB.textContent = ok; okB.className = danger ? 'danger' : '';
+        const done = v => {m.hidden = true; okB.onclick = cancelB.onclick = m.onclick = null; document.removeEventListener('keydown', onKey); resolve(v)};
+        const onKey = e => {if (e.key === 'Escape') done(false)};
+        okB.onclick = () => done(true); cancelB.onclick = () => done(false); m.onclick = e => {if (e.target === m) done(false)};
+        document.addEventListener('keydown', onKey); m.hidden = false; cancelB.focus()
+      })
+    }
     function fmtMin(iso, sec = false) {const t = new Date(iso); if (!iso || isNaN(t)) return ''; const p = n => String(n).padStart(2, '0'); return `${t.getFullYear()}/${p(t.getMonth() + 1)}/${p(t.getDate())} ${p(t.getHours())}:${p(t.getMinutes())}${sec ? ':' + p(t.getSeconds()) : ''}`}
     function doneCls(x) {return x.assignmentCompleted ? ' done' : ''}
     function doneBadge(x) {return `<span class="stateBadge">${x.assignmentCompleted ? '✓ 付与完了' : '○ 未完了'}</span>`}
@@ -1149,7 +1353,7 @@
     function esc(s) {return String(s ?? '').replace(/[&<>"']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[m]))}
     function dateLabel(d) {if (!d) return ''; const [y, m, day] = d.split('-'); return `${y}/${m.padStart(2, '0')}/${day.padStart(2, '0')}`}
     function cfg() {return JSON.parse(localStorage.getItem(CFGKEY) || '{}')}
-    function showPage(id) {const wasActive = $(id).classList.contains('active'); if (id !== 'scan' && scanning) stopScan(); document.querySelectorAll('.page').forEach(x => x.classList.toggle('active', x.id === id)); document.querySelectorAll('.navBtn').forEach(x => x.classList.toggle('active', x.dataset.page === id)); if (id === 'sent') renderSent(); if (id === 'manage') renderManage(); if (id === 'print') {if (!wasActive) resetPrintView(); refreshPrint()} if (id === 'printed') renderPrinted()}
+    function showPage(id) {const wasActive = $(id).classList.contains('active'); if (id !== 'scan' && scanning) stopScan(); document.querySelectorAll('.page').forEach(x => x.classList.toggle('active', x.id === id)); document.querySelectorAll('.navBtn').forEach(x => x.classList.toggle('active', x.dataset.page === id)); if (id === 'sent') renderSent(); if (id === 'manage') renderManage(); if (id === 'print') {if (!wasActive) resetPrintView(); refreshPrint()} if (id === 'printed') {if (!wasActive) resetPrintedView(); renderPrinted()}}
     document.querySelectorAll('.navBtn').forEach(b => b.onclick = () => showPage(b.dataset.page));
 
     function status(msg, type = '') {const e = $('scanStatus'); e.textContent = msg; e.className = 'status ' + type}
@@ -1284,7 +1488,11 @@
     }
     $('selectPendingAll').onclick = () => {pendingRows().forEach(x => pendingSelected.add(x.id)); renderPending()}
     $('unselectPendingAll').onclick = () => {pendingSelected.clear(); renderPending()}
-    $('deletePendingSelected').onclick = () => {const ids = [...pendingSelected]; if (!ids.length) return alert('削除するURLを選択してください。'); if (confirm(`${ids.length}件を削除しますか？`)) {data = data.filter(x => !ids.includes(x.id)); ids.forEach(id => {sessionIds.delete(id); pendingSelected.delete(id)}); saveSession(); save(); renderPending(); renderManage()} }
+    $('deletePendingSelected').onclick = async () => {
+      const ids = [...pendingSelected]; if (!ids.length) return toast('削除するURLを選択してください。', 'warn');
+      if (!await askConfirm({title: `選択した${ids.length}件のURLを削除しますか？`, body: DEL_NOTE})) return;
+      data = data.filter(x => !ids.includes(x.id)); ids.forEach(id => {sessionIds.delete(id); pendingSelected.delete(id)}); saveSession(); save(); renderPending(); renderManage()
+    }
 
     function tstatus(msg, type = '') {const e = $('transferStatus'); e.style.display = 'block'; e.textContent = msg; e.className = 'status ' + type}
     function localDate() {return new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)}
@@ -1395,7 +1603,7 @@
     function manageRows() {
       const m = $('manageMissing').value, d = $('manageImported').value;
       return data.filter(x =>
-        x.status === 'unprinted' &&
+        isWorking(x) &&
         (!m || !x[MISSING_FIELD[m]]) &&
         importedMatch(x, d)
       )
@@ -1405,11 +1613,11 @@
       sel.innerHTML = '<option value="">すべて表示</option>' + ds.map(d => `<option value="${esc(d)}">${esc(dateLabel(d))}</option>`).join('') + (hasNone ? '<option value="__none">生成日不明</option>' : '');
       if ([...sel.options].some(o => o.value === old)) sel.value = old
     }
-    function updateManageCount() {const all = data.filter(x => x.status === 'unprinted').length, rows = manageRows(); $('manageCount').textContent = `選択 ${rows.filter(x => selected.has(x.id)).length}件 / 表示 ${rows.length}件 / 全 ${all}件`}
+    function updateManageCount() {const all = data.filter(isWorking).length, ready = data.filter(isReady).length, rows = manageRows(); $('manageCount').textContent = `選択 ${rows.filter(x => selected.has(x.id)).length}件 / 表示 ${rows.length}件 / 付与完了 ${ready}件 / 付与未完了 ${all}件`}
     function renderManage() {
-      fillImportedSelect(data.filter(x => x.status === 'unprinted'));
+      fillImportedSelect(data.filter(isWorking));
       const rows = manageRows();
-      $('manageBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${doneCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="mcheck check" data-id="${x.id}" type="checkbox" ${selected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note">本社：${esc(x.mainName) || '未設定'}</div><div class="note">ホール：${esc(x.hall) || '未設定'}</div><div class="note">商品：${esc(x.product) || '未設定'}</div><div class="note">生成：${x.createdAt && !isNaN(new Date(x.createdAt)) ? fmtSent(x.createdAt) : '不明'}</div></div>`).join('') : `<div class="empty">${data.some(x => x.status === 'unprinted') ? '条件に該当するQRコードはここに表示されます。' : '再生成したQRコードはここに表示されます。'}</div>`;
+      $('manageBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${doneCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="mcheck check" data-id="${x.id}" type="checkbox" ${selected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note">本社：${esc(x.mainName) || '未設定'}</div><div class="note">ホール：${esc(x.hall) || '未設定'}</div><div class="note">商品：${esc(x.product) || '未設定'}</div><div class="note">生成：${x.createdAt && !isNaN(new Date(x.createdAt)) ? fmtSent(x.createdAt) : '不明'}</div></div>`).join('') : `<div class="empty">${data.some(isWorking) ? '条件に該当するQRコードはここに表示されます。' : data.some(isReady) ? '付与が未完了のQRコードはありません。付与完了のQRコードは「④ 印刷準備」に表示されます。' : '再生成したQRコードはここに表示されます。'}</div>`;
       flashIds = new Set();
       document.querySelectorAll('.mcheck').forEach(e => e.onchange = () => {e.checked ? selected.add(e.dataset.id) : selected.delete(e.dataset.id); updateManageCount()});
       updateManageCount()
@@ -1428,20 +1636,24 @@
       if (year < 1 || month < 1 || month > 12 || day < 1 || day > daysInMonth(year, month)) return null;
       return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     }
-    $('bulkDateText').addEventListener('input', () => {
-      const input = $('bulkDateText'), digits = input.value.replace(/\D/g, '').slice(0, 8);
-      input.value = digits.length <= 4 ? digits : digits.length <= 6 ? `${digits.slice(0, 4)}/${digits.slice(4)}` : `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6)}`;
-      $('bulkDate').value = normalizeBulkDate(input.value) || '';
-    });
-    $('openBulkDate').onclick = () => {
-      const picker = $('bulkDate');
-      try {if (picker.showPicker) picker.showPicker(); else picker.click();}
-      catch (_) {picker.click();}
-    };
-    $('bulkDate').addEventListener('change', () => {
-      const value = $('bulkDate').value;
-      $('bulkDateText').value = value ? value.replace(/-/g, '/') : '';
-    });
+    // 「YYYY/MM/DD」入力欄＋カレンダーの組み合わせ
+    function bindDateField(textId, pickerId, openId) {
+      $(textId).addEventListener('input', () => {
+        const input = $(textId), digits = input.value.replace(/\D/g, '').slice(0, 8);
+        input.value = digits.length <= 4 ? digits : digits.length <= 6 ? `${digits.slice(0, 4)}/${digits.slice(4)}` : `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6)}`;
+        $(pickerId).value = normalizeBulkDate(input.value) || '';
+      });
+      $(openId).onclick = () => {
+        const picker = $(pickerId);
+        try {if (picker.showPicker) picker.showPicker(); else picker.click();}
+        catch (_) {picker.click();}
+      };
+      $(pickerId).addEventListener('change', () => {
+        const value = $(pickerId).value;
+        $(textId).value = value ? value.replace(/-/g, '/') : '';
+      });
+    }
+    bindDateField('bulkDateText', 'bulkDate', 'openBulkDate'); bindDateField('shipDateText', 'shipDate', 'openShipDate');
     const FIELD_LABEL = {date: '納品日', mainName: '本社名', hall: 'ホール名', product: '商品名'};
     const NEED_ROWS = '対象のQRコードを選択してください';
     function selectedManage() {return manageRows().filter(x => selected.has(x.id))}
@@ -1462,26 +1674,31 @@
       commit(`${FIELD_LABEL[field]}を${rows.length}件に付与しました`, rows, btnId);
     }
     $('applyDate').onclick = () => bulk('date', 'bulkDate', 'applyDate'); $('applyProduct').onclick = () => bulk('product', 'bulkProduct', 'applyProduct');
-    // FR-02：本社名・ホール名は常に組み合わせが矛盾しないように付与する
-    $('applyMain').onclick = () => {
-      const m = $('bulkMain').value; if (!m) return toast('本社名を選択してください。', 'warn');
+    // 本社名とホール名は必ずセットで付与する（ホール名だけが付いて本社名が空になることを防ぐ）
+    $('applyLocation').onclick = () => {
+      const m = $('bulkMain').value, h = $('bulkHall').value;
+      if (!m || !h) return toast('本社名とホール名の両方を選択してください。（ホール名を選ぶと、対応する本社名が自動で入力されます）', 'warn');
+      if (!hallsFor(m).includes(h)) return toast(`ホール名「${h}」は、本社「${m}」に属していません。選び直してください。`, 'err');
       const rows = selectedManage(); if (!rows.length) return toast(NEED_ROWS, 'warn');
-      const ok = hallsFor(m), conflict = rows.filter(x => x.hall && !ok.includes(x.hall));
-      if (conflict.length && !confirm(`選択したQRのうち${conflict.length}件は、現在のホール名が本社「${m}」に属していません。\nこれらのホール名を解除して、本社名を付与します。よろしいですか？`)) return;
-      rows.forEach(x => {if (x.hall && !ok.includes(x.hall)) x.hall = ''; x.mainName = m}); commit(`本社名を${rows.length}件に付与しました${conflict.length ? `（ホール名を${conflict.length}件解除）` : ''}`, rows, 'applyMain')
+      rows.forEach(x => {x.mainName = m; x.hall = h});
+      commit(`本社名「${m}」・ホール名「${h}」を${rows.length}件に付与しました`, rows, 'applyLocation')
     };
-    $('applyHall').onclick = () => {
-      const h = $('bulkHall').value; if (!h) return toast('ホール名を選択してください。（本社名・ホール名のどちらから選んでも構いません）', 'warn');
-      const m = $('bulkMain').value; if (!m) return toast('このホール名に対応する本社名が確定していません。表示された候補から本社名を選んでください。', 'warn');
+    // 付与完了にしたQRは③から④（印刷準備）へ移る（データは削除しない）
+    $('markDone').onclick = () => {
       const rows = selectedManage(); if (!rows.length) return toast(NEED_ROWS, 'warn');
-      const conflict = rows.filter(x => x.mainName && x.mainName !== m);
-      if (conflict.length && !confirm(`選択したQRのうち${conflict.length}件は、本社名が「${m}」と異なります（ホール名「${h}」は本社「${m}」に属しています）。\nこれらの本社名も「${m}」に更新して、ホール名を付与しますか？\n（「キャンセル」を選ぶと、何も付与しません）`)) return;
-      rows.forEach(x => {x.hall = h; if (x.mainName && x.mainName !== m) x.mainName = m}); commit(`ホール名を${rows.length}件に付与しました${conflict.length ? `（本社名を${conflict.length}件更新）` : ''}`, rows, 'applyHall')
+      rows.forEach(x => {x.assignmentCompleted = true; selected.delete(x.id)});
+      commit(`${rows.length}件を付与完了にしました。④ 印刷準備に移動しました。`, rows, 'markDone')
     };
-    function setCompleted(v, btnId) {const rows = selectedManage(); if (!rows.length) return toast(NEED_ROWS, 'warn'); rows.forEach(x => x.assignmentCompleted = v); commit(v ? `${rows.length}件を付与完了にしました` : `${rows.length}件の付与完了を解除しました`, rows, btnId)}
-    $('markDone').onclick = () => setCompleted(true, 'markDone'); $('unmarkDone').onclick = () => setCompleted(false, 'unmarkDone');
-    $('clearLabels').onclick = () => {const rows = selectedManage(); if (!rows.length) return toast(NEED_ROWS, 'warn'); if (!confirm(`選択した${rows.length}件のQRコードについて、納品日 / 本社名 / ホール名 / 商品名をすべて消去します。付与完了の状態も解除されます。よろしいですか？`)) return; rows.forEach(x => {x.date = ''; x.mainName = ''; x.hall = ''; x.product = ''; x.assignmentCompleted = false}); commit(`${rows.length}件のラベルを消去しました`, rows, 'clearLabels', 'err')};
-    $('deleteSelected').onclick = () => {const ids = manageRows().filter(x => selected.has(x.id)).map(x => x.id); if (!ids.length) return toast(NEED_ROWS, 'warn'); if (confirm(`${ids.length}件を削除しますか？`)) {data = data.filter(x => !ids.includes(x.id)); ids.forEach(id => selected.delete(id)); const ok = save(); renderManage(); renderPending(); if (ok) toast(`${ids.length}件を削除しました`, 'err')} }
+    $('clearLabels').onclick = async () => {
+      const rows = selectedManage(); if (!rows.length) return toast(NEED_ROWS, 'warn');
+      if (!await askConfirm({title: `選択した${rows.length}件のラベルを消去しますか？`, body: '納品日 / 本社名 / ホール名 / 商品名をすべて消去します。\n消去したラベルは元に戻せません。', ok: '消去する'})) return;
+      rows.forEach(x => {x.date = ''; x.mainName = ''; x.hall = ''; x.product = ''; x.assignmentCompleted = false}); commit(`${rows.length}件のラベルを消去しました`, rows, 'clearLabels', 'err')
+    };
+    $('deleteSelected').onclick = async () => {
+      const ids = manageRows().filter(x => selected.has(x.id)).map(x => x.id); if (!ids.length) return toast(NEED_ROWS, 'warn');
+      if (!await askConfirm({title: `選択した${ids.length}件のQRコードを削除しますか？`, body: DEL_NOTE})) return;
+      data = data.filter(x => !ids.includes(x.id)); ids.forEach(id => selected.delete(id)); const ok = save(); renderManage(); renderPending(); if (ok) toast(`${ids.length}件を削除しました`, 'err')
+    }
 
     function fillMainSelect() {const sel = $('bulkMain'), old = sel.value; sel.innerHTML = '<option value="">本社名を選択</option>' + mainNames().map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join(''); if (mainNames().includes(old)) sel.value = old; fillHallSelect()}
     function allHallNames() {return [...new Set(hallEntries().map(x => x.hall))].sort()}
@@ -1515,12 +1732,6 @@
     };
     function renderLists() {$('productList').innerHTML = products().map(x => `<option value="${esc(x)}">`).join('')}
 
-    function dateMatch(x, v) {return !v || (v === '__none' ? !x.date : x.date === v)}
-    function fillDateSelect(sel, rows, includeUnset = true) {
-      const old = sel.value, ds = [...new Set(rows.map(x => x.date || ''))].filter(Boolean).sort(), hasNone = includeUnset && rows.some(x => !x.date);
-      sel.innerHTML = '<option value="">すべて表示</option>' + ds.map(d => `<option value="${esc(d)}">${esc(dateLabel(d))}</option>`).join('') + (hasNone ? '<option value="__none">納品日未設定</option>' : '');
-      if ([...sel.options].some(o => o.value === old)) sel.value = old
-    }
     // 取り込み日時：同じ取り込み操作で作られたQR（importBatchId）を1単位とする。
     // importBatchId がない既存データは、取り込み日時（なければ生成日時）の「分」が同じものを1単位とみなす。
     function batchKey(x) {if (x.importBatchId) return 'b:' + x.importBatchId; const t = fmtMin(x.importedAt || x.createdAt); return t ? 't:' + t : '__none'}
@@ -1535,65 +1746,96 @@
       list.forEach((g, i) => {g.label = g.key === '__none' ? `取り込み日時不明（${g.count}件）` : `${mins.filter(t => t === mins[i]).length > 1 ? fmtMin(g.iso, true) : mins[i]}（${g.count}件）`});
       return list
     }
+    // ===== 検索条件（④印刷準備・⑤印刷済みで共通）：納品日 / 本社名・ホール名 / 商品名 / 取り込み日時 =====
+    // 「本社名・ホール名」は、1つの選択欄にまとめる（本社名とホール名の組み合わせを1項目として選ぶ）
     let printView = null; // null＝未検索（一覧は非表示） / {mode:'search'|'all', c:条件, text:条件の説明}
-    const PRINT_SELECTS = {date: 'printDate', main: 'printMain', hall: 'printHall', product: 'printProduct', batch: 'printBatch'};
-    function printCriteria() {const c = {}; for (const k in PRINT_SELECTS) c[k] = $(PRINT_SELECTS[k]).value; return c}
+    const PRINT_IDS = {date: 'printDate', loc: 'printLoc', product: 'printProduct', batch: 'printBatch'};
+    const PRINTED_IDS = {date: 'printedDate', loc: 'printedLoc', product: 'printedProduct', batch: 'printedBatch'};
+    const locKey = x => JSON.stringify([x.mainName || '', x.hall || '']);
+    const locLabel = k => {const [m, h] = JSON.parse(k); return (m || '本社名未設定') + ' ／ ' + (h || 'ホール未設定')};
+    function readCriteria(ids) {const c = {}; for (const k in ids) c[k] = $(ids[k]).value; return c}
+    function sameCriteria(ids, a, b) {return Object.keys(ids).every(k => (a[k] || '') === (b[k] || ''))}
     function fillSel(sel, items) {
       const old = sel.value;
       sel.innerHTML = '<option value="">指定しない</option>' + items.map(i => `<option value="${esc(i.v)}">${esc(i.l)}</option>`).join('');
       if (items.some(i => i.v === old)) sel.value = old
     }
     function uniqSorted(rows, f) {return [...new Set(rows.map(f).filter(Boolean))].sort()}
-    function fillPrintOptions() {
-      const un = data.filter(x => x.status === 'unprinted');
-      fillSel($('printDate'), uniqSorted(un, x => x.date).map(d => ({v: d, l: dateLabel(d)})));
-      fillSel($('printMain'), uniqSorted(un, x => x.mainName).map(v => ({v, l: v})));
-      fillSel($('printHall'), uniqSorted(un, x => x.hall).map(v => ({v, l: v})));
-      fillSel($('printProduct'), uniqSorted(un, x => x.product).map(v => ({v, l: v})));
-      fillSel($('printBatch'), batchGroups(un).map(g => ({v: g.key, l: g.label})))
+    // 検索欄の候補を、対象のQRから作る（dateNone：納品日が未設定のQRを検索できる候補を付けるか）
+    function fillSearchOptions(ids, rows, dateNone) {
+      const dates = uniqSorted(rows, x => x.date).map(d => ({v: d, l: dateLabel(d)}));
+      if (dateNone && rows.some(x => !x.date)) dates.push({v: '__none', l: '納品日未設定'});
+      fillSel($(ids.date), dates);
+      fillSel($(ids.loc), [...new Set(rows.map(locKey))].sort((a, b) => locLabel(a).localeCompare(locLabel(b), 'ja')).map(v => ({v, l: locLabel(v)})));
+      fillSel($(ids.product), uniqSorted(rows, x => x.product).map(v => ({v, l: v})));
+      fillSel($(ids.batch), batchGroups(rows).map(g => ({v: g.key, l: g.label})))
     }
-    function criteriaText(c) {
+    function matchCriteria(x, c) {
+      return (!c.date || (c.date === '__none' ? !x.date : x.date === c.date)) && (!c.loc || locKey(x) === c.loc) && (!c.product || x.product === c.product) && (!c.batch || batchKey(x) === c.batch)
+    }
+    function criteriaText(c, rows) {
       const parts = [];
-      if (c.date) parts.push('納品日 ' + dateLabel(c.date));
-      if (c.main) parts.push('本社名 ' + c.main);
-      if (c.hall) parts.push('ホール名 ' + c.hall);
+      if (c.date) parts.push('納品日 ' + (c.date === '__none' ? '未設定' : dateLabel(c.date)));
+      if (c.loc) parts.push('本社名・ホール名 ' + locLabel(c.loc));
       if (c.product) parts.push('商品名 ' + c.product);
-      if (c.batch) {const g = batchGroups(data.filter(x => x.status === 'unprinted')).find(g => g.key === c.batch); parts.push('取り込み日時 ' + (g ? g.label : ''))}
+      if (c.batch) {const g = batchGroups(rows).find(g => g.key === c.batch); parts.push('取り込み日時 ' + (g ? g.label : ''))}
       return parts.join(' / ')
     }
-    function printRows() {
-      if (!printView) return [];
-      const c = printView.c;
-      return data.filter(x => x.status === 'unprinted' && (!c.date || x.date === c.date) && (!c.main || x.mainName === c.main) && (!c.hall || x.hall === c.hall) && (!c.product || x.product === c.product) && (!c.batch || batchKey(x) === c.batch))
-    }
-    function resetPrintView() {printView = null; for (const k in PRINT_SELECTS) $(PRINT_SELECTS[k]).value = ''}
+
+    // ===== ④ 印刷準備（手順7）：表示できるのは、付与完了のQRだけ =====
+    function printRows() {return printView ? data.filter(x => isReady(x) && matchCriteria(x, printView.c)) : []}
+    function resetPrintView() {printView = null; for (const k in PRINT_IDS) $(PRINT_IDS[k]).value = ''}
     function refreshPrint() {
-      fillPrintOptions();
-      const rows = printRows(), all = data.filter(x => x.status === 'unprinted').length, selectedCount = rows.filter(x => printSelected.has(x.id)).length;
-      $('printCount').textContent = `選択 ${selectedCount}件 / 表示 ${rows.length}件 / 全 ${all}件`;
-      $('printCriteria').textContent = !printView ? '' : printView.mode === 'all' ? '表示：全件表示（未印刷のQRコードすべて）' : '検索条件：' + printView.text;
+      fillSearchOptions(PRINT_IDS, data.filter(isReady), false);
+      const rows = printRows(), ready = data.filter(isReady).length, working = data.filter(isWorking).length, selectedCount = rows.filter(x => printSelected.has(x.id)).length;
+      $('printCount').textContent = `選択 ${selectedCount}件 / 表示 ${rows.length}件 / 付与完了 ${ready}件 / 付与未完了 ${working}件`;
+      // 条件を選んだだけでは検索しない。まだ反映していない条件があるときは、案内を出す
+      const pend = $('printCondNote'), notApplied = !sameCriteria(PRINT_IDS, readCriteria(PRINT_IDS), printView ? printView.c : {});
+      pend.style.display = notApplied ? 'block' : 'none';
+      pend.textContent = notApplied ? (printView ? '検索条件を変更しました。「検索」（または「全件表示」）を押すと反映されます。' : '「検索」を押すと、選んだ条件に一致するQRコードが表示されます。') : '';
       let empty = '';
-      if (!printView) empty = '検索条件を選ぶか、「全件表示」を押すと、QRコードがここに表示されます。';
-      else if (!rows.length) empty = printView.mode === 'all' ? '<strong>0件</strong>：未印刷のQRコードはありません。' : '<strong>0件</strong>：条件に該当するQRコードはありません。検索条件を変更してもう一度検索してください。';
-      $('printBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${doneCls(x)}"><input class="pcheck check" data-id="${x.id}" type="checkbox" ${printSelected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note">本社：${esc(x.mainName) || '未設定'}</div><div class="note">ホール：${esc(x.hall) || '未設定'}</div><div class="note">商品：${esc(x.product) || '未設定'}</div><div class="note">取り込み：${fmtMin(x.importedAt || x.createdAt) || '不明'}</div></div>`).join('') : `<div class="empty">${empty}</div>`;
+      if (!printView) empty = '検索条件を選んで「検索」を押すか、「全件表示」を押すと、付与完了のQRコードがここに表示されます。';
+      else if (!rows.length) empty = !ready ? '<strong>0件</strong>：付与完了のQRコードがありません。③で「付与完了にする」を押してください。' : printView.mode === 'all' ? '<strong>0件</strong>：付与完了のQRコードはありません。' : '<strong>0件</strong>：条件に該当するQRコードはありません。検索条件を変更してもう一度検索してください。';
+      $('printBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${doneCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="pcheck check" data-id="${x.id}" type="checkbox" ${printSelected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note">本社：${esc(x.mainName) || '未設定'}</div><div class="note">ホール：${esc(x.hall) || '未設定'}</div><div class="note">商品：${esc(x.product) || '未設定'}</div><div class="note">取り込み：${fmtMin(x.importedAt || x.createdAt) || '不明'}</div></div>`).join('') : `<div class="empty">${empty}</div>`;
+      flashIds = new Set();
       document.querySelectorAll('.pcheck').forEach(e => e.onchange = () => {e.checked ? printSelected.add(e.dataset.id) : printSelected.delete(e.dataset.id); refreshPrint()});
-      $('makePdf').disabled = !rows.some(x => printSelected.has(x.id));
+      const targets = rows.filter(x => printSelected.has(x.id)).length;
+      $('printRunInfo').textContent = targets ? `手順7で選択した${targets}件が印刷対象です。` : '手順7でQRコードを選択すると、ここから印刷できます。';
+      $('makePdf').disabled = !targets;
     }
-    // 検索ロジックは、自動検索（条件変更時）と「検索」ボタンで共通
-    function runPrintSearch(explicit) {
-      const c = printCriteria();
-      if (!Object.values(c).some(Boolean)) {
-        if (explicit) return toast('検索条件を1つ以上指定してください。登録済みのQRコードをすべて確認する場合は「全件表示」を押してください。', 'warn');
-        printView = null; return refreshPrint() // 条件がすべて解除されたら、初期表示に戻す
-      }
-      printView = {mode: 'search', c, text: criteriaText(c)}; refreshPrint()
+    // 検索は「検索」ボタンを押したときだけ実行する（条件を選んだだけでは一覧を変えない）
+    function runPrintSearch() {
+      const c = readCriteria(PRINT_IDS);
+      if (!Object.values(c).some(Boolean)) return toast('検索条件を1つ以上指定してください。付与完了のQRコードをすべて確認する場合は「全件表示」を押してください。', 'warn');
+      printView = {mode: 'search', c, text: criteriaText(c, data.filter(isReady))}; refreshPrint()
     }
-    $('searchPrint').onclick = () => runPrintSearch(true);
-    for (const k in PRINT_SELECTS) $(PRINT_SELECTS[k]).onchange = () => runPrintSearch(false);
-    $('showAllPrint').onclick = () => {printView = {mode: 'all', c: {}, text: ''}; refreshPrint()};
+    $('searchPrint').onclick = runPrintSearch;
+    for (const k in PRINT_IDS) $(PRINT_IDS[k]).onchange = () => refreshPrint(); // 候補の更新と案内の表示だけ。検索はしない
+    $('showAllPrint').onclick = () => {for (const k in PRINT_IDS) $(PRINT_IDS[k]).value = ''; printView = {mode: 'all', c: {}, text: ''}; refreshPrint()};
     $('clearPrintSearch').onclick = () => {resetPrintView(); refreshPrint()};
     $('selectPrintAll').onclick = () => {printRows().forEach(x => printSelected.add(x.id)); refreshPrint()};
     $('unselectPrintAll').onclick = () => {printRows().forEach(x => printSelected.delete(x.id)); refreshPrint()};
+    // 付与完了を外して、③（手順6）に戻す。間違えて付与完了にしたときに使う（データは削除しない）
+    $('backToLabel').onclick = () => {
+      const rows = printRows().filter(x => printSelected.has(x.id)); if (!rows.length) return toast('付与未完了にするQRコードを選択してください。', 'warn');
+      rows.forEach(x => {x.assignmentCompleted = false; printSelected.delete(x.id)});
+      const ok = save(true); refreshPrint(); renderManage();
+      if (ok) toast(`${rows.length}件を付与未完了にしました。手順6（③ ラベル付与）に戻りました。`); else toast(`${rows.length}件を画面上は付与未完了にしましたが、保存に失敗しました（保存容量不足の可能性）。`, 'err')
+    };
+    // 納品日の一括変更：選択したQRだけを変更し、印刷（PDF）には変更後の納品日を使う
+    $('changePrintDate').onclick = () => {
+      if (!$('shipDateText').value.trim()) return toast('変更後の納品日を入力してください。', 'warn');
+      const v = normalizeBulkDate($('shipDateText').value); if (!v) return toast('納品日を YYYY/MM/DD 形式で正しく入力してください。', 'err');
+      const rows = printRows().filter(x => printSelected.has(x.id)); if (!rows.length) return toast('納品日を変更するQRコードを選択してください。', 'warn');
+      const changed = rows.filter(x => x.date !== v); if (!changed.length) return toast('選択したQRコードは、すべて変更後の納品日と同じです。', 'warn');
+      const before = new Map(); changed.forEach(x => {const k = x.date ? dateLabel(x.date) : '未設定'; before.set(k, (before.get(k) || 0) + 1)});
+      changed.forEach(x => {x.date = v});
+      flashIds = new Set(changed.map(x => x.id));
+      const ok = save(true), still = new Set(printRows().map(x => x.id)), gone = changed.filter(x => !still.has(x.id)).length;
+      refreshPrint();
+      const detail = [...before].map(([k, n]) => `${k} ${n}件`).join('、');
+      toast(`${changed.length}件の納品日を ${dateLabel(v)} に変更しました（変更前：${detail}）` + (gone ? `。検索条件の納品日と異なるため、${gone}件は一覧から外れました。` : '') + (ok ? '' : ' ただし、保存に失敗しました（保存容量不足の可能性）。'), !ok ? 'err' : gone ? 'warn' : 'ok')
+    };
 
     async function loadImage(src) {return new Promise((res, rej) => {const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src})}
     async function makePdf() {
@@ -1633,30 +1875,43 @@
     $('makePdf').onclick = makePdf;
 
     function hallOf(x) {return x.hall || ''}
-    function printedFiltered() {const h = $('printedHall').value, d = $('printedDate').value; return data.filter(x => x.status === 'printed' && (!h || hallOf(x) === (h === '__none' ? '' : h)) && dateMatch(x, d))}
+    let printedView = null; // null＝未検索（一覧は非表示） / {mode:'search'|'all', c:条件}
+    function resetPrintedView() {printedView = null; for (const k in PRINTED_IDS) $(PRINTED_IDS[k]).value = ''}
+    function printedFiltered() {return printedView ? data.filter(x => x.status === 'printed' && matchCriteria(x, printedView.c)) : []}
     function updatePrintedCount() {const all = data.filter(x => x.status === 'printed').length, rows = printedFiltered(); $('printedCount').textContent = `選択 ${rows.filter(x => printedSelected.has(x.id)).length}件 / 表示 ${rows.length}件 / 全 ${all}件`}
     function renderPrinted() {
-      const all = data.filter(x => x.status === 'printed'), hsel = $('printedHall'), oldH = hsel.value, hs = [...new Set(all.map(hallOf))].sort();
-      hsel.innerHTML = '<option value="">すべて表示</option>' + hs.map(h => `<option value="${esc(h || '__none')}">${esc(h || 'ホール未設定')}</option>`).join('');
-      if ([...hsel.options].some(o => o.value === oldH)) hsel.value = oldH;
-      const hv = hsel.value; fillDateSelect($('printedDate'), all.filter(x => !hv || hallOf(x) === (hv === '__none' ? '' : hv)));
+      const all = data.filter(x => x.status === 'printed');
+      fillSearchOptions(PRINTED_IDS, all, true);
+      // 条件を選んだだけでは検索しない。まだ反映していない条件があるときは、案内を出す
+      const notApplied = !sameCriteria(PRINTED_IDS, readCriteria(PRINTED_IDS), printedView ? printedView.c : {}), note = $('printedCondNote');
+      note.style.display = notApplied ? 'block' : 'none';
+      note.textContent = notApplied ? (printedView ? '検索条件を変更しました。「検索」（または「全件表示」）を押すと反映されます。' : '「検索」を押すと、選んだ条件に一致するQRコードが表示されます。') : '';
       const rows = printedFiltered().sort((a, b) => (b.printedAt || '').localeCompare(a.printedAt || '')), groups = new Map();
       rows.forEach(x => {const h = hallOf(x); if (!groups.has(h)) groups.set(h, []); groups.get(h).push(x)});
       const card = x => `<div class="qritem"><input class="prcheck check" data-id="${x.id}" type="checkbox" ${printedSelected.has(x.id) ? 'checked' : ''}><img src="${x.image}"><div class="note">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note">本社：${esc(x.mainName) || '未設定'}</div><div class="note">ホール：${esc(x.hall) || '未設定'}</div><div class="note">商品：${esc(x.product) || '未設定'}</div><div class="note">印刷：${x.printedAt ? new Date(x.printedAt).toLocaleString('ja-JP') : ''}</div></div>`;
-      $('printedBody').innerHTML = groups.size ? [...groups.keys()].sort().map(h => `<div class="hallGroup"><div class="hallHead"><h3>${esc(h || 'ホール未設定')}</h3><span class="count">${groups.get(h).length}件</span><button class="secondary grpSel" data-hall="${esc(h)}">このホールを全選択</button></div><div class="qrgrid">${groups.get(h).map(card).join('')}</div></div>`).join('') : `<div class="empty">${all.length ? '条件に該当するQRコードはここに表示されます。' : '印刷済みのQRコードはここに表示されます。'}</div>`;
+      const empty = !printedView ? '検索条件を選んで「検索」を押すか、「全件表示」を押すと、印刷済みのQRコードがここに表示されます。' : all.length ? '条件に該当するQRコードはここに表示されます。' : '印刷済みのQRコードはここに表示されます。';
+      $('printedBody').innerHTML = groups.size ? [...groups.keys()].sort().map(h => `<div class="hallGroup"><div class="hallHead"><h3>${esc(h || 'ホール未設定')}</h3><span class="count">${groups.get(h).length}件</span><button class="secondary grpSel" data-hall="${esc(h)}">このホールを全選択</button></div><div class="qrgrid">${groups.get(h).map(card).join('')}</div></div>`).join('') : `<div class="empty">${empty}</div>`;
       document.querySelectorAll('.prcheck').forEach(e => e.onchange = () => {e.checked ? printedSelected.add(e.dataset.id) : printedSelected.delete(e.dataset.id); updatePrintedCount()});
       document.querySelectorAll('.grpSel').forEach(b => b.onclick = () => {printedFiltered().filter(x => hallOf(x) === b.dataset.hall).forEach(x => printedSelected.add(x.id)); renderPrinted()});
       updatePrintedCount()
     }
-    $('printedHall').onchange = renderPrinted; $('printedDate').onchange = renderPrinted;
+    // 検索は「検索」ボタンを押したときだけ実行する（④と同じ）
+    $('searchPrinted').onclick = () => {
+      const c = readCriteria(PRINTED_IDS); if (!Object.values(c).some(Boolean)) return toast('検索条件を1つ以上指定してください。印刷済みのQRコードをすべて確認する場合は「全件表示」を押してください。', 'warn');
+      printedView = {mode: 'search', c}; renderPrinted()
+    };
+    $('showAllPrinted').onclick = () => {for (const k in PRINTED_IDS) $(PRINTED_IDS[k]).value = ''; printedView = {mode: 'all', c: {}}; renderPrinted()};
+    $('clearPrinted').onclick = () => {resetPrintedView(); renderPrinted()};
+    for (const k in PRINTED_IDS) $(PRINTED_IDS[k]).onchange = () => renderPrinted(); // 候補の更新と案内の表示だけ。検索はしない
     $('selectPrintedAll').onclick = () => {printedFiltered().forEach(x => printedSelected.add(x.id)); renderPrinted()}
     $('unselectPrintedAll').onclick = () => {printedFiltered().forEach(x => printedSelected.delete(x.id)); renderPrinted()}
-    $('restorePrinted').onclick = () => {const rows = printedFiltered().filter(x => printedSelected.has(x.id)); if (!rows.length) return toast('未印刷に戻すQRを選択してください。', 'warn'); rows.forEach(x => {x.status = 'unprinted'; delete x.printedAt; printedSelected.delete(x.id)}); const ok = save(true); renderPrinted(); renderManage(); if (ok) toast(`${rows.length}件を未印刷（手順7）に戻しました。`); else toast(`${rows.length}件を画面上は未印刷に戻しましたが、保存に失敗しました（保存容量不足の可能性）。`, 'err')}
+    // 印刷済みから戻すQRは、付与完了のまま手順7（④ 印刷準備）に戻す
+    $('restorePrinted').onclick = () => {const rows = printedFiltered().filter(x => printedSelected.has(x.id)); if (!rows.length) return toast('手順7に戻すQRを選択してください。', 'warn'); rows.forEach(x => {x.status = 'unprinted'; x.assignmentCompleted = true; delete x.printedAt; printedSelected.delete(x.id)}); const ok = save(true); renderPrinted(); renderManage(); if (ok) toast(`${rows.length}件を手順7（④ 印刷準備）に戻しました。`); else toast(`${rows.length}件を画面上は手順7に戻しましたが、保存に失敗しました（保存容量不足の可能性）。`, 'err')}
 
 
     function loadSettings() {
       const c = cfg(); $('gasUrl').value = c.url || ''; $('transferTo').value = c.to || ''; $('transferToken').value = c.token || '';
-      const cfgOk = !!(c.url && c.to && c.token), cfgText = cfgOk ? 'Mail移行設定済み' : '未設定'; for (const id of ['transferConfigStatus', 'transferConfigStatusStep3']) {$(id).textContent = cfgText; $(id).className = 'status ' + (cfgOk ? 'ok' : '')} $('hallMaster').value = hallEntries().map(x => `${x.main},${x.hall}`).join('\n'); fillMainSelect(); renderLists()
+      const cfgOk = !!(c.url && c.to && c.token), cfgText = cfgOk ? 'Mail移行設定済み' : '未設定'; for (const id of ['transferConfigStatus', 'transferConfigStatusStep3']) {$(id).textContent = cfgText; $(id).className = 'status ' + (cfgOk ? 'ok' : '')} $('hallMaster').value = hallEntries().map(x => `${x.main},${x.hall}`).join('\n'); fillMainSelect(); renderLists(); loadD1Settings()
     }
     $('saveTransferSettings').onclick = () => {try {localStorage.setItem(CFGKEY, JSON.stringify({url: $('gasUrl').value.trim(), to: $('transferTo').value.trim(), token: $('transferToken').value.trim()}))} catch (e) {return toast('設定を保存できませんでした。ブラウザの保存容量を確認してください。', 'err')} loadSettings(); const c = cfg(); if (c.url && c.to && c.token) toast('移行設定を保存しました。'); else toast('保存しましたが、未入力の項目があります（GAS URL / 転送トークン / 送信先Mail）。', 'warn')}
     $('copyHallSample').onclick = async () => {
@@ -1664,12 +1919,110 @@
       try {await navigator.clipboard.writeText(t); toast('サンプルをコピーしました。')}
       catch (e) {const r = document.createRange(); r.selectNodeContents($('hallSample')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast('コピーできませんでした。選択状態にしたので、手動でコピーしてください。', 'warn')}
     };
-    $('saveSettings').onclick = () => {const a = $('hallMaster').value.split(/\n/).map(x => x.split(',').map(v => v.trim())).filter(x => x.length >= 2 && x[0] && x[1]).map(x => ({main: x[0], hall: x.slice(1).join(',')})); if (!a.length) return toast('「本社名,ホール名」の形式で1行以上入力してください。', 'warn'); try {localStorage.setItem(HALLKEY, JSON.stringify(a))} catch (e) {return toast('リストを保存できませんでした。ブラウザの保存容量を確認してください。', 'err')} loadSettings(); toast('本社名 / ホール名リストを保存しました。')}
+    $('saveSettings').onclick = () => {const a = $('hallMaster').value.split(/\n/).map(x => x.split(',').map(v => v.trim())).filter(x => x.length >= 2 && x[0] && x[1]).map(x => ({main: x[0], hall: x.slice(1).join(',')})); if (!a.length) return toast('「本社名,ホール名」の形式で1行以上入力してください。', 'warn'); try {localStorage.setItem(HALLKEY, JSON.stringify(a))} catch (e) {return toast('リストを保存できませんでした。ブラウザの保存容量を確認してください。', 'err')} loadSettings(); scheduleD1(); toast('本社名 / ホール名リストを保存しました。')}
     $('exportData').onclick = () => {const blob = new Blob([JSON.stringify({data, halls: hallEntries(), products: products()}, null, 2)], {type: 'application/json'}), a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'logistics_v4_backup.json'; a.click(); URL.revokeObjectURL(a.href)}
-    $('importData').onchange = async e => {const f = e.target.files[0]; if (!f) return; try {const o = JSON.parse(await f.text()); if (Array.isArray(o.data)) data = o.data.map(normRec); if (Array.isArray(o.halls)) localStorage.setItem(HALLKEY, JSON.stringify(o.halls)); if (Array.isArray(o.products)) localStorage.setItem(PRODUCTKEY, JSON.stringify(o.products)); const ok = save(true); loadSettings(); renderPending(); renderManage(); refreshPrint(); renderPrinted(); if (ok) toast('バックアップを読み込みました。'); else toast('バックアップを読み込みましたが、保存に失敗しました（保存容量不足の可能性）。', 'err')} catch (err) {toast('バックアップの読み込みに失敗しました。ファイルの内容を確認してください。', 'err')} e.target.value = ''}
-    $('wipeAll').onclick = () => {if (confirm('QRデータをすべて削除しますか？')) {data = []; selected.clear(); pendingSelected.clear(); printSelected.clear(); printedSelected.clear(); sessionIds.clear(); saveSession(); const ok = save(true); renderPending(); renderManage(); refreshPrint(); renderPrinted(); if (ok) toast('QRデータをすべて削除しました。', 'err'); else toast('削除しましたが、保存に失敗しました。', 'err')} }
+    $('importData').onchange = async e => {
+      const f = e.target.files[0]; if (!f) return;
+      try {
+        const o = JSON.parse(await f.text());
+        if (!o || !Array.isArray(o.data)) throw new Error('data がありません');
+        // 読み込めると確認できてから、現在のデータを置き換える（失敗したときは何も変えない）
+        const next = o.data.map(normRec);
+        data = next; selected.clear(); printSelected.clear(); printedSelected.clear(); pendingSelected.clear();
+        if (Array.isArray(o.halls)) localStorage.setItem(HALLKEY, JSON.stringify(o.halls));
+        if (Array.isArray(o.products)) localStorage.setItem(PRODUCTKEY, JSON.stringify(o.products));
+        const ok = save(true); loadSettings(); renderPending(); renderManage(); refreshPrint(); renderPrinted();
+        if (ok) toast(`バックアップを読み込みました（QR ${data.length}件）。`); else toast('バックアップを読み込みましたが、保存に失敗しました（保存容量不足の可能性）。', 'err')
+      } catch (err) {toast('バックアップの読み込みに失敗しました。ファイルの内容を確認してください。（現在のデータは変更していません）', 'err')}
+      e.target.value = ''
+    }
+    $('wipeAll').onclick = async () => {
+      if (!await askConfirm({title: 'QRデータをすべて削除しますか？', body: 'この端末に保存されているQRデータを、すべて削除します。\n' + DEL_NOTE, ok: 'すべて削除する'})) return;
+      data = []; selected.clear(); pendingSelected.clear(); printSelected.clear(); printedSelected.clear(); sessionIds.clear(); saveSession(); const ok = save(true); renderPending(); renderManage(); refreshPrint(); renderPrinted(); if (ok) toast('QRデータをすべて削除しました。', 'err'); else toast('削除しましたが、保存に失敗しました。', 'err')
+    }
 
-    data = data.map(normRec); save(); purgeSent(); sessionIds = new Set([...sessionIds].filter(id => {const x = data.find(y => y.id === id); return x && !x.sentAt})); saveSession(); loadSettings(); renderPending(); renderSent(); renderManage(); refreshPrint(); renderPrinted(); checkLibs();
+    // ===== D1への保存（localStorageの保存はそのまま。成功後にD1へも送る） =====
+    // ・トークン未設定なら何もしない。送信に失敗しても、画面とlocalStorageには影響しない。
+    // ・前回送った内容との差分（追加・変更・削除）だけを送る。QR画像（image）は送らない。
+    const D1CFGKEY = 'logistics_d1_cfg', D1SYNCKEY = 'logistics_d1_synced', D1CHUNK = 50;
+    let d1Timer = 0, d1Running = false, d1Again = false, d1Force = false, d1State = {type: '', msg: ''}, d1LastFailed = false;
+    function d1Token() {try {return (JSON.parse(localStorage.getItem(D1CFGKEY) || '{}').token || '').trim()} catch (e) {return ''}}
+    function d1Synced() {try {const o = JSON.parse(localStorage.getItem(D1SYNCKEY) || '{}'); return {rec: o.rec || {}, halls: o.halls || '', products: o.products || ''}} catch (e) {return {rec: {}, halls: '', products: ''}}}
+    function d1SaveSynced(o) {try {localStorage.setItem(D1SYNCKEY, JSON.stringify(o))} catch (e) { }}
+    function d1Sig(x) {const {image, ...r} = x; return JSON.stringify(r)}
+    function d1SetStatus(type, msg) {d1State = {type, msg}; const e = $('d1Status'); if (e) {e.textContent = msg; e.className = 'status ' + type}}
+    function loadD1Settings() {
+      $('d1Token').value = d1Token();
+      if (d1State.msg) return d1SetStatus(d1State.type, d1State.msg);
+      d1SetStatus(d1Token() ? 'ok' : '', d1Token() ? 'D1保存：有効（変更のたびに自動で保存します）' : '未設定（この端末のブラウザにだけ保存）')
+    }
+    function scheduleD1() {if (!d1Token()) return; clearTimeout(d1Timer); d1Timer = setTimeout(() => syncD1(), 1500)}
+    async function d1Post(token, payload) {
+      const res = await fetch('/api/sync', {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token}, body: JSON.stringify(payload)});
+      let j = null; try {j = await res.json()} catch (e) { }
+      if (!res.ok || !j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + res.status));
+      return j
+    }
+    // force=true：差分ではなく全件を送り直す（何度送っても結果は同じ）
+    async function syncD1(force) {
+      const token = d1Token(); if (!token) return false;
+      if (d1Running) {d1Again = true; d1Force = d1Force || !!force; return false}
+      d1Running = true; clearTimeout(d1Timer);
+      try {
+        const st = d1Synced(), now = new Set(data.map(x => x.id));
+        const sigs = new Map(data.map(x => [x.id, d1Sig(x)]));
+        const ups = data.filter(x => force || st.rec[x.id] !== sigs.get(x.id));
+        const dels = Object.keys(st.rec).filter(id => !now.has(id));
+        const hallsRaw = localStorage.getItem(HALLKEY), prodList = products(), prodSig = JSON.stringify(prodList);
+        const sendHalls = hallsRaw !== null && (force || st.halls !== hallsRaw), sendProd = prodList.length > 0 && (force || st.products !== prodSig);
+        if (!ups.length && !dels.length && !sendHalls && !sendProd) {d1SetStatus('ok', 'D1保存：最新です（' + fmtMin(new Date().toISOString(), true) + '）'); d1LastFailed = false; return true}
+        d1SetStatus('', 'D1に保存しています…');
+        const chunks = []; for (let i = 0; i < ups.length; i += D1CHUNK) chunks.push(ups.slice(i, i + D1CHUNK)); if (!chunks.length) chunks.push([]);
+        for (let i = 0; i < chunks.length; i++) {
+          const payload = {upserts: chunks[i]};
+          if (i === 0) {payload.deletes = dels; if (sendHalls) payload.halls = hallEntries(); if (sendProd) payload.products = prodList}
+          await d1Post(token, payload);
+          // 送れた分だけ記録する（途中で失敗しても、次回は残りだけ送る）
+          chunks[i].forEach(x => {st.rec[x.id] = sigs.get(x.id)});
+          if (i === 0) {dels.forEach(id => {delete st.rec[id]}); if (sendHalls) st.halls = hallsRaw; if (sendProd) st.products = prodSig}
+          d1SaveSynced(st)
+        }
+        d1SetStatus('ok', `D1保存：完了（保存${ups.length}件 / 削除${dels.length}件・${fmtMin(new Date().toISOString(), true)}）`); d1LastFailed = false; return true
+      } catch (e) {
+        d1SetStatus('err', 'D1に保存できませんでした：' + (e.message || e) + '（この端末のブラウザには保存済みです。通信が戻ると自動で再送します）');
+        if (!d1LastFailed) toast('D1に保存できませんでした。この端末のブラウザには保存済みです。', 'warn');
+        d1LastFailed = true; return false
+      } finally {
+        d1Running = false;
+        if (d1Again) {const f = d1Force; d1Again = false; d1Force = false; setTimeout(() => syncD1(f), 300)}
+      }
+    }
+    $('saveD1Settings').onclick = async () => {
+      const t = $('d1Token').value.trim();
+      try {localStorage.setItem(D1CFGKEY, JSON.stringify({token: t}))} catch (e) {return toast('設定を保存できませんでした。ブラウザの保存容量を確認してください。', 'err')}
+      if (!t) {d1State = {type: '', msg: ''}; loadD1Settings(); return toast('D1保存を無効にしました。この端末のブラウザには、今まで通り保存されます。', 'warn')}
+      d1State = {type: '', msg: ''}; const ok = await syncD1(); if (ok) toast('D1に保存しました。')
+    };
+    $('syncD1Now').onclick = async () => {if (!d1Token()) return toast('先にD1保存用トークンを入力して「D1設定を保存」を押してください。', 'warn'); const ok = await syncD1(true); if (ok) toast('全データをD1に保存しました。')};
+    $('checkD1').onclick = async () => {
+      const t = d1Token(); if (!t) return toast('先にD1保存用トークンを入力して「D1設定を保存」を押してください。', 'warn');
+      d1SetStatus('', 'D1の件数を確認しています…');
+      try {
+        const res = await fetch('/api/records?summary=1', {headers: {'Authorization': 'Bearer ' + t}}); const j = await res.json().catch(() => null);
+        if (!res.ok || !j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + res.status));
+        const c = j.counts, here = data.length;
+        d1SetStatus(c.total === here ? 'ok' : 'warn', `D1：${c.total}件（未印刷${c.unprinted} / 印刷済み${c.printed}）　この端末：${here}件` + (c.total === here ? '　一致しています。' : '　件数が異なります（スマホ・PCなど別端末のデータや、未送信分が原因の場合があります）。'))
+      } catch (e) {d1SetStatus('err', 'D1の件数を確認できませんでした：' + (e.message || e))}
+    };
+    window.addEventListener('online', () => scheduleD1());
+
+    // 「使い方」ボタン：説明文を開閉する（閉じている間は、操作欄の高さを使わない）
+    document.querySelectorAll('.helpBtn').forEach(b => b.onclick = () => {const box = $(b.dataset.help); box.hidden = !box.hidden; b.textContent = box.hidden ? '使い方' : '使い方を閉じる'});
+    data = data.map(normRec); const repaired = repairMainNames(); save(); purgeSent(); sessionIds = new Set([...sessionIds].filter(id => {const x = data.find(y => y.id === id); return x && !x.sentAt})); saveSession(); loadSettings(); renderPending(); renderSent(); renderManage(); refreshPrint(); renderPrinted(); checkLibs();
+    if (repaired) toast(`ホール名だけが設定されていた${repaired}件に、対応する本社名を補いました。`, 'warn');
+    // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
+    function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
+    setHdrH(); window.addEventListener('resize', setHdrH);
     if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=616').catch(() => { }));
   </script>
 </body>
