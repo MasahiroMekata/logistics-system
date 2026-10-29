@@ -1000,7 +1000,7 @@
     <section id="scan" class="page active">
       <div class="card">
         <h2>手順1：QRコード読取</h2>
-        <p class="note">「スキャン開始」を押してQRコードをカメラに向けてください。<br>画面全体からQRコードを自動で検出し、読み取れたURLだけを保存します。<br>同じURLは重複登録しません。</p>
+        <p class="note">「スキャン開始」を押してQRコードをカメラに向けてください。<br>カメラ映像に表示される<strong>読み取り枠の中</strong>にあるQRコードだけを読み取り、読み取れたURLだけを保存します。枠の外にあるQRコードは読み取りません。<br>同じURLは重複登録しません。</p>
         <div class="actions">
           <button id="startScan">スキャン開始</button>
           <button id="stopScan" class="secondary" disabled>停止</button>
@@ -1402,7 +1402,8 @@
       $('cameraBox').style.display = 'block'; $('startScan').disabled = true; $('stopScan').disabled = false;
       scanning = true; missCount = 0; lastHitAt = 0; rateCount = 0; rateShown = 0; rateTime = performance.now(); recent.clear();
       camAdded = new Set(); camDup = new Set(); camBad = new Set(); $('scanLive').textContent = '今回 0件'; badge('', '探索中');
-      status(useNative ? 'スキャン中（高速モード）。QRコードをカメラに向けてください。' : 'スキャン中。QRコードをカメラに向けてください。');
+      status(useNative ? 'スキャン中（高速モード）。読み取り枠の中にQRコードを入れてください。' : 'スキャン中。読み取り枠の中にQRコードを入れてください。');
+      if (v.videoWidth) drawOverlay([], v);
       rafId = requestAnimationFrame(tick)
     }
     function stopScan() {
@@ -1415,31 +1416,61 @@
     $('startScan').onclick = startScan; $('stopScan').onclick = stopScan;
     document.addEventListener('visibilitychange', () => {if (document.hidden && scanning) stopScan()});
 
-    function tryJsQR(v, sx, sy, sw, sh, maxW) {
+    // ===== 読み取り枠（映像のピクセル座標で定義。枠内だけを検出対象にする） =====
+    const ROI_RATIO = 0.62; // 映像の短辺に対する読み取り枠の一辺の割合
+    function getRoi(v) {
+      const vw = v.videoWidth, vh = v.videoHeight, side = Math.round(Math.min(vw, vh) * ROI_RATIO);
+      return {x: Math.round((vw - side) / 2), y: Math.round((vh - side) / 2), w: side, h: side}
+    }
+    function inRoi(pts, roi) {
+      const tol = roi.w * 0.04; // 検出座標の誤差を許容
+      return pts.every(p => p.x >= roi.x - tol && p.x <= roi.x + roi.w + tol && p.y >= roi.y - tol && p.y <= roi.y + roi.h + tol)
+    }
+    // 映像の(sx,sy,sw,sh)の範囲だけを作業用canvasに切り出す（枠外は含めない）
+    function cropToWork(v, sx, sy, sw, sh, maxW) {
       const sc = Math.min(1, maxW / sw), w = Math.max(1, Math.round(sw * sc)), h = Math.max(1, Math.round(sh * sc));
       work.width = w; work.height = h; wctx.drawImage(v, sx, sy, sw, sh, 0, 0, w, h);
+      return {sc, w, h}
+    }
+    function tryJsQR(v, sx, sy, sw, sh, maxW) {
+      const {sc, w, h} = cropToWork(v, sx, sy, sw, sh, maxW);
       const im = wctx.getImageData(0, 0, w, h), code = window.jsQR(im.data, w, h, {inversionAttempts: 'attemptBoth'});
       if (!code || !code.data) return null;
       const L = code.location, pts = [L.topLeftCorner, L.topRightCorner, L.bottomRightCorner, L.bottomLeftCorner].map(p => ({x: sx + p.x / sc, y: sy + p.y / sc}));
       return {data: code.data, points: pts}
     }
     async function detectFrame(v) {
+      const roi = getRoi(v);
       if (useNative) {
-        const codes = await detector.detect(v);
-        return codes.filter(c => c.rawValue).map(c => {let pts = c.cornerPoints; if (!pts || pts.length < 4) {const b = c.boundingBox; pts = [{x: b.x, y: b.y}, {x: b.x + b.width, y: b.y}, {x: b.x + b.width, y: b.y + b.height}, {x: b.x, y: b.y + b.height}]} return {data: c.rawValue, points: pts}})
+        // 読み取り枠の内側だけを切り出して検出する
+        const {sc} = cropToWork(v, roi.x, roi.y, roi.w, roi.h, 1280);
+        const codes = await detector.detect(work);
+        return codes.filter(c => c.rawValue).map(c => {
+          let pts = c.cornerPoints; if (!pts || pts.length < 4) {const b = c.boundingBox; pts = [{x: b.x, y: b.y}, {x: b.x + b.width, y: b.y}, {x: b.x + b.width, y: b.y + b.height}, {x: b.x, y: b.y + b.height}]}
+          return {data: c.rawValue, points: pts.map(p => ({x: roi.x + p.x / sc, y: roi.y + p.y / sc}))}
+        }).filter(f => inRoi(f.points, roi))
       }
-      // jsQR: 1回に1パス。全体→中央60%→中央40%(等倍)の順に切り替えて小さなQRも拾う。
-      const vw = v.videoWidth, vh = v.videoHeight, pass = missCount % 3; let r = null;
-      if (pass === 0) r = tryJsQR(v, 0, 0, vw, vh, 800);
-      else if (pass === 1) {const cw = vw * .6, ch = vh * .6; r = tryJsQR(v, (vw - cw) / 2, (vh - ch) / 2, cw, ch, 800)}
-      else {const cw = vw * .4, ch = vh * .4; r = tryJsQR(v, (vw - cw) / 2, (vh - ch) / 2, cw, ch, 800)}
-      return r ? [r] : []
+      // jsQR: 1回に1パス。読み取り枠全体→枠の中央60%（等倍に近い拡大）の順に切り替えて小さなQRも拾う。いずれも枠の内側だけを対象にする。
+      const pass = missCount % 2; let r = null;
+      if (pass === 0) r = tryJsQR(v, roi.x, roi.y, roi.w, roi.h, 800);
+      else {const cw = roi.w * .6, ch = roi.h * .6; r = tryJsQR(v, roi.x + (roi.w - cw) / 2, roi.y + (roi.h - ch) / 2, cw, ch, 800)}
+      return r && inRoi(r.points, roi) ? [r] : []
+    }
+    // 読み取り枠（枠外を暗くし、四隅の枠線とガイド文を重ねて表示）
+    function roiSvg(vw, vh, roi, sw) {
+      const cl = Math.round(roi.w * 0.12), x1 = roi.x, y1 = roi.y, x2 = roi.x + roi.w, y2 = roi.y + roi.h, bw = sw + 2, fs = Math.max(14, Math.round(Math.min(vw, vh) / 28));
+      const corner = `M${x1} ${y1 + cl}V${y1}H${x1 + cl} M${x2 - cl} ${y1}H${x2}V${y1 + cl} M${x2} ${y2 - cl}V${y2}H${x2 - cl} M${x1 + cl} ${y2}H${x1}V${y2 - cl}`;
+      return `<path fill="rgba(0,0,0,.45)" fill-rule="evenodd" d="M0 0H${vw}V${vh}H0Z M${x1} ${y1}V${y2}H${x2}V${y1}Z"/>`
+        + `<rect x="${x1}" y="${y1}" width="${roi.w}" height="${roi.h}" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="${Math.max(1, sw / 2)}"/>`
+        + `<path d="${corner}" fill="none" stroke="#fff" stroke-width="${bw}" stroke-linecap="round" stroke-linejoin="round"/>`
+        + `<text x="${vw / 2}" y="${Math.max(fs + 4, y1 - fs * 0.6)}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="#fff" stroke="#000" stroke-width="${Math.max(2, fs / 6)}" paint-order="stroke" font-family="sans-serif">この枠の中にQRコードを入れてください</text>`
     }
     function drawOverlay(list, v) {
       const svg = $('overlay'), vw = v.videoWidth, vh = v.videoHeight;
+      if (!vw || !vh) return;
       if (svg.dataset.w !== String(vw) || svg.dataset.h !== String(vh)) {svg.setAttribute('viewBox', `0 0 ${vw} ${vh}`); svg.dataset.w = vw; svg.dataset.h = vh}
       const sw = Math.max(3, Math.round(vw / 180)), col = {ok: '46,204,113', dup: '245,166,35', bad: '229,72,77'};
-      svg.innerHTML = list.map(f => {const c = col[f.state] || col.ok; return `<polygon points="${f.points.map(p => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ')}" fill="rgba(${c},.25)" stroke="rgb(${c})" stroke-width="${sw}" stroke-linejoin="round"/>`}).join('')
+      svg.innerHTML = roiSvg(vw, vh, getRoi(v), sw) + list.map(f => {const c = col[f.state] || col.ok; return `<polygon points="${f.points.map(p => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ')}" fill="rgba(${c},.25)" stroke="rgb(${c})" stroke-width="${sw}" stroke-linejoin="round"/>`}).join('')
     }
     function handleFound(list, v) {
       const now = Date.now(); let changed = false;
@@ -1448,7 +1479,7 @@
         if (last && now - last < 2500) {f.state = recent.get('state:' + raw) || 'ok'; continue}
         if (!/^https?:\/\/\S+$/i.test(raw)) {f.state = 'bad'; camBad.add(raw); recent.set('state:' + raw, 'bad'); badge('bad', 'URL以外のQR'); banner('bad', 'URL以外のQRです（保存しません）'); status('URL以外のQRを検出しました：' + raw.slice(0, 60), 'warn'); beep(300, .2); continue}
         const r = registerScan(raw);
-        if (r === 'new' || r === 'relist') {f.state = 'ok'; recent.set('state:' + raw, 'ok'); changed = true; badge('hit', '保存しました'); camAdded.add(raw); camDup.delete(raw); banner('ok', `✓ 保存しました（今回 ${camAdded.size}件目）`); status(`URLを保存しました（今回 ${camAdded.size}件）。次のQRをカメラに向けてください。`, 'ok'); beep(1200, .09); if (navigator.vibrate) navigator.vibrate(60)}
+        if (r === 'new' || r === 'relist') {f.state = 'ok'; recent.set('state:' + raw, 'ok'); changed = true; badge('hit', '保存しました'); camAdded.add(raw); camDup.delete(raw); banner('ok', `✓ 保存しました（今回 ${camAdded.size}件目）`); status(`URLを保存しました（今回 ${camAdded.size}件）。次のQRを読み取り枠の中に入れてください。`, 'ok'); beep(1200, .09); if (navigator.vibrate) navigator.vibrate(60)}
         else {f.state = 'dup'; if (!camAdded.has(raw)) camDup.add(raw); recent.set('state:' + raw, 'dup'); badge('dup', '登録済み'); banner('dup', r === 'sent' ? '送信済みのURLです' : '登録済みのURLです'); status(r === 'sent' ? 'このURLは送信済みです。' : '同じURLは登録済みです。', 'warn'); beep(500, .12)}
       }
       drawOverlay(list, v);
