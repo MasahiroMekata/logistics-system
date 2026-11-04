@@ -14,17 +14,24 @@
       box-sizing: border-box
     }
 
+    /* FR-006：端末（iPhone/Android）による文字の自動拡大を止める */
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent
+    }
+
     body {
       margin: 0;
       background: #f4f5f7;
       color: #222;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", "Noto Sans CJK JP", "Yu Gothic", sans-serif
     }
 
     header {
       background: #222;
       color: #fff;
-      padding: 14px 18px;
+      padding: 14px max(18px, env(safe-area-inset-right)) 14px max(18px, env(safe-area-inset-left));
       position: sticky;
       top: 0;
       z-index: 20
@@ -42,7 +49,7 @@
     .wrap {
       max-width: 1280px;
       margin: auto;
-      padding: 16px
+      padding: 16px max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))
     }
 
     .nav {
@@ -51,6 +58,7 @@
       margin-bottom: 16px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
       padding-bottom: 4px
     }
 
@@ -82,16 +90,24 @@
       padding: 10px 12px
     }
 
+    /* FR-008：通常の処理実行ボタン＝黒（メニュー選択中 .navBtn.active と同じ #222）＋白文字 */
     button {
       font: inherit;
-      border: 0;
+      font-weight: 600;
+      line-height: 1.3;
+      min-height: 42px;
+      border: 1px solid transparent;
       border-radius: 8px;
       padding: 10px 14px;
       background: #222;
       color: #fff;
-      cursor: pointer
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      touch-action: manipulation
     }
 
+    /* 補助操作ボタン（条件をクリア・全件表示・選択解除・戻す・キャンセル など）＝既存のグレー */
     button.secondary {
       background: #e5e7eb;
       color: #222
@@ -101,7 +117,8 @@
       display: inline-flex;
       align-items: center;
       font: inherit;
-      font-weight: 400;
+      font-weight: 600;
+      min-height: 42px;
       margin: 0;
       border-radius: 8px;
       padding: 10px 14px;
@@ -115,8 +132,10 @@
       color: #222
     }
 
+    /* FR-008：危険操作（データ削除・消去）＝赤背景＋白文字 */
     button.danger {
-      background: #b42318
+      background: #b42318;
+      color: #fff
     }
 
     button:disabled {
@@ -183,6 +202,28 @@
       background: #fff
     }
 
+    /* FR-006：端末ごとの標準スタイル（iOSの内側の影・Androidの形状の違い）を無効にして、共通CSSで指定 */
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="date"]),
+    select {
+      -webkit-appearance: none;
+      appearance: none;
+      min-height: 42px;
+      line-height: 1.3
+    }
+
+    select {
+      padding-right: 34px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 12px 8px
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+      accent-color: #222
+    }
+
     .actions,
     .toolbar,
     .bulkFields,
@@ -218,6 +259,13 @@
 
       .applyActions button {
         flex: 1 1 calc(50% - 8px)
+      }
+
+      input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="date"]),
+      select,
+      textarea {
+        font-size: 16px;
+        min-height: 46px
       }
     }
 
@@ -434,9 +482,10 @@
     .qritem {
       border: 1px solid #ddd;
       border-radius: 10px;
-      padding: 36px 8px 8px;
+      padding: 36px 8px 12px;
       background: #fff;
-      position: relative
+      position: relative;
+      min-width: 0
     }
 
     .qritem img {
@@ -445,6 +494,39 @@
       object-fit: contain;
       background: #fff;
       image-rendering: pixelated
+    }
+
+    /* FR-007：付与ラベル（納品日・本社・ホール・商品）を現在の12pxの1.5倍（18px）に拡大。QR画像の幅・カードの幅は変更しない */
+    .qritem .note {
+      overflow-wrap: anywhere;
+      word-break: break-word
+    }
+
+    .qritem .cardLbl {
+      font-size: 18px;
+      line-height: 1.45;
+      color: #222
+    }
+
+    .qritem .cardLbl:first-of-type {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #e5e7eb
+    }
+
+    .qritem .cardLbl+.cardLbl {
+      margin-top: 2px
+    }
+
+    /* 生成・取り込み・印刷の日時は管理情報なので、従来の大きさのまま、ラベルと区切って表示 */
+    .qritem .cardLbl~.note:not(.cardLbl) {
+      margin-top: 4px
+    }
+
+    .qritem .cardLbl+.note:not(.cardLbl) {
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px dashed #d8dce2
     }
 
     /* チェックボックスはQR画像に重ならないよう、カード上部の専用行に置く */
@@ -726,10 +808,6 @@
       color: #fff
     }
 
-    button.success {
-      background: #1f9d55
-    }
-
     /* 操作結果のトースト通知（自動で消える） */
     #toast {
       position: fixed;
@@ -903,7 +981,7 @@
 
     .inlineFilter select {
       width: auto;
-      padding: 8px
+      padding: 8px 30px 8px 8px
     }
 
     /* 手順7・手順9の「選択操作」の行：ボタンの位置と幅を揃える */
@@ -957,73 +1035,30 @@
         overflow-y: auto
       }
     }
-    /* ===== v6.1 FR-004：操作ボタンの視認性（色・大きさ・グルーピング） ===== */
-    /* 主要な操作＝青／補助的な操作＝白＋枠線／選択の補助（全選択・選択解除）＝薄いグレー／削除＝赤枠／付与完了＝緑 */
-    button {
-      background: #1d4ed8;
-      border: 1px solid transparent;
-      font-weight: 600;
-      min-height: 42px
-    }
-
-    button:hover:not(:disabled) {
-      filter: brightness(1.08)
-    }
-
+    /* ===== v6.1 ボタンの配置（FR-004）：色は上の button / .secondary / .danger に集約。ここでは配置とサイズだけを指定 ===== */
     button:focus-visible {
-      outline: 3px solid #93c5fd;
+      outline: 3px solid #9ca3af;
       outline-offset: 2px
+    }
+
+    button:active:not(:disabled) {
+      filter: brightness(.9)
+    }
+
+    @media (hover: hover) {
+      button:hover:not(:disabled) {
+        filter: brightness(1.15)
+      }
     }
 
     button:disabled {
       box-shadow: none
     }
 
-    label.fileBtn {
-      background: #1d4ed8;
-      font-weight: 600;
-      min-height: 42px
-    }
-
-    button.secondary,
-    label.fileBtn.secondary {
-      background: #fff;
-      color: #1f2937;
-      border: 1px solid #b9c0cc
-    }
-
-    button.ghost {
-      background: #eceff3;
-      color: #374151;
-      border: 1px solid transparent;
-      font-weight: 500;
-      font-size: 13px;
-      min-height: 38px
-    }
-
-    button.danger {
-      background: #fff;
-      color: #b42318;
-      border: 1px solid #e0a39d
-    }
-
-    .modalActions button.danger {
-      background: #b42318;
-      color: #fff;
-      border-color: #b42318
-    }
-
-    button.success {
-      background: #1f9d55;
-      color: #fff
-    }
-
-    .actions>button.ghost,
-    .barActions>button.ghost,
-    .selRow>button.ghost {
-      flex: 0 0 auto
-    }
-
+    /* 全選択・選択解除（左）と、実行ボタン（右）を分けて配置する */
+    .actions>.selBtn,
+    .barActions>.selBtn,
+    .selRow>.selBtn,
     .actions>.actBtn,
     .barActions>.actBtn,
     .selRow>.actBtn {
@@ -1057,10 +1092,6 @@
       button {
         min-height: 46px;
         font-size: 15px
-      }
-
-      button.ghost {
-        min-height: 42px
       }
 
       .actions>button,
@@ -1198,7 +1229,7 @@
     }
 
     .navBtn.active {
-      box-shadow: 0 0 0 3px #93c5fd
+      box-shadow: 0 0 0 3px #c9ced6
     }
   </style>
 </head>
@@ -1277,8 +1308,8 @@
         <h2>手順2：URL確認</h2>
         <p class="note">送信したいURLを選んでください。<br>行のどこをタップしても選択 / 解除できます。</p>
         <div class="actions">
-          <button id="selectPendingAll" class="ghost">全選択</button>
-          <button id="unselectPendingAll" class="ghost">選択解除</button>
+          <button id="selectPendingAll" class="secondary selBtn">全選択</button>
+          <button id="unselectPendingAll" class="secondary selBtn">選択解除</button>
           <span class="spacer"></span>
           <button id="deletePendingSelected" class="danger">選択URL削除</button>
         </div>
@@ -1308,10 +1339,10 @@
           メールで送信したURLの履歴です。<br>PCにメールが届かなかった場合など、特定のURLを選択して手順2に戻すことでURL送信をやり直すことができます。<br>履歴はメール送信から24時間経過すると自動で消去されます。
         </p>
         <div class="actions">
-          <button id="selectSentAll" class="ghost">全選択</button>
-          <button id="unselectSentAll" class="ghost">選択解除</button>
+          <button id="selectSentAll" class="secondary selBtn">全選択</button>
+          <button id="unselectSentAll" class="secondary selBtn">選択解除</button>
           <span class="spacer"></span>
-          <button id="restoreSent" class="actBtn">手順2に戻す</button>
+          <button id="restoreSent" class="secondary actBtn">手順2に戻す</button>
         </div>
         <div style="margin-top:8px"><span id="sentCount" class="count" style="margin-left:0"></span></div>
         <div id="sentStatus" class="status" style="display:none"></div>
@@ -1363,10 +1394,10 @@
           <button id="applyProduct">商品名を付与</button>
         </div>
         <div class="barActions">
-          <button id="selectAll" class="ghost">全選択</button>
-          <button id="unselectAll" class="ghost">選択解除</button>
+          <button id="selectAll" class="secondary selBtn">全選択</button>
+          <button id="unselectAll" class="secondary selBtn">選択解除</button>
           <span class="spacer"></span>
-          <button id="markDone" class="success actBtn">付与完了にする</button>
+          <button id="markDone" class="actBtn">付与完了にする</button>
         </div>
       </div>
       <div class="card">
@@ -1419,8 +1450,8 @@
         </div>
         <div id="printCondNote" class="status warn" style="display:none"></div>
         <div class="toolbar selRow" style="margin-top:10px">
-          <button id="selectPrintAll" class="ghost">全選択</button>
-          <button id="unselectPrintAll" class="ghost">選択解除</button>
+          <button id="selectPrintAll" class="secondary selBtn">全選択</button>
+          <button id="unselectPrintAll" class="secondary selBtn">選択解除</button>
           <span class="spacer"></span>
           <button id="backToLabel" class="secondary actBtn">付与未完了にする</button>
         </div>
@@ -1484,8 +1515,8 @@
         </div>
         <div id="printedCondNote" class="status warn" style="display:none"></div>
         <div class="toolbar selRow" style="margin-top:10px">
-          <button id="selectPrintedAll" class="ghost">全選択</button>
-          <button id="unselectPrintedAll" class="ghost">選択解除</button>
+          <button id="selectPrintedAll" class="secondary selBtn">全選択</button>
+          <button id="unselectPrintedAll" class="secondary selBtn">選択解除</button>
           <span class="spacer"></span>
           <button id="restorePrinted" class="secondary actBtn">手順7に戻す</button>
         </div>
@@ -1908,7 +1939,7 @@
     function renderManage() {
       fillImportedSelect(data.filter(isWorking));
       const rows = manageRows();
-      $('manageBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${doneCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="mcheck check" data-id="${x.id}" type="checkbox" ${selected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note">本社：${esc(x.mainName) || '未設定'}</div><div class="note">ホール：${esc(x.hall) || '未設定'}</div><div class="note">商品：${esc(x.product) || '未設定'}</div><div class="note">生成：${x.createdAt && !isNaN(new Date(x.createdAt)) ? fmtSent(x.createdAt) : '不明'}</div></div>`).join('') : `<div class="empty">${data.some(isWorking) ? '条件に該当するQRコードはここに表示されます。' : data.some(isReady) ? '付与が未完了のQRコードはありません。付与完了のQRコードは「④ 印刷準備」に表示されます。' : '再生成したQRコードはここに表示されます。'}</div>`;
+      $('manageBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${doneCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="mcheck check" data-id="${x.id}" type="checkbox" ${selected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">生成：${x.createdAt && !isNaN(new Date(x.createdAt)) ? fmtSent(x.createdAt) : '不明'}</div></div>`).join('') : `<div class="empty">${data.some(isWorking) ? '条件に該当するQRコードはここに表示されます。' : data.some(isReady) ? '付与が未完了のQRコードはありません。付与完了のQRコードは「④ 印刷準備」に表示されます。' : '再生成したQRコードはここに表示されます。'}</div>`;
       flashIds = new Set();
       document.querySelectorAll('.mcheck').forEach(e => e.onchange = () => {e.checked ? selected.add(e.dataset.id) : selected.delete(e.dataset.id); updateManageCount()});
       updateManageCount()
@@ -2091,7 +2122,7 @@
       let empty = '';
       if (!printView) empty = '検索条件を選んで「検索」を押すか、「全件表示」を押すと、付与完了のQRコードがここに表示されます。';
       else if (!rows.length) empty = !ready ? '<strong>0件</strong>：付与完了のQRコードがありません。③で「付与完了にする」を押してください。' : printView.mode === 'all' ? '<strong>0件</strong>：付与完了のQRコードはありません。' : '<strong>0件</strong>：条件に該当するQRコードはありません。検索条件を変更してもう一度検索してください。';
-      $('printBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${doneCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="pcheck check" data-id="${x.id}" type="checkbox" ${printSelected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note">本社：${esc(x.mainName) || '未設定'}</div><div class="note">ホール：${esc(x.hall) || '未設定'}</div><div class="note">商品：${esc(x.product) || '未設定'}</div><div class="note">取り込み：${fmtMin(importedAtOf(x)) || '不明'}</div></div>`).join('') : `<div class="empty">${empty}</div>`;
+      $('printBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${doneCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="pcheck check" data-id="${x.id}" type="checkbox" ${printSelected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">取り込み：${fmtMin(importedAtOf(x)) || '不明'}</div></div>`).join('') : `<div class="empty">${empty}</div>`;
       flashIds = new Set();
       document.querySelectorAll('.pcheck').forEach(e => e.onchange = () => {e.checked ? printSelected.add(e.dataset.id) : printSelected.delete(e.dataset.id); refreshPrint()});
       const targets = rows.filter(x => printSelected.has(x.id)).length;
@@ -2183,7 +2214,7 @@
       note.textContent = notApplied ? (printedView ? '検索条件を変更しました。「検索」（または「全件表示」）を押すと反映されます。' : '「検索」を押すと、選んだ条件に一致するQRコードが表示されます。') : '';
       const rows = printedFiltered().sort((a, b) => (b.printedAt || '').localeCompare(a.printedAt || '')), groups = new Map();
       rows.forEach(x => {const h = hallOf(x); if (!groups.has(h)) groups.set(h, []); groups.get(h).push(x)});
-      const card = x => `<div class="qritem"><input class="prcheck check" data-id="${x.id}" type="checkbox" ${printedSelected.has(x.id) ? 'checked' : ''}><img src="${x.image}"><div class="note">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note">本社：${esc(x.mainName) || '未設定'}</div><div class="note">ホール：${esc(x.hall) || '未設定'}</div><div class="note">商品：${esc(x.product) || '未設定'}</div><div class="note">取り込み：${fmtMin(importedAtOf(x)) || '不明'}</div><div class="note">印刷：${x.printedAt ? new Date(x.printedAt).toLocaleString('ja-JP') : ''}</div></div>`;
+      const card = x => `<div class="qritem"><input class="prcheck check" data-id="${x.id}" type="checkbox" ${printedSelected.has(x.id) ? 'checked' : ''}><img src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">取り込み：${fmtMin(importedAtOf(x)) || '不明'}</div><div class="note">印刷：${x.printedAt ? new Date(x.printedAt).toLocaleString('ja-JP') : ''}</div></div>`;
       const empty = !printedView ? '検索条件を選んで「検索」を押すか、「全件表示」を押すと、印刷済みのQRコードがここに表示されます。' : all.length ? '条件に該当するQRコードはここに表示されます。' : '印刷済みのQRコードはここに表示されます。';
       $('printedBody').innerHTML = groups.size ? [...groups.keys()].sort().map(h => `<div class="hallGroup"><div class="hallHead"><h3>${esc(h || 'ホール未設定')}</h3><span class="count">${groups.get(h).length}件</span><button class="secondary grpSel" data-hall="${esc(h)}">このホールを全選択</button></div><div class="qrgrid">${groups.get(h).map(card).join('')}</div></div>`).join('') : `<div class="empty">${empty}</div>`;
       document.querySelectorAll('.prcheck').forEach(e => e.onchange = () => {e.checked ? printedSelected.add(e.dataset.id) : printedSelected.delete(e.dataset.id); updatePrintedCount()});
