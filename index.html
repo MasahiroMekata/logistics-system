@@ -785,9 +785,19 @@
     }
 
     /* FR-01：付与完了の視覚表示（色＋アイコン＋文字） */
+    /* 付与完了（手動）＝緑の枠とバッジ。カードの背景色は、4項目の入力状況（.filled）だけで決める */
     .qritem.done {
-      background: #eef9f1;
       border-color: #1f9d55
+    }
+
+    /* 納品日・本社名・ホール名・商品名がすべて入力済み＝淡いグリーンの背景（付与完了とは独立）。
+       白との色差を従来(#eef9f1)の約2.5倍にして見分けやすくしつつ、彩度は低く保って目に優しくする */
+    .qritem.filled {
+      background: #d4eedb
+    }
+
+    .qritem.filled:not(.done) {
+      border-color: #a9d6b7
     }
 
     .stateBadge {
@@ -826,7 +836,7 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity .18s, transform .18s;
-      z-index: 100
+      z-index: 300
     }
 
     #toast.show {
@@ -935,6 +945,169 @@
       display: flex;
       gap: 10px;
       justify-content: flex-end
+    }
+
+    /* ③ QR拡大ダイアログ：背景は不透明（後ろの一覧のQRコードを映さない）。QRの周囲に十分な白い余白（クワイエットゾーン）を取る */
+    .qrZoom {
+      background: #2b2f36;
+      overflow-y: auto;
+      overscroll-behavior: contain
+    }
+
+    .qrZoomBox {
+      max-width: min(1500px, 100%);
+      padding: 16px;
+      margin: auto
+    }
+
+    .qrZoomHead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px
+    }
+
+    .qrZoomHead h3 {
+      margin: 0
+    }
+
+    .qrZoomMain {
+      display: grid;
+      gap: 16px
+    }
+
+    .qrZoomView {
+      min-width: 0;
+      text-align: center
+    }
+
+    .qrZoomLabelArea {
+      min-width: 0
+    }
+
+    .qrZoomNote {
+      margin: 0 0 8px
+    }
+
+    /* PC：左にQRと現在のラベル、右にラベル付与の操作欄を並べる。スマホ：上下に並べる */
+    @media (min-width: 1280px) {
+      .qrZoomMain {
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: start
+      }
+
+      /* QRの大きさは保ったまま、右の列に幅を残す */
+      .qrZoomMain #qrZoomImg {
+        width: min(30vw, clamp(180px, calc(100vh - 400px), 480px))
+      }
+
+      /* 一覧表示と同じ配置：入力欄（納品日・本社名・ホール名・商品名）は1段、付与ボタン3つも1段に横並び */
+      .qrZoom .bulkFields,
+      .qrZoom .barActions {
+        flex-wrap: nowrap
+      }
+
+      .qrZoom .bulkFields .field {
+        flex: 1 1 0;
+        min-width: 0
+      }
+
+      .qrZoom .bulkFields .dateField {
+        flex: 1.5 1 0
+      }
+
+      .qrZoom .barActions button {
+        min-width: 0
+      }
+    }
+
+    /* ダイアログ内に移した手順6の操作欄：固定表示をやめ、一覧向けの操作（全選択など）は隠す */
+    .qrZoom #labelBar {
+      position: static;
+      max-height: none;
+      overflow: visible;
+      box-shadow: none;
+      margin: 0;
+      background: #f7f7f8;
+      border: 1px solid #e5e7eb
+    }
+
+    /* 「付与完了にする」は一覧に戻って押す。ダイアログ内では、全選択・選択解除と一緒にこの段ごと隠す */
+    .qrZoom .bulkSelRow,
+    .qrZoom #manageCount {
+      display: none
+    }
+
+    .qrZoomImgWrap {
+      background: #fff;
+      padding: 28px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      width: fit-content;
+      margin: 0 auto 12px
+    }
+
+    #qrZoomImg {
+      display: block;
+      width: min(64vw, clamp(180px, calc(100vh - 400px), 480px));
+      aspect-ratio: 1;
+      background: #fff;
+      image-rendering: pixelated
+    }
+
+    /* スマホ：余白を詰めて、拡大QRが一覧のQRより小さくならないようにする（QR画像には、白い余白4マス分が元から含まれる） */
+    @media (max-width: 760px) {
+      .modal.qrZoom {
+        padding: 8px
+      }
+
+      .qrZoomBox {
+        padding: 10px
+      }
+
+      .qrZoomImgWrap {
+        padding: 10px
+      }
+
+      #qrZoomImg {
+        width: min(calc(100vw - 58px), clamp(180px, calc(100vh - 400px), 480px))
+      }
+    }
+
+    .qrZoomInfo {
+      margin: 0 0 14px;
+      text-align: left
+    }
+
+    .qrZoomInfo>div {
+      display: flex;
+      gap: 12px;
+      padding: 6px 4px;
+      border-bottom: 1px solid #e5e7eb
+    }
+
+    .qrZoomInfo dt {
+      flex: 0 0 5.5em;
+      font-size: 14px;
+      color: #666
+    }
+
+    .qrZoomInfo dd {
+      margin: 0;
+      flex: 1;
+      min-width: 0;
+      font-size: 18px;
+      font-weight: 600;
+      overflow-wrap: anywhere
+    }
+
+    body.modalOpen {
+      overflow: hidden
+    }
+
+    .qritem img.zoomQr {
+      cursor: zoom-in
     }
 
     /* ラベル付与の操作欄（PC画面では上部に固定） */
@@ -1246,6 +1419,23 @@
       <div class="modalActions"><button id="confirmCancel" class="secondary">キャンセル</button><button id="confirmOk" class="danger">削除する</button></div>
     </div>
   </div>
+  <div id="qrZoomModal" class="modal qrZoom" role="dialog" aria-modal="true" aria-labelledby="qrZoomTitle" hidden>
+    <div class="modalBox qrZoomBox">
+      <div class="qrZoomHead"><h3 id="qrZoomTitle">QRコード拡大表示</h3><button type="button" id="qrZoomClose" class="secondary">閉じる</button></div>
+      <div class="qrZoomMain">
+        <div class="qrZoomView">
+          <div class="qrZoomImgWrap"><img id="qrZoomImg" alt="選択したQRコード"></div>
+          <dl class="qrZoomInfo">
+            <div><dt>納品日</dt><dd id="qrZoomDate"></dd></div>
+            <div><dt>本社名</dt><dd id="qrZoomMain"></dd></div>
+            <div><dt>ホール名</dt><dd id="qrZoomHall"></dd></div>
+            <div><dt>商品名</dt><dd id="qrZoomProduct"></dd></div>
+          </dl>
+        </div>
+        <div id="qrZoomLabelArea" class="qrZoomLabelArea"><p class="note qrZoomNote">この画面でのラベル付与は、いま表示しているQRコード1件だけに行われます。</p></div>
+      </div>
+    </div>
+  </div>
   <div class="wrap">
     <div id="libWarn" class="libWarn" style="display:none"></div>
 
@@ -1365,7 +1555,7 @@
       <div class="card" id="labelBar">
         <div class="labelBarHead"><h2>手順6：ラベルの付与</h2><button type="button" class="secondary helpBtn" data-help="manageHelp">使い方</button><span id="manageCount" class="count"></span></div>
         <div id="manageHelp" class="note helpBox" hidden>
-          ここには、付与が完了していないQRコードが表示されます。「付与完了にする」を押したQRコードは、④ 印刷準備に移動します。<br>本社名とホール名は、セットで付与されます。ホール名を先に選ぶと、対応する本社名が自動で入力されます。本社名を先に選ぶと、その本社のホールだけを選べます。
+          ここには、付与が完了していないQRコードが表示されます。「付与完了にする」を押したQRコードは、④ 印刷準備に移動します。<br>カードの背景が薄い緑色のときは、納品日・本社名・ホール名・商品名の4項目がすべて入力済みです（付与完了とは別の表示で、自動では付与完了になりません）。4項目が未入力でも、「付与完了にする」を手動で押せます。<br>QRコードの画像を押すと、そのQRコード1件だけを大きく表示します（専用の読み取り機械で読むとき用）。この表示中も、ラベルの付与をその1件に対して行えます（「付与完了にする」は、閉じて一覧に戻ってから押します）。<br>本社名とホール名は、セットで付与されます。ホール名を先に選ぶと、対応する本社名が自動で入力されます。本社名を先に選ぶと、その本社のホールだけを選べます。
         </div>
         <div class="bulkFields">
           <div class="field dateField" id="dateWrap">
@@ -1393,7 +1583,7 @@
           <button id="applyLocation">本社名・ホール名を付与</button>
           <button id="applyProduct">商品名を付与</button>
         </div>
-        <div class="barActions">
+        <div class="barActions bulkSelRow">
           <button id="selectAll" class="secondary selBtn">全選択</button>
           <button id="unselectAll" class="secondary selBtn">選択解除</button>
           <span class="spacer"></span>
@@ -1424,7 +1614,7 @@
       <div class="card" id="printBar">
         <div class="labelBarHead"><h2>手順7：印刷するQRコード選択</h2><button type="button" class="secondary helpBtn" data-help="printHelp">使い方</button><span id="printCount" class="count"></span></div>
         <div id="printHelp" class="note helpBox" hidden>
-          ここには、③で「付与完了」にしたQRコードだけが表示されます。<br>納品日・本社名・ホール名・商品名・取り込み日時から条件を選んで「検索」を押すと、条件に一致するQRコードが表示されます。条件は1つだけでも、組み合わせても指定でき、複数指定した場合はすべてに一致するものを表示します。<br>付与完了のQRコードをすべて確認したいときは「全件表示」を押してください。<br>間違えて付与完了にしたQRコードは、選択して「付与未完了にする」を押すと、③に戻ります。<br>印刷するQRコードを選んだら、一覧の最下部の「手順8」で、印刷設定とA4 PDF作成を行います。
+          ここには、③で「付与完了」にしたQRコードだけが表示されます。<br>納品日・本社名・ホール名・商品名・取り込み日時から条件を選んで「検索」を押すと、条件に一致するQRコードが表示されます。本社名を選ぶとホール名の候補はその本社のものに絞り込まれ、ホール名を先に選ぶと対応する本社名が自動で選ばれます。条件は1つだけでも、組み合わせても指定でき、複数指定した場合はすべてに一致するものを表示します。<br>付与完了のQRコードをすべて確認したいときは「全件表示」を押してください。<br>間違えて付与完了にしたQRコードは、選択して「付与未完了にする」を押すと、③に戻ります。<br>印刷するQRコードを選んだら、一覧の最下部の「手順8」で、印刷設定とA4 PDF作成を行います。
         </div>
         <div class="toolbar">
           <div class="field"><label>納品日</label><select id="printDate">
@@ -1489,7 +1679,7 @@
       <div class="card" id="printedBar">
         <div class="labelBarHead"><h2>手順9：印刷済みQRコード確認</h2><button type="button" class="secondary helpBtn" data-help="printedHelp">使い方</button><span id="printedCount" class="count"></span></div>
         <div id="printedHelp" class="note helpBox" hidden>
-          PDF作成後のQRコードをホール名ごとに分けて保管しています。<br>特定のQRコードを選択して手順7に戻すことで再びQRコードをPDFに含めることができます。<br>納品日・本社名・ホール名・商品名・取り込み日時から条件を選んで「検索」を押すと、条件に一致するQRコードが表示されます。すべて確認したいときは「全件表示」を押してください。
+          PDF作成後のQRコードをホール名ごとに分けて保管しています。<br>特定のQRコードを選択して手順7に戻すことで再びQRコードをPDFに含めることができます。<br>納品日・本社名・ホール名・商品名・取り込み日時から条件を選んで「検索」を押すと、条件に一致するQRコードが表示されます。本社名を選ぶとホール名の候補はその本社のものに絞り込まれ、ホール名を先に選ぶと対応する本社名が自動で選ばれます。すべて確認したいときは「全件表示」を押してください。
         </div>
         <div class="toolbar">
           <div class="field"><label>納品日</label><select id="printedDate">
@@ -1646,6 +1836,10 @@
     }
     function fmtMin(iso, sec = false) {const t = new Date(iso); if (!iso || isNaN(t)) return ''; const p = n => String(n).padStart(2, '0'); return `${t.getFullYear()}/${p(t.getMonth() + 1)}/${p(t.getDate())} ${p(t.getHours())}:${p(t.getMinutes())}${sec ? ':' + p(t.getSeconds()) : ''}`}
     function doneCls(x) {return x.assignmentCompleted ? ' done' : ''}
+    // 4項目（納品日・本社名・ホール名・商品名）がすべて入力済みか。手動の「付与完了」(assignmentCompleted)とは連動しない別の状態
+    function isFilled(x) {return !!(String(x.date || '').trim() && String(x.mainName || '').trim() && String(x.hall || '').trim() && String(x.product || '').trim())}
+    // カードのクラス：done＝付与完了（手動。緑の枠＋バッジ） / filled＝4項目入力済み（薄い緑の背景）
+    function cardCls(x) {return doneCls(x) + (isFilled(x) ? ' filled' : '')}
     function doneBadge(x) {return `<span class="stateBadge">${x.assignmentCompleted ? '✓ 付与完了' : '○ 未完了'}</span>`}
     function saveSession() {localStorage.setItem(SESSIONKEY, JSON.stringify([...sessionIds]))}
     function products() {return [...new Set([...JSON.parse(localStorage.getItem(PRODUCTKEY) || '[]'), ...data.map(x => x.product).filter(Boolean)])]}
@@ -1939,7 +2133,7 @@
     function renderManage() {
       fillImportedSelect(data.filter(isWorking));
       const rows = manageRows();
-      $('manageBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${doneCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="mcheck check" data-id="${x.id}" type="checkbox" ${selected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">生成：${x.createdAt && !isNaN(new Date(x.createdAt)) ? fmtSent(x.createdAt) : '不明'}</div></div>`).join('') : `<div class="empty">${data.some(isWorking) ? '条件に該当するQRコードはここに表示されます。' : data.some(isReady) ? '付与が未完了のQRコードはありません。付与完了のQRコードは「④ 印刷準備」に表示されます。' : '再生成したQRコードはここに表示されます。'}</div>`;
+      $('manageBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${cardCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="mcheck check" data-id="${x.id}" type="checkbox" ${selected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img class="zoomQr" data-id="${x.id}" role="button" tabindex="0" title="押すとこのQRコードだけを拡大表示します" src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">生成：${x.createdAt && !isNaN(new Date(x.createdAt)) ? fmtSent(x.createdAt) : '不明'}</div></div>`).join('') : `<div class="empty">${data.some(isWorking) ? '条件に該当するQRコードはここに表示されます。' : data.some(isReady) ? '付与が未完了のQRコードはありません。付与完了のQRコードは「④ 印刷準備」に表示されます。' : '再生成したQRコードはここに表示されます。'}</div>`;
       flashIds = new Set();
       document.querySelectorAll('.mcheck').forEach(e => e.onchange = () => {e.checked ? selected.add(e.dataset.id) : selected.delete(e.dataset.id); updateManageCount()});
       updateManageCount()
@@ -1947,7 +2141,45 @@
     $('manageMissing').onchange = renderManage; $('manageImported').onchange = renderManage;
     $('selectAll').onclick = () => {manageRows().forEach(x => selected.add(x.id)); renderManage()}
     $('unselectAll').onclick = () => {selected.clear(); renderManage()}
-    function afterLabelChange() {renderManage(); renderPending(); renderLists()}
+    function afterLabelChange() {renderManage(); renderPending(); renderLists(); refreshQrDialog()}
+
+    // ===== ③ QRコードの拡大表示ダイアログ =====
+    // 専用の読み取り機械が隣のQRコードまで読まないように、選択した1件だけを大きく表示する。
+    // ダイアログの背景は不透明にして、後ろの一覧のQRコードが映らないようにする（一覧のデータ・選択状態・スクロール位置は変更しない）。
+    let qrZoomY = 0, qrZoomOpener = null, qrZoomId = null, qrZoomSlot = null;
+    function fillQrDialog(x) {
+      $('qrZoomImg').src = x.image;
+      $('qrZoomDate').textContent = x.date ? dateLabel(x.date) : '未設定';
+      $('qrZoomMain').textContent = x.mainName || '未設定'; $('qrZoomHall').textContent = x.hall || '未設定'; $('qrZoomProduct').textContent = x.product || '未設定'
+    }
+    function openQrDialog(id, opener) {
+      if (qrZoomId) return;
+      const x = data.find(r => r.id === id); if (!x || !x.image) return;
+      fillQrDialog(x); qrZoomId = id;
+      // 手順6の「ラベルの付与」操作欄を、ダイアログの中へ移して表示する（同じ要素なので、ボタン・入力欄・処理はそのまま使える）。
+      // 閉じたときは元の位置へ戻す。ダイアログ表示中の付与の対象は、表示中のQR1件だけ（selectedManage で切り替え）。
+      const bar = $('labelBar'); qrZoomSlot = document.createElement('div'); bar.before(qrZoomSlot); $('qrZoomLabelArea').appendChild(bar);
+      qrZoomY = window.scrollY; qrZoomOpener = opener || null;
+      $('qrZoomModal').hidden = false; document.body.classList.add('modalOpen'); $('qrZoomClose').focus()
+    }
+    // ラベルを付与したら、ダイアログ内の「現在のラベル」を更新する。付与完了にした（③から④へ移った）ときは、一覧へ戻る
+    function refreshQrDialog() {
+      if (!qrZoomId) return;
+      const x = data.find(r => r.id === qrZoomId);
+      if (!x || !isWorking(x)) return closeQrDialog();
+      fillQrDialog(x)
+    }
+    function closeQrDialog() {
+      const m = $('qrZoomModal'); if (m.hidden) return;
+      m.hidden = true; $('qrZoomImg').removeAttribute('src'); document.body.classList.remove('modalOpen'); qrZoomId = null;
+      if (qrZoomSlot) {qrZoomSlot.replaceWith($('labelBar')); qrZoomSlot = null}
+      window.scrollTo(0, qrZoomY); if (qrZoomOpener && document.contains(qrZoomOpener)) qrZoomOpener.focus({preventScroll: true}); qrZoomOpener = null
+    }
+    $('qrZoomClose').onclick = closeQrDialog;
+    $('qrZoomModal').addEventListener('click', e => {if (e.target === $('qrZoomModal')) closeQrDialog()});
+    document.addEventListener('keydown', e => {if (e.key === 'Escape') closeQrDialog()});
+    $('manageBody').addEventListener('click', e => {const img = e.target.closest && e.target.closest('img.zoomQr'); if (img) openQrDialog(img.dataset.id, img)});
+    $('manageBody').addEventListener('keydown', e => {if (e.key !== 'Enter' && e.key !== ' ') return; const img = e.target.closest && e.target.closest('img.zoomQr'); if (img) {e.preventDefault(); openQrDialog(img.dataset.id, img)}});
     // うるう年：4で割り切れる年。ただし100で割り切れる年は平年、400で割り切れる年はうるう年
     function isLeapYear(y) {return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0}
     function daysInMonth(y, m) {return [31, isLeapYear(y) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1]}
@@ -1978,7 +2210,11 @@
     bindDateField('bulkDateText', 'bulkDate', 'openBulkDate'); bindDateField('shipDateText', 'shipDate', 'openShipDate');
     const FIELD_LABEL = {date: '納品日', mainName: '本社名', hall: 'ホール名', product: '商品名'};
     const NEED_ROWS = '対象のQRコードを選択してください';
-    function selectedManage() {return manageRows().filter(x => selected.has(x.id))}
+    // 付与の対象。ダイアログ表示中は「表示中のQR1件」だけ（一覧の選択・絞り込みには影響しない）。それ以外は従来どおり、選択したQR
+    function selectedManage() {
+      if (qrZoomId) {const x = data.find(r => r.id === qrZoomId); return x && isWorking(x) ? [x] : []}
+      return manageRows().filter(x => selected.has(x.id))
+    }
     function bulk(field, id, btnId) {
       let val;
       if (field === 'date') {
@@ -2086,14 +2322,31 @@
     // 本社名・ホール名の候補（未設定のQRがあるときは「未設定」も選べる）
     function nameOptions(rows, f, noneLabel) {const o = uniqSortedJa(rows, f).map(v => ({v, l: v})); if (rows.some(x => !f(x))) o.push({v: '__none', l: noneLabel}); return o}
     // 検索欄の候補を、対象のQRから作る（dateNone：納品日が未設定のQRを検索できる候補を付けるか）
-    function fillSearchOptions(ids, rows, dateNone) {
+    // 本社名・ホール名の連動状態（④・⑤それぞれ）。true＝本社名がホール名の選択から自動で入力されたもの
+    const searchAutoMain = {print: false, printed: false};
+    function fillSearchOptions(ids, rows, dateNone, key) {
       const dates = uniqSorted(rows, x => x.date).map(d => ({v: d, l: dateLabel(d)}));
       if (dateNone && rows.some(x => !x.date)) dates.push({v: '__none', l: '納品日未設定'});
       fillSel($(ids.date), dates);
       fillSel($(ids.main), nameOptions(rows, x => x.mainName, '本社名未設定'));
-      fillSel($(ids.hall), nameOptions(rows, x => x.hall, 'ホール未設定'));
+      // 本社名を手動で選んだときは、その本社に所属するホール名をすべて候補にする。未選択・自動入力のときは全ホールを候補にする
+      const m = $(ids.main).value; if (!m) searchAutoMain[key] = false;
+      const hallRows = (m && !searchAutoMain[key]) ? rows.filter(x => m === '__none' ? !x.mainName : x.mainName === m) : rows;
+      fillSel($(ids.hall), nameOptions(hallRows, x => x.hall, 'ホール未設定'));
       fillSel($(ids.product), uniqSorted(rows, x => x.product).map(v => ({v, l: v})));
       fillSel($(ids.batch), batchGroups(rows).map(g => ({v: g.key, l: g.label})))
+    }
+    // 本社名⇔ホール名の連動（④・⑤共通）。changed＝いま変更した検索欄（main / hall など）
+    function linkMainHall(ids, key, rows, changed) {
+      const mainSel = $(ids.main), hallSel = $(ids.hall);
+      if (changed === 'main') {searchAutoMain[key] = false; return} // ホール名の候補は fillSearchOptions が、選んだ本社に合わせて作り直す
+      if (changed !== 'hall') return;
+      const h = hallSel.value;
+      if (!h) {if (searchAutoMain[key]) {mainSel.value = ''; searchAutoMain[key] = false} return} // ホール名を未指定に戻したら、自動入力した本社名も外す
+      if (mainSel.value && !searchAutoMain[key]) return; // 手動で選んだ本社名は変更しない（候補はその本社のホールだけ）
+      const mains = [...new Set(rows.filter(x => h === '__none' ? !x.hall : x.hall === h).map(x => x.mainName || '__none'))];
+      if (mains.length === 1) {mainSel.value = mains[0]; searchAutoMain[key] = true}
+      else {mainSel.value = ''; searchAutoMain[key] = false} // 複数の本社に同じホール名があるときは、本社名を決めない
     }
     function matchCriteria(x, c) {
       return (!c.date || (c.date === '__none' ? !x.date : x.date === c.date)) && (!c.main || (c.main === '__none' ? !x.mainName : x.mainName === c.main)) && (!c.hall || (c.hall === '__none' ? !x.hall : x.hall === c.hall)) && (!c.product || x.product === c.product) && (!c.batch || batchKey(x) === c.batch)
@@ -2110,9 +2363,9 @@
 
     // ===== ④ 印刷準備（手順7）：表示できるのは、付与完了のQRだけ =====
     function printRows() {return printView ? data.filter(x => isReady(x) && matchCriteria(x, printView.c)) : []}
-    function resetPrintView() {printView = null; for (const k in PRINT_IDS) $(PRINT_IDS[k]).value = ''}
+    function resetPrintView() {printView = null; searchAutoMain.print = false; for (const k in PRINT_IDS) $(PRINT_IDS[k]).value = ''}
     function refreshPrint() {
-      fillSearchOptions(PRINT_IDS, data.filter(isReady), false);
+      fillSearchOptions(PRINT_IDS, data.filter(isReady), false, 'print');
       const rows = printRows(), ready = data.filter(isReady).length, working = data.filter(isWorking).length, selectedCount = rows.filter(x => printSelected.has(x.id)).length;
       $('printCount').textContent = `選択 ${selectedCount}件 / 表示 ${rows.length}件 / 付与完了 ${ready}件 / 付与未完了 ${working}件`;
       // 条件を選んだだけでは検索しない。まだ反映していない条件があるときは、案内を出す
@@ -2122,7 +2375,7 @@
       let empty = '';
       if (!printView) empty = '検索条件を選んで「検索」を押すか、「全件表示」を押すと、付与完了のQRコードがここに表示されます。';
       else if (!rows.length) empty = !ready ? '<strong>0件</strong>：付与完了のQRコードがありません。③で「付与完了にする」を押してください。' : printView.mode === 'all' ? '<strong>0件</strong>：付与完了のQRコードはありません。' : '<strong>0件</strong>：条件に該当するQRコードはありません。検索条件を変更してもう一度検索してください。';
-      $('printBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${doneCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="pcheck check" data-id="${x.id}" type="checkbox" ${printSelected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">取り込み：${fmtMin(importedAtOf(x)) || '不明'}</div></div>`).join('') : `<div class="empty">${empty}</div>`;
+      $('printBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${cardCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="pcheck check" data-id="${x.id}" type="checkbox" ${printSelected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">取り込み：${fmtMin(importedAtOf(x)) || '不明'}</div></div>`).join('') : `<div class="empty">${empty}</div>`;
       flashIds = new Set();
       document.querySelectorAll('.pcheck').forEach(e => e.onchange = () => {e.checked ? printSelected.add(e.dataset.id) : printSelected.delete(e.dataset.id); refreshPrint()});
       const targets = rows.filter(x => printSelected.has(x.id)).length;
@@ -2136,7 +2389,7 @@
       printView = {mode: 'search', c, text: criteriaText(c, data.filter(isReady))}; refreshPrint()
     }
     $('searchPrint').onclick = runPrintSearch;
-    for (const k in PRINT_IDS) $(PRINT_IDS[k]).onchange = () => refreshPrint(); // 候補の更新と案内の表示だけ。検索はしない
+    for (const k in PRINT_IDS) $(PRINT_IDS[k]).onchange = () => {linkMainHall(PRINT_IDS, 'print', data.filter(isReady), k); refreshPrint()}; // 候補の更新と案内の表示だけ。検索はしない
     $('showAllPrint').onclick = () => {for (const k in PRINT_IDS) $(PRINT_IDS[k]).value = ''; printView = {mode: 'all', c: {}, text: ''}; refreshPrint()};
     $('clearPrintSearch').onclick = () => {resetPrintView(); refreshPrint()};
     $('selectPrintAll').onclick = () => {printRows().forEach(x => printSelected.add(x.id)); refreshPrint()};
@@ -2202,12 +2455,12 @@
 
     function hallOf(x) {return x.hall || ''}
     let printedView = null; // null＝未検索（一覧は非表示） / {mode:'search'|'all', c:条件}
-    function resetPrintedView() {printedView = null; for (const k in PRINTED_IDS) $(PRINTED_IDS[k]).value = ''}
+    function resetPrintedView() {printedView = null; searchAutoMain.printed = false; for (const k in PRINTED_IDS) $(PRINTED_IDS[k]).value = ''}
     function printedFiltered() {return printedView ? data.filter(x => x.status === 'printed' && matchCriteria(x, printedView.c)) : []}
     function updatePrintedCount() {const all = data.filter(x => x.status === 'printed').length, rows = printedFiltered(); $('printedCount').textContent = `選択 ${rows.filter(x => printedSelected.has(x.id)).length}件 / 表示 ${rows.length}件 / 全 ${all}件`}
     function renderPrinted() {
       const all = data.filter(x => x.status === 'printed');
-      fillSearchOptions(PRINTED_IDS, all, true);
+      fillSearchOptions(PRINTED_IDS, all, true, 'printed');
       // 条件を選んだだけでは検索しない。まだ反映していない条件があるときは、案内を出す
       const notApplied = !sameCriteria(PRINTED_IDS, readCriteria(PRINTED_IDS), printedView ? printedView.c : {}), note = $('printedCondNote');
       note.style.display = notApplied ? 'block' : 'none';
@@ -2228,7 +2481,7 @@
     };
     $('showAllPrinted').onclick = () => {for (const k in PRINTED_IDS) $(PRINTED_IDS[k]).value = ''; printedView = {mode: 'all', c: {}}; renderPrinted()};
     $('clearPrinted').onclick = () => {resetPrintedView(); renderPrinted()};
-    for (const k in PRINTED_IDS) $(PRINTED_IDS[k]).onchange = () => renderPrinted(); // 候補の更新と案内の表示だけ。検索はしない
+    for (const k in PRINTED_IDS) $(PRINTED_IDS[k]).onchange = () => {linkMainHall(PRINTED_IDS, 'printed', data.filter(x => x.status === 'printed'), k); renderPrinted()}; // 候補の更新と案内の表示だけ。検索はしない
     $('selectPrintedAll').onclick = () => {printedFiltered().forEach(x => printedSelected.add(x.id)); renderPrinted()}
     $('unselectPrintedAll').onclick = () => {printedFiltered().forEach(x => printedSelected.delete(x.id)); renderPrinted()}
     // 印刷済みから戻すQRは、付与完了のまま手順7（④ 印刷準備）に戻す
