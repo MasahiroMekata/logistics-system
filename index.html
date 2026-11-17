@@ -1210,7 +1210,8 @@
     }
 
     .headMain .helpBtn {
-      flex: 0 0 auto
+      flex: 0 0 auto;
+      margin-left: auto
     }
 
     /* 件数表示は見出しの行とは分け、その下に表示する（v6.13〜） */
@@ -1791,7 +1792,7 @@
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.15</h1>
+    <h1>物流管理支援システム v6.16</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -3215,13 +3216,13 @@
     window.addEventListener('online', () => scheduleD1());
 
     // 「使用方法」ボタン：説明文を開閉する（閉じている間は、操作欄の高さを使わない）
-    document.querySelectorAll('.helpBtn').forEach(b => b.onclick = () => {const box = $(b.dataset.help); box.hidden = !box.hidden; b.textContent = box.hidden ? '使用方法' : '使用方法を閉じる'; b.setAttribute('aria-expanded', String(!box.hidden))});
+    document.querySelectorAll('.helpBtn').forEach(b => b.onclick = () => {const box = $(b.dataset.help); box.hidden = !box.hidden; b.textContent = box.hidden ? '使用方法' : '閉じる'; b.setAttribute('aria-expanded', String(!box.hidden))});
     data = data.map(normRec); const repaired = repairMainNames(); save(); purgeSent(); sessionIds = new Set([...sessionIds].filter(id => {const x = data.find(y => y.id === id); return x && !x.sentAt})); saveSession(); loadSettings(); renderPending(); renderSent(); renderManage(); refreshPrint(); renderPrinted(); checkLibs();
     if (repaired) toast(`ホール名だけが入力されていた${repaired}件に、本社名を補いました。`, 'warn');
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=626').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=627').catch(() => { }));
   </script>
 </body>
 
