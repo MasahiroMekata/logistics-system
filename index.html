@@ -1738,7 +1738,7 @@
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.10</h1>
+    <h1>物流管理支援システム v6.11</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -1994,11 +1994,11 @@
         <p id="printRunInfo" class="note" style="margin-bottom:8px"></p>
         <div id="printRunWarn" class="status warn" style="display:none"></div>
         <div class="toolbar">
+          <button id="makePdf" disabled>A4 PDF作成</button>
           <div class="field"><label>印刷設定：1ページあたりのQRコード数</label><select id="perPage">
               <option value="4">4個（2行×2列）</option>
               <option value="6" selected>6個（3行×2列）</option>
             </select></div>
-          <button id="makePdf" disabled>A4 PDF作成</button>
         </div>
       </div>
     </section>
@@ -3168,7 +3168,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=621').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=622').catch(() => { }));
   </script>
 </body>
 
