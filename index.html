@@ -10,6 +10,47 @@
   <title>物流管理支援システム</title>
   <link rel="manifest" href="manifest.webmanifest">
   <style>
+    :root {
+      /* ===== v6.6 デザイントークン（UI-2：色・角丸・影の集約） =====
+         ボタンの色は従来どおり4種類だけ（黒=実行／灰=補助／赤=危険／緑=完了）。
+         青（--c-sel 系）は「選択中」を示す専用色として定義し、それ以外には使わない。
+         警告色・危険色・完了色は各1色に統一した。グレーは bg／panel／line／line2／mid の5段階。
+         角丸は sm（ボタン・入力欄）／md（カード類）／pill（バッジ類）の3段階。 */
+      --c-bg: #f4f5f7;
+      --c-panel: #f7f7f8;
+      --c-line: #e5e7eb;
+      --c-line2: #cfd3d8;
+      --c-mid: #9ca3af;
+      --c-ink: #222;
+      --c-sub: #555;
+      --c-faint: #6b7280;
+      --c-green: #1f9d55;
+      --c-green-text: #14663a;
+      --c-green-bg: #e8f7ed;
+      --c-green-bg2: #d4eedb;
+      --c-green-line: #a9d6b7;
+      --c-red: #b42318;
+      --c-red-bg: #fdecec;
+      --c-red-line: #f0c8c8;
+      --c-warn: #d98a0b;
+      --c-warn-text: #8a5a00;
+      --c-warn-bg: #fff4d6;
+      --c-sel-bg: #eef5ff;
+      --c-sel-line: #7aa7ff;
+      --c-sel-line-soft: #d9e7ff;
+      --r-sm: 8px;
+      --r-md: 12px;
+      --r-pill: 99px;
+      --shadow-card: 0 1px 5px #00000012;
+      --shadow-bar: 0 4px 12px #00000026;
+      --shadow-pop: 0 5px 14px #00000020;
+      --shadow-toast: 0 6px 18px #00000030;
+      --shadow-modal: 0 10px 30px #00000040;
+      /* ボタンの共通ルール：最小幅と、ホバー時の発光（--c-mid の透明度違い） */
+      --btn-minw: 128px;
+      --glow: 0 0 0 3px var(--c-mid), 0 0 10px 4px rgba(156, 163, 175, .8)
+    }
+
     * {
       box-sizing: border-box
     }
@@ -38,13 +79,13 @@
 
     body {
       margin: 0;
-      background: #f4f5f7;
-      color: #222;
+      background: var(--c-bg);
+      color: var(--c-ink);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", "Noto Sans CJK JP", "Yu Gothic", sans-serif
     }
 
     header {
-      background: #222;
+      background: var(--c-ink);
       color: #fff;
       padding: 16px max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left));
       position: sticky;
@@ -80,10 +121,10 @@
     .navGroup {
       flex: 1 0 auto;
       background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 14px;
+      border: 1px solid var(--c-line);
+      border-radius: var(--r-md);
       padding: 16px;
-      box-shadow: 0 1px 5px #00000010
+      box-shadow: var(--shadow-card)
     }
 
     .navTitle {
@@ -104,27 +145,31 @@
       white-space: nowrap;
       }
 
-    /* FR-008：通常の処理実行ボタン＝黒（メニュー選択中 .navBtn.active と同じ #222）＋白文字 */
+    /* FR-008：通常の処理実行ボタン＝黒（メニュー選択中 .navBtn.active と同じ var(--c-ink)）＋白文字 */
     button {
       font: inherit; font-size: 16px;
       font-weight: 400;
       line-height: 24px;
       min-height: 40px;
       border: 1px solid transparent;
-      border-radius: 8px;
+      border-radius: var(--r-sm);
       padding: 8px 16px;
-      background: #222;
+      background: var(--c-ink);
       color: #fff;
       cursor: pointer;
       -webkit-appearance: none;
       appearance: none;
-      touch-action: manipulation
+      touch-action: manipulation;
+      /* ボタンの文字は1行だけ。幅は文字数に合わせて広がり、短い文字でも最小幅は保つ */
+      white-space: nowrap;
+      min-width: var(--btn-minw);
+      transition: box-shadow .12s ease
     }
 
     /* 補助操作ボタン（条件をクリア・全件表示・選択解除・戻す・キャンセル など）＝既存のグレー */
     button.secondary {
-      background: #e5e7eb;
-      color: #222
+      background: var(--c-line);
+      color: var(--c-ink)
     }
 
     label.fileBtn {
@@ -134,27 +179,31 @@
       font-weight: 400;
       min-height: 40px;
       margin: 0;
-      border-radius: 8px;
+      border-radius: var(--r-sm);
       padding: 8px 16px;
-      background: #222;
+      background: var(--c-ink);
       color: #fff;
-      cursor: pointer; line-height: 24px
+      cursor: pointer; line-height: 24px;
+      white-space: nowrap;
+      justify-content: center;
+      min-width: var(--btn-minw);
+      transition: box-shadow .12s ease
     }
 
     label.fileBtn.secondary {
-      background: #e5e7eb;
-      color: #222
+      background: var(--c-line);
+      color: var(--c-ink)
     }
 
     /* FR-008：危険操作（データ削除・消去）＝赤背景＋白文字 */
     button.danger {
-      background: #b42318;
+      background: var(--c-red);
       color: #fff
     }
 
     /* 付与完了ボタン＝緑（ボタンの色は 黒・灰・赤・緑 の4種類だけ） */
     button.success {
-      background: #1f9d55;
+      background: var(--c-green);
       color: #fff
     }
 
@@ -164,12 +213,12 @@
     }
 
     .navBtn {
-      background: #e5e7eb;
-      color: #222
+      background: var(--c-line);
+      color: var(--c-ink)
     }
 
     .navBtn.active {
-      background: #222;
+      background: var(--c-ink);
       color: #fff
     }
 
@@ -183,10 +232,10 @@
 
     .card {
       background: #fff;
-      border-radius: 12px;
+      border-radius: var(--r-md);
       padding: 16px;
       margin-bottom: 16px;
-      box-shadow: 0 1px 5px #00000012
+      box-shadow: var(--shadow-card)
     }
 
     .row {
@@ -216,8 +265,8 @@
     select {
       width: 100%;
       padding: 8px;
-      border: 1px solid #cfd3d8;
-      border-radius: 8px;
+      border: 1px solid var(--c-line2);
+      border-radius: var(--r-sm);
       background: #fff
     }
 
@@ -240,7 +289,7 @@
 
     input[type="checkbox"],
     input[type="radio"] {
-      accent-color: #222
+      accent-color: var(--c-ink)
     }
 
     .actions,
@@ -265,9 +314,8 @@
     }
 
     .applyActions button {
-      flex: 1 1 0;
-      min-width: 0;
-      }
+      flex: 0 0 auto
+    }
 
     @media(max-width:760px) {
       .applyActions {
@@ -288,55 +336,55 @@
 
     .status {
       padding: 0px 0 0px 8px;
-      border-left: 3px solid #c5c9ce;
+      border-left: 3px solid var(--c-line2);
       border-radius: 0;
       background: none;
       margin-top: 8px;
       font-size: 14px;
       font-weight: 400;
-      color: #555;
+      color: var(--c-sub);
       line-height: 1.6
     }
 
     .status.ok {
       background: none;
-      border-left-color: #1f9d55;
-      color: #14663a
+      border-left-color: var(--c-green);
+      color: var(--c-green-text)
     }
 
     .status.warn {
       background: none;
-      border-left-color: #d98a0b;
-      color: #8a5a00
+      border-left-color: var(--c-warn);
+      color: var(--c-warn-text)
     }
 
     .status.err {
       background: none;
-      border-left-color: #c53030;
-      color: #b42318
+      border-left-color: var(--c-red);
+      color: var(--c-red)
     }
 
     .ok {
-      background: #e8f7ed
+      background: var(--c-green-bg)
     }
 
     .warn {
-      background: #fff4d6
+      background: var(--c-warn-bg)
     }
 
     .err {
-      background: #fdecec
+      background: var(--c-red-bg)
     }
 
     .note {
       font-size: 12px;
-      color: #666;
+      color: var(--c-sub);
       line-height: 1.65
     }
 
     .count {
       font-size: 13px;
-      color: #555;
+      color: var(--c-sub);
       margin-left: auto
     }
 
@@ -344,9 +392,9 @@
       width: 100%;
       max-width: 650px;
       margin-top: 16px;
-      border-radius: 12px;
+      border-radius: var(--r-md);
       overflow: hidden;
-      background: #111
+      background: var(--c-ink)
     }
 
     .camStage {
@@ -376,26 +424,26 @@
       top: 8px;
       left: 8px;
       background: #fff;
-      color: #222;
+      color: var(--c-ink);
       padding: 0 16px;
-      border-radius: 99px;
+      border-radius: var(--r-pill);
       font-size: 13px;
       font-weight: 700;
       max-width: 68%; line-height: 32px
     }
 
     .scanBadge.hit {
-      background: #2ecc71;
+      background: var(--c-green);
       color: #fff
     }
 
     .scanBadge.dup {
-      background: #f5a623;
+      background: var(--c-warn);
       color: #fff
     }
 
     .scanBadge.bad {
-      background: #e5484d;
+      background: var(--c-red);
       color: #fff
     }
 
@@ -406,7 +454,7 @@
       background: #000a;
       color: #fff;
       padding: 0 16px;
-      border-radius: 99px;
+      border-radius: var(--r-pill);
       font-size: 13px;
       font-weight: 700; line-height: 32px
     }
@@ -417,7 +465,7 @@
       right: 8px;
       top: 56px;
       padding: 16px;
-      border-radius: 10px;
+      border-radius: var(--r-md);
       text-align: center;
       font-weight: 800;
       font-size: 16px;
@@ -434,15 +482,15 @@
     }
 
     .scanBanner.ok {
-      background: #1f9d55
+      background: var(--c-green)
     }
 
     .scanBanner.dup {
-      background: #d98a0b
+      background: var(--c-warn)
     }
 
     .scanBanner.bad {
-      background: #c53030
+      background: var(--c-red)
     }
 
     .liveText {
@@ -452,7 +500,7 @@
       bottom: 8px;
       color: #fff;
       background: #000a;
-      border-radius: 8px;
+      border-radius: var(--r-sm);
       padding: 8px 8px;
       font-size: 12px;
       line-height: 1.4;
@@ -472,7 +520,7 @@
       gap: 8px;
       align-items: center;
       padding: 8px 8px;
-      background: #1b1b1b;
+      background: var(--c-ink);
       color: #fff;
       font-size: 13px
     }
@@ -493,8 +541,8 @@
     }
 
     .qritem {
-      border: 1px solid #ddd;
-      border-radius: 10px;
+      border: 1px solid var(--c-line);
+      border-radius: var(--r-md);
       padding: 40px 8px 16px;
       background: #fff;
       position: relative;
@@ -518,13 +566,13 @@
     .qritem .cardLbl {
       font-size: 18px;
       line-height: 1.45;
-      color: #222
+      color: var(--c-ink)
     }
 
     .qritem .cardLbl:first-of-type {
       margin-top: 8px;
       padding-top: 8px;
-      border-top: 1px solid #e5e7eb
+      border-top: 1px solid var(--c-line)
     }
 
     .qritem .cardLbl+.cardLbl {
@@ -539,7 +587,7 @@
     .qritem .cardLbl+.note:not(.cardLbl) {
       margin-top: 8px;
       padding-top: 8px;
-      border-top: 1px dashed #d8dce2
+      border-top: 1px dashed var(--c-line)
     }
 
     /* チェックボックスはQR画像に重ならないよう、カード上部の専用行に置く */
@@ -565,34 +613,33 @@
     th,
     td {
       padding: 8px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--c-line);
       text-align: left;
       vertical-align: middle
     }
 
     th {
-      background: #f7f7f8
+      background: var(--c-panel)
     }
 
     .thumb {
       width: 64px;
       height: 64px;
       object-fit: contain;
-      border: 1px solid #ddd;
-      border-radius: 6px
-    }
+      border: 1px solid var(--c-line);
+      border-radius: var(--r-sm)}
 
     .pill {
       display: inline-block;
       padding: 0 8px;
-      border-radius: 99px;
-      background: #eee;
+      border-radius: var(--r-pill);
+      background: var(--c-line);
       font-size: 12px; line-height: 24px
     }
 
     .empty {
       text-align: center;
-      color: #777;
+      color: var(--c-faint);
       padding: 32px
     }
 
@@ -616,8 +663,8 @@
       gap: 8px;
       align-items: center;
       padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      border: 1px solid var(--c-line);
+      border-radius: var(--r-sm);
       background: #fff;
       cursor: pointer;
       margin: 0;
@@ -625,8 +672,8 @@
     }
 
     .urlRow.sel {
-      background: #eef5ff;
-      border-color: #7aa7ff
+      background: var(--c-sel-bg);
+      border-color: var(--c-sel-line)
     }
 
     .urlRow input[type=checkbox] {
@@ -637,7 +684,7 @@
     }
 
     .urlIndex {
-      color: #666;
+      color: var(--c-sub);
       font-weight: 600;
       text-align: right;
       font-size: 13px
@@ -659,7 +706,7 @@
       display: block;
       margin-top: 0px;
       font-size: 12px;
-      color: #666;
+      color: var(--c-sub);
       font-weight: 400
     }
 
@@ -674,9 +721,9 @@
       flex-wrap: wrap;
       padding: 8px 8px;
       margin-bottom: 8px;
-      background: #f1f3f5;
-      border-radius: 8px;
-      border-left: 5px solid #222
+      background: var(--c-panel);
+      border-radius: var(--r-sm);
+      border-left: 5px solid var(--c-ink)
     }
 
     .hallHead h3 {
@@ -696,10 +743,10 @@
       margin-bottom: 16px;
       padding: 8px 16px;
       background: #fff;
-      border: 1px solid #f0c8c8;
-      border-left: 5px solid #c53030;
-      border-radius: 8px;
-      color: #b42318;
+      border: 1px solid var(--c-red-line);
+      border-left: 5px solid var(--c-red);
+      border-radius: var(--r-sm);
+      color: var(--c-red);
       font-size: 14px;
       line-height: 1.6
     }
@@ -711,26 +758,26 @@
     .tag {
       font-size: 11px;
       padding: 0 8px;
-      border-radius: 99px;
-      background: #eee;
-      color: #555;
+      border-radius: var(--r-pill);
+      background: var(--c-line);
+      color: var(--c-sub);
       white-space: nowrap; line-height: 24px
     }
 
     .tag.sent {
-      background: #d9f2e0;
-      color: #14663a
+      background: var(--c-green-bg);
+      color: var(--c-green-text)
     }
 
     .transferCard {
-      border: 2px solid #d9e7ff
+      border: 2px solid var(--c-sel-line-soft)
     }
 
     .settings textarea {
       width: 100%;
       min-height: 150px;
       border: 1px solid #ccc;
-      border-radius: 8px;
+      border-radius: var(--r-sm);
       padding: 8px;
       font: inherit
     }
@@ -747,9 +794,9 @@
       top: 100%;
       z-index: 40;
       background: #fff;
-      border: 1px solid #cfd3d8;
-      border-radius: 0 0 8px 8px;
-      box-shadow: 0 5px 14px #0002;
+      border: 1px solid var(--c-line2);
+      border-radius: 0 0 var(--r-sm) var(--r-sm);
+      box-shadow: var(--shadow-pop);
       max-height: 260px;
       overflow: auto
     }
@@ -760,7 +807,7 @@
 
     .storeSuggestItem {
       padding: 8px 16px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--c-line);
       cursor: pointer
     }
 
@@ -791,23 +838,24 @@
 
     .datePickerWrap button {
       height: 100%;
-      white-space: nowrap
+      white-space: nowrap;
+      min-width: 0
     }
 
     /* FR-01：付与完了の視覚表示（色＋アイコン＋文字） */
     /* 付与完了（手動）＝緑の枠とバッジ。カードの背景色は、4項目の入力状況（.filled）だけで決める */
     .qritem.done {
-      border-color: #1f9d55
+      border-color: var(--c-green)
     }
 
     /* 納品日・本社名・ホール名・商品名がすべて入力済み＝淡いグリーンの背景（付与完了とは独立）。
        白との色差を従来(#eef9f1)の約2.5倍にして見分けやすくしつつ、彩度は低く保って目に優しくする */
     .qritem.filled {
-      background: #d4eedb
+      background: var(--c-green-bg2)
     }
 
     .qritem.filled:not(.done) {
-      border-color: #a9d6b7
+      border-color: var(--c-green-line)
     }
 
     .stateBadge {
@@ -817,14 +865,14 @@
       font-size: 12px;
       font-weight: 700;
       padding: 0 8px;
-      border-radius: 99px;
-      background: #eee;
-      color: #555;
+      border-radius: var(--r-pill);
+      background: var(--c-line);
+      color: var(--c-sub);
       white-space: nowrap; line-height: 24px
     }
 
     .qritem.done .stateBadge {
-      background: #1f9d55;
+      background: var(--c-green);
       color: #fff
     }
 
@@ -836,13 +884,13 @@
       transform: translateX(-50%) translateY(-12px);
       max-width: min(92vw, 560px);
       padding: 16px 16px;
-      border-radius: 10px;
-      background: #1f9d55;
+      border-radius: var(--r-md);
+      background: var(--c-green);
       color: #fff;
       font-weight: 700;
       font-size: 14px;
       line-height: 1.5;
-      box-shadow: 0 6px 18px #0003;
+      box-shadow: var(--shadow-toast);
       opacity: 0;
       pointer-events: none;
       transition: opacity .18s, transform .18s;
@@ -855,12 +903,21 @@
     }
 
     #toast.err {
-      background: #c53030
+      background: var(--c-red)
     }
 
     #toast.warn {
-      background: #f5b50a;
-      color: #222
+      background: var(--c-warn);
+      color: var(--c-ink)
+    }
+
+    /* 最後に拡大表示したQRコード：次に別のQRコードを開くまで光らせる */
+    .qritem {
+      transition: box-shadow .2s
+    }
+
+    .qritem.lastView {
+      box-shadow: 0 0 0 3px var(--c-ink), 0 0 12px 4px rgba(34, 34, 34, .3)
     }
 
     .qritem.flash {
@@ -869,26 +926,26 @@
 
     @keyframes flashOk {
       0% {
-        box-shadow: 0 0 0 4px #1f9d55;
-        background: #d5f3df
+        box-shadow: 0 0 0 4px var(--c-green);
+        background: var(--c-green-bg2)
       }
 
       100% {
-        box-shadow: 0 0 0 0 #1f9d5500
+        box-shadow: 0 0 0 0 transparent
       }
     }
 
     button.btnOk {
-      background: #1f9d55 !important;
+      background: var(--c-green) !important;
       color: #fff !important
     }
 
     .sampleBox {
       margin: 8px 0;
       padding: 8px 16px;
-      background: #f7f7f8;
-      border: 1px solid #e1e3e6;
-      border-radius: 8px;
+      background: var(--c-panel);
+      border: 1px solid var(--c-line);
+      border-radius: var(--r-sm);
       font-family: ui-monospace, Menlo, Consolas, monospace;
       font-size: 13px;
       line-height: 1.7;
@@ -931,11 +988,11 @@
 
     .modalBox {
       background: #fff;
-      border-radius: 12px;
+      border-radius: var(--r-md);
       padding: 24px;
       max-width: 440px;
       width: 100%;
-      box-shadow: 0 10px 30px #0004
+      box-shadow: var(--shadow-modal)
     }
 
     .modalBox h3 {
@@ -947,7 +1004,7 @@
       margin: 0 0 16px;
       font-size: 14px;
       line-height: 1.7;
-      color: #444;
+      color: var(--c-sub);
       white-space: pre-line
     }
 
@@ -959,7 +1016,7 @@
 
     /* ③ QR拡大ダイアログ：背景は不透明（後ろの一覧のQRコードを映さない）。QRの周囲に十分な白い余白（クワイエットゾーン）を取る */
     .qrZoom {
-      background: #2b2f36;
+      background: var(--c-ink);
       overflow-y: auto;
       overscroll-behavior: contain
     }
@@ -1013,8 +1070,7 @@
       }
 
       /* 一覧表示と同じ配置：入力欄（納品日・本社名・ホール名・商品名）は1段、付与ボタン3つも1段に横並び */
-      .qrZoom .bulkFields,
-      .qrZoom .barActions {
+      .qrZoom .bulkFields {
         flex-wrap: nowrap
       }
 
@@ -1024,12 +1080,9 @@
       }
 
       .qrZoom .bulkFields .dateField {
-        flex: 1.5 1 0
+        flex: 2.2 1 0
       }
 
-      .qrZoom .barActions button {
-        min-width: 0
-      }
     }
 
     /* ダイアログ内に移した手順6の操作欄：固定表示をやめ、一覧向けの操作（全選択など）は隠す */
@@ -1039,8 +1092,8 @@
       overflow: visible;
       box-shadow: none;
       margin: 0;
-      background: #f7f7f8;
-      border: 1px solid #e5e7eb
+      background: var(--c-panel);
+      border: 1px solid var(--c-line)
     }
 
     /* 「付与完了にする」は一覧に戻って押す。ダイアログ内では、全選択・選択解除と一緒にこの段ごと隠す */
@@ -1052,8 +1105,8 @@
     .qrZoomImgWrap {
       background: #fff;
       padding: 32px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
+      border: 1px solid var(--c-line);
+      border-radius: var(--r-md);
       width: fit-content;
       margin: 0 auto 16px
     }
@@ -1094,13 +1147,13 @@
       display: flex;
       gap: 16px;
       padding: 8px 8px;
-      border-bottom: 1px solid #e5e7eb
+      border-bottom: 1px solid var(--c-line)
     }
 
     .qrZoomInfo dt {
       flex: 0 0 5.5em;
       font-size: 14px;
-      color: #666
+      color: var(--c-sub)
     }
 
     .qrZoomInfo dd {
@@ -1134,10 +1187,74 @@
     }
 
     .helpBox {
+      margin: 0 0 16px;
+      padding: 16px;
+      background: var(--c-panel);
+      border: 1px solid var(--c-line);
+      border-radius: var(--r-sm);
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--c-ink)
+    }
+
+    .helpSec {
+      margin: 0 0 16px;
+      padding-left: 16px;
+      border-left: 4px solid var(--c-ink)
+    }
+
+    .helpSec:last-child {
+      margin-bottom: 0
+    }
+
+    .helpSec.can {
+      border-left-color: var(--c-green)
+    }
+
+    .helpSec.caution {
+      border-left-color: var(--c-warn)
+    }
+
+    .helpSec h4 {
       margin: 0 0 8px;
-      padding: 8px 16px;
-      background: #f7f7f8;
-      border-radius: 8px
+      font-size: 15px
+    }
+
+    .helpSec h4::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: var(--c-ink)
+    }
+
+    .helpSec.can h4::before {
+      background: var(--c-green)
+    }
+
+    .helpSec.caution h4::before {
+      background: var(--c-warn)
+    }
+
+    .helpSec ul,
+    .helpSec ol {
+      margin: 0;
+      padding-left: 24px
+    }
+
+    .helpSec li {
+      margin: 0 0 8px
+    }
+
+    .helpSec li:last-child {
+      margin-bottom: 0
+    }
+
+    .helpSec p.sub {
+      margin: 8px 0 8px;
+      font-weight: 700
     }
 
     .helpBox[hidden] {
@@ -1166,10 +1283,6 @@
       align-items: center
     }
 
-    .actBtn {
-      min-width: 170px
-    }
-
     .barActions.mixed button {
       flex: 0 0 auto
     }
@@ -1186,8 +1299,8 @@
     }
 
     .barActions button {
-      flex: 1 1 auto;
-      }
+      flex: 0 0 auto
+    }
 
     /* ボタンの段。右寄せの段は、ボタンを引き伸ばさず右端に置く */
     .barActions.end {
@@ -1205,14 +1318,14 @@
         position: sticky;
         top: var(--hdrH, 52px);
         z-index: 15;
-        box-shadow: 0 4px 12px #00000026;
+        box-shadow: var(--shadow-bar);
         max-height: 50vh;
         overflow-y: auto
       }
     }
     /* ===== v6.1 ボタンの配置（FR-004）：色は上の button / .secondary / .danger に集約。ここでは配置とサイズだけを指定 ===== */
     button:focus-visible {
-      outline: 3px solid #9ca3af;
+      outline: 3px solid var(--c-mid);
       outline-offset: 2px
     }
 
@@ -1220,9 +1333,23 @@
       filter: brightness(.9)
     }
 
+    /* ホバー：ボタンの外枠だけを光らせる（背景色・文字色は変えない）。選択中のメニューも、ホバー中だけ光る */
     @media (hover: hover) {
-      button:hover:not(:disabled) {
-        filter: brightness(1.15)
+      button:hover:not(:disabled),
+      label.fileBtn:hover {
+        box-shadow: var(--glow)
+      }
+
+      button.navArrow:hover {
+        box-shadow: var(--glow), 0 2px 8px #0005
+      }
+    }
+
+    /* タッチ操作の端末にはホバーがないので、押している間だけ光らせる */
+    @media (hover: none) {
+      button:active:not(:disabled),
+      label.fileBtn:active {
+        box-shadow: var(--glow)
       }
     }
 
@@ -1242,24 +1369,19 @@
 
     #searchPrint,
     #searchPrinted {
-      flex: 2 1 140px
+      flex: 0 0 auto
     }
 
     .transferCard #sendSelected {
-      flex: 2 1 184px
-    }
-
-    #startScan {
-      min-width: 152px
+      flex: 0 0 auto
     }
 
     /* 納品日の一括変更：選択操作とは別の段にまとめる */
     .bulkDateBox {
       flex: 1 1 100%;
       padding: 8px 16px;
-      background: #f7f7f8;
-      border-radius: 10px
-    }
+      background: var(--c-panel);
+      border-radius: var(--r-md)}
 
     @media(max-width:760px) {
       button,
@@ -1271,7 +1393,8 @@
       .actions>button,
       .barActions>button,
       .selRow>button {
-        flex: 1 1 calc(50% - 8px)
+        flex: 1 1 calc(50% - 8px);
+        min-width: max-content
       }
 
       .actions>.actBtn,
@@ -1323,14 +1446,14 @@
 
     .navRail::before {
       left: 0;
-      border-radius: 14px 0 0 14px;
-      background: linear-gradient(to right, #f4f5f7 25%, #f4f5f700)
+      border-radius: var(--r-md) 0 0 var(--r-md);
+      background: linear-gradient(to right, var(--c-bg) 25%, transparent)
     }
 
     .navRail::after {
       right: 0;
-      border-radius: 0 14px 14px 0;
-      background: linear-gradient(to left, #f4f5f7 25%, #f4f5f700)
+      border-radius: 0 var(--r-md) var(--r-md) 0;
+      background: linear-gradient(to left, var(--c-bg) 25%, transparent)
     }
 
     .navRail.canL::before,
@@ -1350,9 +1473,10 @@
       width: 32px;
       height: 32px;
       min-height: 0;
+      min-width: 0;
       padding: 0;
       border-radius: 50%;
-      background: #222;
+      background: var(--c-ink);
       color: #fff;
       font-size: 22px;
       line-height: 1;
@@ -1398,19 +1522,183 @@
       display: none;
       text-align: center;
       font-size: 12px;
-      color: #6b7280;
+      color: var(--c-faint);
       margin-top: 8px
     }
 
-    .navBtn.active {
-      box-shadow: 0 0 0 3px #c9ced6
+
+    /* ===== v6.2 ① QR拡大ダイアログ：左右のQRコードへの切り替え ===== */
+    .qrZoomTitleBox {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      flex-wrap: wrap
     }
-  </style>
+
+    .qrZoomPos {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--c-sub)
+    }
+
+    /* QRの左右に大きな矢印ボタン（QRの周囲の白い余白には何も重ねない） */
+    .qrZoomNavRow {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px
+    }
+
+    .qrZoomNavRow .qrZoomImgWrap {
+      margin: 0;
+      flex: 0 1 auto
+    }
+
+    .qrZoom .qrNavBtn {
+      flex: 0 0 56px;
+      min-height: 0;
+      min-width: 0;
+      padding: 0;
+      font-size: 32px;
+      line-height: 1;
+      border-radius: var(--r-md)}
+
+    /* 幅がせまい画面では、QRの下に左右2つのボタンを並べる */
+    @media (max-width: 900px) {
+      .qrZoomNavRow {
+        flex-wrap: wrap;
+        gap: 8px
+      }
+
+      .qrZoomNavRow .qrZoomImgWrap {
+        order: 1;
+        flex: 0 0 100%;
+        display: flex;
+        justify-content: center
+      }
+
+      .qrZoom .qrNavBtn {
+        flex: 1 1 calc(50% - 4px);
+        min-height: 56px;
+        height: 56px;
+        font-size: 28px
+      }
+
+      #qrZoomPrev {
+        order: 2
+      }
+
+      #qrZoomNext {
+        order: 3
+      }
+    }
+
+    /* ===== v6.2 ② ドラッグ選択（③④⑤のQRカード） ===== */
+    body.dragSel {
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: crosshair
+    }
+
+    .qritem .check {
+      cursor: pointer
+    }
+
+    /* ===== v6.4 使用方法ボタン：他のボタンより小さく、別の見た目（白地・細い枠のカプセル型） ===== */
+    button.secondary.helpBtn {
+      min-width: 0;
+      min-height: 32px;
+      padding: 0 12px;
+      font-size: 13px;
+      line-height: 30px;
+      background: #fff;
+      color: var(--c-sub);
+      border: 1px solid var(--c-line2);
+      border-radius: var(--r-pill)}
+
+    button.secondary.helpBtn::before {
+      content: "?";
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      margin-right: 6px;
+      border-radius: 50%;
+      background: var(--c-sub);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 18px;
+      text-align: center
+    }
+
+    button.secondary.helpBtn[aria-expanded="true"] {
+      background: var(--c-panel);
+      color: var(--c-ink);
+      border-color: var(--c-mid)
+    }
+
+    @media (max-width: 760px) {
+      button.secondary.helpBtn {
+        min-height: 36px;
+        line-height: 34px;
+        font-size: 13px
+      }
+    }
+
+    /* ===== v6.6 UI-5／機能1：トーストの「元に戻す」ボタン、カードの選択表示、チェックボックス拡大 ===== */
+    #toast {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    #toast .toastUndo {
+      min-width: 0;
+      min-height: 32px;
+      padding: 0 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 30px;
+      background: transparent;
+      color: #fff;
+      border: 1px solid #fff;
+      border-radius: var(--r-pill);
+      white-space: nowrap
+    }
+
+    /* カード全体が選択操作の対象であることを示す（画像は拡大表示のまま） */
+    .qritem {
+      cursor: pointer
+    }
+
+    /* 選択中のカード：枠の色や背景（付与完了・入力済みの表示）と競合しないよう、外側のリングで示す */
+    .qritem.sel {
+      box-shadow: 0 0 0 2px var(--c-sel-line)
+    }
+
+    .qritem.sel.lastView {
+      box-shadow: 0 0 0 3px var(--c-ink), 0 0 12px 4px rgba(34, 34, 34, .3)
+    }
+
+    /* チェックボックスの当たり判定を大きくする（カード上部の専用行 40px の中に収まる大きさ） */
+    .check {
+      width: 24px;
+      height: 24px
+    }
+
+    @media (pointer: coarse) {
+      .check {
+        width: 28px;
+        height: 28px
+      }
+    }
+</style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.1</h1>
+    <h1>物流管理支援システム v6.6</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -1422,10 +1710,14 @@
   </div>
   <div id="qrZoomModal" class="modal qrZoom" role="dialog" aria-modal="true" aria-labelledby="qrZoomTitle" hidden>
     <div class="modalBox qrZoomBox">
-      <div class="qrZoomHead"><h3 id="qrZoomTitle">QRコード拡大表示</h3><button type="button" id="qrZoomClose" class="secondary">閉じる</button></div>
+      <div class="qrZoomHead"><div class="qrZoomTitleBox"><h3 id="qrZoomTitle">QRコード拡大表示</h3><span id="qrZoomPos" class="qrZoomPos"></span></div><button type="button" id="qrZoomClose" class="secondary">閉じる</button></div>
       <div class="qrZoomMain">
         <div class="qrZoomView">
-          <div class="qrZoomImgWrap"><img id="qrZoomImg" alt="選択したQRコード"></div>
+          <div class="qrZoomNavRow">
+            <button type="button" id="qrZoomPrev" class="secondary qrNavBtn" aria-label="左隣のQRコードを表示" title="左隣のQRコード（←キー）">◀</button>
+            <div class="qrZoomImgWrap"><img id="qrZoomImg" alt="選択したQRコード"></div>
+            <button type="button" id="qrZoomNext" class="secondary qrNavBtn" aria-label="右隣のQRコードを表示" title="右隣のQRコード（→キー）">▶</button>
+          </div>
           <dl class="qrZoomInfo">
             <div><dt>納品日</dt><dd id="qrZoomDate"></dd></div>
             <div><dt>本社名</dt><dd id="qrZoomMain"></dd></div>
@@ -1471,8 +1763,8 @@
 
     <section id="scan" class="page active">
       <div class="card">
-        <h2>手順1：QRコード読取</h2>
-        <p class="note">「スキャン開始」を押してQRコードをカメラに向けてください。<br>許可されたドメインのURLのQRコードだけを自動で検出して保存します。他のドメインのQRコードや、URL以外のQRコードは保存しません。<br>同じURLは重複登録しません。</p>
+        <div class="labelBarHead"><h2>手順1：QRコード読取</h2><button type="button" class="secondary helpBtn" data-help="scanHelp" aria-expanded="false" aria-controls="scanHelp">使用方法</button></div>
+        <div id="scanHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>スマホのカメラでQRコードを読み取り、URLを一覧に保存します。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>「スキャン開始」を押します。</li><li>QRコードをカメラに向けます。</li><li>読み取れると、画面に緑の表示が出ます。</li><li>終わったら「停止」を押します。</li><li>次は、手順2でURLを確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>初めて使うときは、カメラの使用を「許可」してください。</li><li>決められたサイトのURLだけを保存します。ほかのQRコードは保存しません。</li><li>同じURLは、二重に保存しません。</li><li>暗いときは「ライトON」、小さいときは「拡大」のバーを使えます（スマホによっては表示されません）。</li></ul></div></div>
         <div class="actions">
           <button id="startScan">スキャン開始</button>
           <button id="stopScan" class="secondary" disabled>停止</button>
@@ -1496,8 +1788,8 @@
       </div>
 
       <div class="card">
-        <h2>手順2：URL確認</h2>
-        <p class="note">送信したいURLを選んでください。<br>行のどこをタップしても選択 / 解除できます。</p>
+        <div class="labelBarHead"><h2>手順2：URL確認</h2><button type="button" class="secondary helpBtn" data-help="pendingHelp" aria-expanded="false" aria-controls="pendingHelp">使用方法</button></div>
+        <div id="pendingHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>読み取ったURLを一覧で確認し、送るURLを選びます。</li><li>要らないURLを削除できます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>送るURLの行を押して、チェックを入れます。行のどこを押しても選べます。</li><li>すべて選ぶときは「全選択」、やめるときは「選択解除」を押します。</li><li>要らないURLは、チェックを入れて「選択URL削除」を押します。</li><li>選び終わったら、手順3へ進みます。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>手順3で送られるのは、チェックを入れたURLだけです。</li><li>削除すると、一覧から消えます。消す前に、もう一度確認してください。</li></ul></div></div>
         <div class="actions">
           <button id="selectPendingAll" class="secondary selBtn">全選択</button>
           <button id="unselectPendingAll" class="secondary selBtn">選択解除</button>
@@ -1509,8 +1801,8 @@
       </div>
 
       <div class="card transferCard">
-        <h2>手順3：URL送信</h2>
-        <p class="note">手順2で選択したURLをTXTファイルにまとめ、指定したメールアドレスへ送信します。<br>送信完了したURLだけ、手順2の一覧から「② 送信済み」へ移動します。</p>
+        <div class="labelBarHead"><h2>手順3：URL送信</h2><button type="button" class="secondary helpBtn" data-help="sendHelp" aria-expanded="false" aria-controls="sendHelp">使用方法</button></div>
+        <div id="sendHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>選んだURLを、メールでPCに送ります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>手順2で、送るURLを選びます。</li><li>「URL送信」を押します。</li><li>「送信完了」と出たら、PCでメールを確認します。</li><li>うまく送れないときは、「URL送信GAS接続テスト」を押して、接続を確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>先に「⚙ 設定」で、送信先などを入力して保存してください。</li><li>送ったURLは、手順2の一覧から「② 送信済み」へ移ります。</li><li>「GASの応答を確認できませんでした」と出たときは、メールが届いたか確認してください。届いていないときだけ、もう一度送ります。もう一度送ると、メールが二重に届くことがあります。</li></ul></div></div>
         <div class="actions">
           <button id="sendSelected">URL送信</button>
           <button id="testGasStep3" class="secondary">
@@ -1525,10 +1817,8 @@
 
     <section id="sent" class="page">
       <div class="card">
-        <h2>手順4：送信済みURL確認</h2>
-        <p class="note">
-          メールで送信したURLの履歴です。<br>PCにメールが届かなかった場合など、特定のURLを選択して手順2に戻すことでURL送信をやり直すことができます。<br>履歴はメール送信から24時間経過すると、ブラウザ内から自動で完全に消去されます（元に戻せません）。
-        </p>
+        <div class="labelBarHead"><h2>手順4：送信済みURL確認</h2><button type="button" class="secondary helpBtn" data-help="sentHelp" aria-expanded="false" aria-controls="sentHelp">使用方法</button></div>
+        <div id="sentHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>メールで送ったURLの記録を見ます。</li><li>メールが届かなかったとき、手順2に戻して、もう一度送れます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>やり直したいURLの行を押して、チェックを入れます。</li><li>「手順2に戻す」を押します。</li><li>手順3で、もう一度「URL送信」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>送ってから24時間たつと、記録は自動で消えます。元に戻せません。</li><li>「全選択」「選択解除」でまとめて選べます。</li></ul></div></div>
         <div class="actions">
           <button id="selectSentAll" class="secondary selBtn">全選択</button>
           <button id="unselectSentAll" class="secondary selBtn">選択解除</button>
@@ -1536,6 +1826,7 @@
           <button id="restoreSent" class="secondary actBtn">手順2に戻す</button>
         </div>
         <div style="margin-top:8px"><span id="sentCount" class="count" style="margin-left:0"></span></div>
+        <div id="sentPurgeNote" class="status warn" style="display:none"></div>
         <div id="sentStatus" class="status" style="display:none"></div>
         <div id="sentGrid" class="urlList" style="margin-top:8px"></div>
       </div>
@@ -1543,8 +1834,8 @@
 
     <section id="manage" class="page">
       <div class="card">
-        <h2>手順5：QRコード生成</h2>
-        <p class="note">URL一覧（〇〇.txt）をアップロードしてください。<br>URLからQRコード画像を生成します。<br>同じURLは重複登録しません。</p>
+        <div class="labelBarHead"><h2>手順5：QRコード生成</h2><button type="button" class="secondary helpBtn" data-help="importHelp" aria-expanded="false" aria-controls="importHelp">使用方法</button></div>
+        <div id="importHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>URLが書かれたファイルを読み込んで、QRコードを作ります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>「URL一覧を一括読込」を押します。</li><li>URLが書かれたファイル（txtまたはcsv）を選びます。ファイルは、まとめて何個でも選べます。</li><li>「読み込み完了」と出たら、手順6へ進みます。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>同じURLのQRコードは、二重に作りません。</li><li>表示された「追加・重複・読み取り不可」の件数を確認してください。「読み取り不可」は、URLが見つからなかったファイルの数です。</li></ul></div></div>
         <label class="fileBtn">
           URL一覧を一括読込
           <input id="pcImportImages" type="file" accept=".txt,.csv,text/plain,text/csv" multiple=""
@@ -1554,10 +1845,8 @@
       </div>
 
       <div class="card" id="labelBar">
-        <div class="labelBarHead"><h2>手順6：ラベルの付与</h2><button type="button" class="secondary helpBtn" data-help="manageHelp">使い方</button><span id="manageCount" class="count"></span></div>
-        <div id="manageHelp" class="note helpBox" hidden>
-          ここには、付与が完了していないQRコードが表示されます。「付与完了にする」を押したQRコードは、④ 印刷準備に移動します。<br>カードの背景が薄い緑色のときは、納品日・本社名・ホール名・商品名の4項目がすべて入力済みです（付与完了とは別の表示で、自動では付与完了になりません）。4項目が未入力でも、「付与完了にする」を手動で押せます。<br>QRコードの画像を押すと、そのQRコード1件だけを大きく表示します（専用の読み取り機械で読むとき用）。この表示中も、ラベルの付与をその1件に対して行えます（「付与完了にする」は、閉じて一覧に戻ってから押します）。<br>本社名とホール名は、セットで付与されます。ホール名を先に選ぶと、対応する本社名が自動で入力されます。本社名を先に選ぶと、その本社のホールだけを選べます。
-        </div>
+        <div class="labelBarHead"><h2>手順6：ラベルの付与</h2><button type="button" class="secondary helpBtn" data-help="manageHelp" aria-expanded="false" aria-controls="manageHelp">使用方法</button><span id="manageCount" class="count"></span></div>
+        <div id="manageHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>QRコードに、納品日・本社名・ホール名・商品名を付けます。</li><li>付け終わったQRコードは、「④ 印刷準備」へ進めます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>付けたいQRコードのチェックを入れます。「全選択」でまとめて選べます。</li><li>納品日・本社名・ホール名・商品名を入力または選択します。</li><li>「納品日を付与」「本社名・ホール名を付与」「商品名を付与」のどれかを押します。</li><li>すべて付け終わったら、QRコードのチェックを入れて「付与完了にする」を押します。</li><li>付与完了にしたQRコードは、「④ 印刷準備」へ移ります。</li></ol><p class="sub">そのほかの操作</p><ul><li>QRコードの画像を押すと、そのQRコードだけを大きく表示します（専用の読み取り機で読むときに使います）。</li><li>大きく表示している間は、左右の矢印ボタン（またはキーボードの ← →）で、隣のQRコードに切り替えられます。</li><li>大きく表示している間のラベル付与は、いま表示している1件だけに付きます。「付与完了にする」は、閉じて一覧に戻ってから押します。</li><li>チェックボックスを押したまま、ほかのQRコードの上へなぞると、通ったQRコードをまとめて選べます（パソコンのマウス操作です）。</li><li>「未入力の項目で絞り込み」「QRコードの生成日で絞り込み」で、一覧を絞れます。</li></ul></div><div class="helpSec caution"><h4>注意点</h4><ul><li>本社名とホール名は、セットで付きます。ホール名を先に選ぶと、本社名が自動で入ります。</li><li>カードの背景が薄い緑のときは、4項目がすべて入っています。ただし、自動で付与完了にはなりません。4項目が空のままでも、「付与完了にする」は押せます。</li><li>「選択QRのラベルを消去」と「選択QR削除」は、元に戻せません。</li></ul></div></div>
         <div class="bulkFields">
           <div class="field dateField" id="dateWrap">
             <label>納品日</label>
@@ -1613,10 +1902,8 @@
 
     <section id="print" class="page">
       <div class="card" id="printBar">
-        <div class="labelBarHead"><h2>手順7：印刷するQRコード選択</h2><button type="button" class="secondary helpBtn" data-help="printHelp">使い方</button><span id="printCount" class="count"></span></div>
-        <div id="printHelp" class="note helpBox" hidden>
-          ここには、③で「付与完了」にしたQRコードだけが表示されます。<br>納品日・本社名・ホール名・商品名・取り込み日時から条件を選んで「検索」を押すと、条件に一致するQRコードが表示されます。本社名を選ぶとホール名の候補はその本社のものに絞り込まれ、ホール名を先に選ぶと対応する本社名が自動で選ばれます。条件は1つだけでも、組み合わせても指定でき、複数指定した場合はすべてに一致するものを表示します。<br>付与完了のQRコードをすべて確認したいときは「全件表示」を押してください。<br>間違えて付与完了にしたQRコードは、選択して「付与未完了にする」を押すと、③に戻ります。<br>印刷するQRコードを選んだら、一覧の最下部の「手順8」で、印刷設定とA4 PDF作成を行います。
-        </div>
+        <div class="labelBarHead"><h2>手順7：印刷するQRコード選択</h2><button type="button" class="secondary helpBtn" data-help="printHelp" aria-expanded="false" aria-controls="printHelp">使用方法</button><span id="printCount" class="count"></span></div>
+        <div id="printHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>印刷するQRコードを探して、選びます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>探す条件（納品日・本社名・ホール名・商品名・取り込み日時）を選びます。1つだけでも、組み合わせても使えます。</li><li>「検索」を押します。すべて見るときは「全件表示」、条件を消すときは「条件をクリア」を押します。</li><li>印刷するQRコードのチェックを入れます。</li><li>選び終わったら、一覧の下の「手順8」へ進みます。</li></ol><p class="sub">そのほかの操作</p><ul><li>間違えて付与完了にしたQRコードは、選んで「付与未完了にする」を押すと、③に戻ります。</li><li>納品日を変えたいときは、QRコードを選び、日付を入れて「選択QRの納品日を一括変更」を押します。チェックを入れたQRコードだけが変わり、印刷にも変更後の日付が使われます。</li><li>チェックボックスを押したまま、ほかのQRコードの上へなぞると、通ったQRコードをまとめて選べます（パソコンのマウス操作です）。</li></ul></div><div class="helpSec caution"><h4>注意点</h4><ul><li>条件を選んだだけでは、一覧は変わりません。必ず「検索」を押してください。</li><li>ここに出るのは、③で「付与完了にする」を押したQRコードだけです。</li><li>本社名を選ぶと、ホール名の候補がその本社のものに絞られます。ホール名を先に選ぶと、本社名が自動で入ります。</li></ul></div></div>
         <div class="toolbar">
           <div class="field"><label>納品日</label><select id="printDate">
               <option value="">指定しない</option>
@@ -1664,8 +1951,10 @@
         <div id="printBody" class="qrgrid"></div>
       </div>
       <div class="card" id="printRun">
-        <h2>手順8：QRコードの印刷</h2>
+        <div class="labelBarHead"><h2>手順8：QRコードの印刷</h2><button type="button" class="secondary helpBtn" data-help="runHelp" aria-expanded="false" aria-controls="runHelp">使用方法</button></div>
+        <div id="runHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>手順7で選んだQRコードを、A4のPDFにします。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>手順7で、印刷するQRコードにチェックを入れます。</li><li>「1ページあたりのQRコード数」を、4個か6個から選びます。</li><li>「A4 PDF作成」を押します。</li><li>保存されたPDFを、印刷します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>QRコードを選ぶまで、「A4 PDF作成」は押せません。</li><li>ページは、納品日とホール名ごとに分かれます。</li><li>PDFを作ると、選んだQRコードは「⑤ 印刷済み」へ移ります。</li><li>「⑤ 印刷済み」に残るのは、ホールごとに最近の2回分だけです。それより古いものは、自動で消えます。</li></ul></div></div>
         <p id="printRunInfo" class="note" style="margin-bottom:8px"></p>
+        <div id="printRunWarn" class="status warn" style="display:none"></div>
         <div class="toolbar">
           <div class="field"><label>印刷設定：1ページあたりのQRコード数</label><select id="perPage">
               <option value="4">4個（2行×2列）</option>
@@ -1678,10 +1967,8 @@
 
     <section id="printed" class="page">
       <div class="card" id="printedBar">
-        <div class="labelBarHead"><h2>手順9：印刷済みQRコード確認</h2><button type="button" class="secondary helpBtn" data-help="printedHelp">使い方</button><span id="printedCount" class="count"></span></div>
-        <div id="printedHelp" class="note helpBox" hidden>
-          PDF作成後のQRコードをホール名ごとに分けて保管しています。<br>特定のQRコードを選択して手順7に戻すことで再びQRコードをPDFに含めることができます。<br>納品日・本社名・ホール名・商品名・取り込み日時から条件を選んで「検索」を押すと、条件に一致するQRコードが表示されます。本社名を選ぶとホール名の候補はその本社のものに絞り込まれ、ホール名を先に選ぶと対応する本社名が自動で選ばれます。すべて確認したいときは「全件表示」を押してください。
-        </div>
+        <div class="labelBarHead"><h2>手順9：印刷済みQRコード確認</h2><button type="button" class="secondary helpBtn" data-help="printedHelp" aria-expanded="false" aria-controls="printedHelp">使用方法</button><span id="printedCount" class="count"></span></div>
+        <div id="printedHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>PDFにしたQRコードを、ホール名ごとに確認します。</li><li>もう一度印刷したいQRコードを、手順7に戻せます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>探す条件を選んで、「検索」を押します。すべて見るときは「全件表示」を押します。</li><li>戻したいQRコードのチェックを入れます。ホールごとにまとめて選ぶときは「このホールを全選択」を押します。</li><li>「手順7に戻す」を押します。</li><li>④ 印刷準備で選び直して、PDFを作ります。</li></ol><p class="sub">そのほかの操作</p><ul><li>チェックボックスを押したまま、ほかのQRコードの上へなぞると、通ったQRコードをまとめて選べます（パソコンのマウス操作です）。</li></ul></div><div class="helpSec caution"><h4>注意点</h4><ul><li>「検索」か「全件表示」を押すまで、一覧は出ません。</li><li>残るのは、ホールごとに最近の2回分だけです。それより古いものは、自動で消えます。</li><li>条件の選び方は、手順7と同じです。</li></ul></div></div>
         <div class="toolbar">
           <div class="field"><label>納品日</label><select id="printedDate">
               <option value="">指定しない</option>
@@ -1719,8 +2006,8 @@
 
       <section id="settings" class="page">
       <div class="card settings">
-        <h2>Google Apps Script / 送信先メールアドレス設定</h2>
-        <p class="note">スマホからPCへメールを自動送信するために必要な設定です。<br>Google Apps Script（GAS）のURL / 転送トークン / 送信先メールアドレスを設定してください。</p>
+        <div class="labelBarHead"><h2>Google Apps Script / 送信先メールアドレス設定</h2><button type="button" class="secondary helpBtn" data-help="gasHelp" aria-expanded="false" aria-controls="gasHelp">使用方法</button></div>
+        <div id="gasHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>スマホのURLを、メールでPCに送るための設定をします。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>「Google Apps Script URL」「転送トークン」「送信先Mail」を入力します。</li><li>「移行設定を保存」を押します。</li><li>「GAS接続テスト」を押して、「接続OK」と出るか確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>転送トークンは、システム管理者に確認してください。</li><li>ここが未設定だと、手順3でURLを送れません。</li></ul></div></div>
         <div class="row">
           <div class="field"><label>Google Apps Script URL</label><input id="gasUrl" type="url"
               placeholder="https://script.google.com/.../.../exec"></div>
@@ -1734,8 +2021,8 @@
         <div id="transferConfigStatus" class="status">未設定</div>
       </div>
       <div class="card settings">
-        <h2>D1保存（サーバーへの自動バックアップ）</h2>
-        <p class="note">この端末のデータは、今まで通りブラウザに保存されます。トークンを設定すると、変更のたびに Cloudflare D1 にも自動で保存されます。<br>未設定の場合は、この端末のブラウザにだけ保存します（D1には送りません）。QRコード画像は保存せず、URLなどの情報を保存します。</p>
+        <div class="labelBarHead"><h2>D1保存（サーバーへの自動バックアップ）</h2><button type="button" class="secondary helpBtn" data-help="d1Help" aria-expanded="false" aria-controls="d1Help">使用方法</button></div>
+        <div id="d1Help" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>データを、この端末のブラウザだけでなく、サーバー（Cloudflare D1）にも自動で保存します。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>「D1保存用トークン」を入力します。</li><li>「D1設定を保存」を押します。</li><li>すぐに保存したいときは「今すぐD1に保存」、保存されている件数を見たいときは「D1の件数を確認」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>トークンは、システム管理者に確認してください。</li><li>トークンを入れないときは、この端末のブラウザにだけ保存します。</li><li>QRコードの画像は保存しません。URLなどの情報だけを保存します。</li><li>トークンを空にして保存すると、D1への保存をやめます。</li></ul></div></div>
         <div class="row">
           <div class="field"><label>D1保存用トークン</label><input id="d1Token" type="password" autocomplete="off"
               placeholder="システム管理者に問い合わせてください"></div>
@@ -1745,8 +2032,8 @@
         <div id="d1Status" class="status">未設定（この端末のブラウザにだけ保存）</div>
       </div>
       <div class="card settings">
-        <h2>本社名 / ホール名設定</h2>
-        <p class="note">1行につき「本社名,ホール名」の形式で入力してください。同じ本社名に複数のホールを登録できます。</p>
+        <div class="labelBarHead"><h2>本社名 / ホール名設定</h2><button type="button" class="secondary helpBtn" data-help="hallHelp" aria-expanded="false" aria-controls="hallHelp">使用方法</button></div>
+        <div id="hallHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>本社名とホール名の一覧を登録します。登録すると、ラベル付与や検索で選べるようになります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>下の入力欄に、1行ずつ「本社名,ホール名」の形で入力します。</li><li>同じ本社に複数のホールがあるときは、本社名を同じにして、行を分けます。</li><li>「本社名 / ホール名リストを保存」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>本社名とホール名は、「,」（カンマ）で区切ります。</li><li>形が違う行は、登録されません。</li><li>保存すると、いまの一覧が、入力した内容に置き換わります。</li></ul></div></div>
         <div class="sampleBox" id="hallSample">本社名A,ホールA1
           本社名A,ホールA2
           本社名B,ホールB1
@@ -1758,7 +2045,8 @@
           / ホール名リストを保存</button>
       </div>
       <div class="card">
-        <h2>データ管理</h2>
+        <div class="labelBarHead"><h2>データ管理</h2><button type="button" class="secondary helpBtn" data-help="dataHelp" aria-expanded="false" aria-controls="dataHelp">使用方法</button></div>
+        <div id="dataHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>QRコードのデータを、ファイルに保存したり、読み込んだり、すべて消したりします。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>保存するとき：「バックアップを書き出す」を押します。</li><li>元に戻すとき：「バックアップを読み込む」を押して、保存したファイルを選びます。</li><li>すべて消すとき：「全データ削除」を押し、確認の画面で「すべて削除する」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>「バックアップを読み込む」と、いまのQRコードのデータが、ファイルの内容に置き換わります。</li><li>読み込めなかったときは、いまのデータは変わりません。</li><li>「全データ削除」は、元に戻せません。先にバックアップを書き出してください。</li></ul></div></div>
         <div class="actions"><button id="exportData" class="secondary">バックアップを書き出す</button><label
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
@@ -1797,9 +2085,35 @@
       $('libReload').onclick = () => location.reload()
     }
     let toastTimer = 0;
-    function toast(msg, type = 'ok') {
-      const e = $('toast'); e.textContent = msg; e.className = 'show ' + (type === 'ok' ? '' : type);
-      clearTimeout(toastTimer); toastTimer = setTimeout(() => e.classList.remove('show'), type === 'ok' ? 2600 : 4500)
+    function toast(msg, type = 'ok', undoable = false) {
+      const e = $('toast'); e.innerHTML = '';
+      const span = document.createElement('span'); span.textContent = msg; e.appendChild(span);
+      if (undoable && undoStack.length) {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'toastUndo'; b.textContent = '元に戻す';
+        b.onclick = () => {clearTimeout(toastTimer); e.classList.remove('show'); doUndo()};
+        e.appendChild(b)
+      }
+      e.className = 'show ' + (type === 'ok' ? '' : type);
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => e.classList.remove('show'), undoable ? 9000 : type === 'ok' ? 2600 : 4500)
+    }
+    // ===== v6.6 機能1：「元に戻す」 =====
+    // 取り返しのつかない操作（削除・ラベル消去・付与・印刷・全削除など）の直前に、データ全体の控えを取る。
+    // トーストの「元に戻す」を押すと、控えの状態に戻る。控えは最大5件まで（古いものから捨てる）。
+    // ※メール送信そのものは取り消せないため、URL送信は対象外。
+    let undoStack = [];
+    function pushUndo(label) {
+      try {undoStack.push({label, data: JSON.parse(JSON.stringify(data)), session: [...sessionIds]}); if (undoStack.length > 5) undoStack.shift()} catch (e) { }
+    }
+    function doUndo() {
+      const u = undoStack.pop(); if (!u) return;
+      if (qrZoomId) closeQrDialog();
+      data = u.data; sessionIds = new Set(u.session);
+      const ids = new Set(data.map(x => x.id));
+      [selected, pendingSelected, printSelected, printedSelected, sentSelected].forEach(s => s.forEach(id => {if (!ids.has(id)) s.delete(id)}));
+      saveSession();
+      const ok = save(true);
+      renderPending(); renderSent(); renderManage(); renderLists(); refreshPrint(); renderPrinted();
+      toast(ok ? `「${u.label}」を元に戻しました。` : '元に戻しましたが、保存できませんでした（容量不足の可能性）。', ok ? 'ok' : 'err')
     }
     function flashBtn(id) {const b = $(id); if (!b) return; b.classList.add('btnOk'); setTimeout(() => b.classList.remove('btnOk'), 700)}
     let flashIds = new Set();
@@ -1810,10 +2124,10 @@
       catch (e) {if (!quiet) toast('保存できません。容量不足の可能性があります。バックアップを書き出し、不要なQRを削除してください。', 'err'); return false}
     }
     // 付与結果の共通処理：保存→表示更新→通知（件数は実際の処理結果）
-    function commit(msg, rows, btnId, type = 'ok') {
+    function commit(msg, rows, btnId, type = 'ok', undoable = false) {
       flashIds = new Set(rows.map(r => r.id));
       const ok = save(true); afterLabelChange();
-      if (ok) {toast(msg, type); flashBtn(btnId)}
+      if (ok) {toast(msg, type, undoable); flashBtn(btnId)}
       else toast(`${rows.length}件の更新を保存できませんでした（容量不足の可能性）。バックアップを書き出してください。`, 'err')
     }
     // 既存データ（付与完了状態・取り込み情報がないもの）を補完する。assignmentCompleted の既定値は false。
@@ -2008,7 +2322,8 @@
     $('deletePendingSelected').onclick = async () => {
       const ids = [...pendingSelected]; if (!ids.length) return toast('削除するURLを選択してください。', 'warn');
       if (!await askConfirm({title: `選択した${ids.length}件のURLを削除しますか？`, body: DEL_NOTE})) return;
-      data = data.filter(x => !ids.includes(x.id)); ids.forEach(id => {sessionIds.delete(id); pendingSelected.delete(id)}); saveSession(); save(); renderPending(); renderManage()
+      pushUndo('URLの削除');
+      data = data.filter(x => !ids.includes(x.id)); ids.forEach(id => {sessionIds.delete(id); pendingSelected.delete(id)}); saveSession(); save(); renderPending(); renderManage(); toast(`${ids.length}件を削除しました。`, 'err', true)
     }
 
     function tstatus(msg, type = '') {const e = $('transferStatus'); e.style.display = 'block'; e.textContent = msg; e.className = 'status ' + type}
@@ -2069,7 +2384,15 @@
       return ch
     }
     function sentRows() {return data.filter(x => x.sentAt).sort((a, b) => b.sentAt.localeCompare(a.sentAt))}
-    function updateSentCount() {const rows = sentRows(), k = rows.filter(x => sentSelected.has(x.id)).length; $('sentCount').textContent = `選択 ${k}件 / 全 ${rows.length}件`; $('restoreSent').textContent = k ? `手順2に戻す（${k}件）` : '手順2に戻す'}
+    function updateSentCount() {const rows = sentRows(), k = rows.filter(x => sentSelected.has(x.id)).length; $('sentCount').textContent = `選択 ${k}件 / 全 ${rows.length}件`; $('restoreSent').textContent = k ? `手順2に戻す（${k}件）` : '手順2に戻す'; updateSentPurgeNote(rows)}
+    // v6.6 機能6：送信済み記録の自動削除（送信から24時間）の予定を表示する
+    function updateSentPurgeNote(rows) {
+      const e = $('sentPurgeNote'); if (!e) return;
+      if (!rows.length) {e.style.display = 'none'; return}
+      const oldest = rows.reduce((a, b) => a.sentAt < b.sentAt ? a : b), exp = new Date(new Date(oldest.sentAt).getTime() + 24 * 60 * 60 * 1000);
+      e.style.display = 'block';
+      e.textContent = `送信済みの記録は、送信から24時間たつと自動で消えます。最も古い記録（${fmtSent(oldest.sentAt)}に送信）は、${fmtSent(exp.toISOString())}ごろに消える予定です。`
+    }
     function renderSent() {
       purgeSent();
       const rows = sentRows(), n = rows.length;
@@ -2082,8 +2405,9 @@
     $('unselectSentAll').onclick = () => {sentSelected.clear(); renderSent()}
     $('restoreSent').onclick = () => {
       const rows = sentRows().filter(x => sentSelected.has(x.id)); if (!rows.length) return toast('手順2に戻すURLを選択してください。', 'warn');
+      pushUndo('手順2に戻す');
       rows.forEach(x => {delete x.sentAt; sessionIds.add(x.id); sentSelected.delete(x.id)}); saveSession(); save(); renderSent(); renderPending();
-      toast(`${rows.length}件を手順2に戻しました。`)
+      toast(`${rows.length}件を手順2に戻しました。`, 'ok', true)
     }
     document.addEventListener('visibilitychange', () => {if (!document.hidden) {purgeSent(); if ($('sent').classList.contains('active')) renderSent()} });
     setInterval(() => {if (purgeSent()) {if ($('sent').classList.contains('active')) renderSent(); if ($('manage').classList.contains('active')) renderManage()}}, 60 * 1000);
@@ -2146,12 +2470,21 @@
       if ([...sel.options].some(o => o.value === old)) sel.value = old
     }
     function updateManageCount() {const all = data.filter(isWorking).length, ready = data.filter(isReady).length, rows = manageRows(); $('manageCount').textContent = `選択 ${rows.filter(x => selected.has(x.id)).length}件 / 表示 ${rows.length}件 / 付与完了 ${ready}件 / 付与未完了 ${all}件`}
+    // 最後に拡大表示したQRコードのID（そのカードを光らせる）。次に別のQRコードを開くまで残す。一覧から無くなったら消す
+    let lastViewId = null;
+    function setLastView(id) {
+      lastViewId = id;
+      document.querySelectorAll('#manageBody .qritem.lastView').forEach(e => e.classList.remove('lastView'));
+      const img = [...document.querySelectorAll('#manageBody img.zoomQr')].find(e => e.dataset.id === id), card = img && img.closest('.qritem');
+      if (card) card.classList.add('lastView'); else lastViewId = null
+    }
     function renderManage() {
       fillImportedSelect(data.filter(isWorking));
       const rows = manageRows();
-      $('manageBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${cardCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="mcheck check" data-id="${x.id}" type="checkbox" ${selected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img class="zoomQr" data-id="${x.id}" role="button" tabindex="0" title="押すとこのQRコードだけを拡大表示します" src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">生成：${x.createdAt && !isNaN(new Date(x.createdAt)) ? fmtSent(x.createdAt) : '不明'}</div></div>`).join('') : `<div class="empty">${data.some(isWorking) ? '条件に該当するQRコードはここに表示されます。' : data.some(isReady) ? '付与が未完了のQRコードはありません。付与完了のQRコードは「④ 印刷準備」に表示されます。' : '再生成したQRコードはここに表示されます。'}</div>`;
+      $('manageBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${cardCls(x)}${flashIds.has(x.id) ? ' flash' : ''}${x.id === lastViewId ? ' lastView' : ''}${selected.has(x.id) ? ' sel' : ''}"><input class="mcheck check" data-id="${x.id}" type="checkbox" ${selected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img class="zoomQr" data-id="${x.id}" role="button" tabindex="0" title="押すとこのQRコードだけを拡大表示します" src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">生成：${x.createdAt && !isNaN(new Date(x.createdAt)) ? fmtSent(x.createdAt) : '不明'}</div></div>`).join('') : `<div class="empty">${data.some(isWorking) ? '条件に該当するQRコードはここに表示されます。' : data.some(isReady) ? '付与が未完了のQRコードはありません。付与完了のQRコードは「④ 印刷準備」に表示されます。' : '再生成したQRコードはここに表示されます。'}</div>`;
       flashIds = new Set();
-      document.querySelectorAll('.mcheck').forEach(e => e.onchange = () => {e.checked ? selected.add(e.dataset.id) : selected.delete(e.dataset.id); updateManageCount()});
+      if (lastViewId && !rows.some(x => x.id === lastViewId)) lastViewId = null;
+      document.querySelectorAll('.mcheck').forEach(e => e.onchange = () => {e.checked ? selected.add(e.dataset.id) : selected.delete(e.dataset.id); const c = e.closest('.qritem'); if (c) c.classList.toggle('sel', e.checked); updateManageCount()});
       updateManageCount()
     }
     $('manageMissing').onchange = renderManage; $('manageImported').onchange = renderManage;
@@ -2163,6 +2496,9 @@
     // 専用の読み取り機械が隣のQRコードまで読まないように、選択した1件だけを大きく表示する。
     // ダイアログの背景は不透明にして、後ろの一覧のQRコードが映らないようにする（一覧のデータ・選択状態・スクロール位置は変更しない）。
     let qrZoomY = 0, qrZoomOpener = null, qrZoomId = null, qrZoomSlot = null;
+    // 左右の切り替え用：ダイアログを開いた時点の一覧（絞り込み後の表示順）のIDを保存する。
+    // ラベルを付与して背後の一覧が変わっても、隣のQRコードが入れ替わらないようにするため
+    let qrZoomList = [], qrZoomMoved = false;
     function fillQrDialog(x) {
       $('qrZoomImg').src = x.image;
       $('qrZoomDate').textContent = x.date ? dateLabel(x.date) : '未設定';
@@ -2171,31 +2507,164 @@
     function openQrDialog(id, opener) {
       if (qrZoomId) return;
       const x = data.find(r => r.id === id); if (!x || !x.image) return;
-      fillQrDialog(x); qrZoomId = id;
+      fillQrDialog(x); qrZoomId = id; qrZoomMoved = false; setLastView(id);
+      qrZoomList = manageRows().filter(r => r.image).map(r => r.id); if (!qrZoomList.includes(id)) qrZoomList.push(id);
       // 手順6の「ラベルの付与」操作欄を、ダイアログの中へ移して表示する（同じ要素なので、ボタン・入力欄・処理はそのまま使える）。
       // 閉じたときは元の位置へ戻す。ダイアログ表示中の付与の対象は、表示中のQR1件だけ（selectedManage で切り替え）。
       const bar = $('labelBar'); qrZoomSlot = document.createElement('div'); bar.before(qrZoomSlot); $('qrZoomLabelArea').appendChild(bar);
       qrZoomY = window.scrollY; qrZoomOpener = opener || null;
-      $('qrZoomModal').hidden = false; document.body.classList.add('modalOpen'); $('qrZoomClose').focus()
+      $('qrZoomModal').hidden = false; document.body.classList.add('modalOpen'); updateQrNav(); $('qrZoomClose').focus()
     }
+    // 切り替えられるQR：保存した一覧のうち、いまも付与未完了で、画像があるもの
+    function qrZoomValid() {const m = new Map(data.map(r => [r.id, r])); return qrZoomList.filter(id => {const x = m.get(id); return x && isWorking(x) && x.image})}
+    function updateQrNav() {
+      const v = qrZoomValid(), i = v.indexOf(qrZoomId);
+      $('qrZoomPos').textContent = i >= 0 ? `${i + 1} / ${v.length}` : '';
+      $('qrZoomPrev').disabled = i <= 0; $('qrZoomNext').disabled = i < 0 || i >= v.length - 1
+    }
+    // dir=-1：左隣 / dir=+1：右隣。ラベル付与の対象（selectedManage）は qrZoomId で決まるので、切り替えるだけで新しいQRが対象になる
+    function moveQrDialog(dir) {
+      if (!qrZoomId) return;
+      const v = qrZoomValid(), i = v.indexOf(qrZoomId), j = i + dir; if (i < 0 || j < 0 || j >= v.length) return;
+      const x = data.find(r => r.id === v[j]); if (!x) return;
+      qrZoomId = x.id; qrZoomMoved = true; setLastView(x.id); fillQrDialog(x); updateQrNav()
+    }
+    $('qrZoomPrev').onclick = () => moveQrDialog(-1);
+    $('qrZoomNext').onclick = () => moveQrDialog(1);
     // ラベルを付与したら、ダイアログ内の「現在のラベル」を更新する。付与完了にした（③から④へ移った）ときは、一覧へ戻る
     function refreshQrDialog() {
       if (!qrZoomId) return;
       const x = data.find(r => r.id === qrZoomId);
       if (!x || !isWorking(x)) return closeQrDialog();
-      fillQrDialog(x)
+      fillQrDialog(x); updateQrNav()
     }
     function closeQrDialog() {
       const m = $('qrZoomModal'); if (m.hidden) return;
-      m.hidden = true; $('qrZoomImg').removeAttribute('src'); document.body.classList.remove('modalOpen'); qrZoomId = null;
+      const lastId = qrZoomId, moved = qrZoomMoved;
+      m.hidden = true; $('qrZoomImg').removeAttribute('src'); document.body.classList.remove('modalOpen'); qrZoomId = null; qrZoomList = []; qrZoomMoved = false;
       if (qrZoomSlot) {qrZoomSlot.replaceWith($('labelBar')); qrZoomSlot = null}
-      window.scrollTo(0, qrZoomY); if (qrZoomOpener && document.contains(qrZoomOpener)) qrZoomOpener.focus({preventScroll: true}); qrZoomOpener = null
+      window.scrollTo(0, qrZoomY);
+      // 左右に切り替えた場合は、最後に見ていたQRコードのカードに戻る（画面の外にあれば、固定の操作欄の下に見える位置までスクロール）
+      const last = moved && lastId ? [...document.querySelectorAll('#manageBody img.zoomQr')].find(e => e.dataset.id === lastId) : null;
+      if (last) {
+        const hdr = document.querySelector('header'), bar = $('labelBar');
+        let top = hdr ? hdr.getBoundingClientRect().bottom : 0;
+        if (bar && getComputedStyle(bar).position === 'sticky') top = Math.max(top, bar.getBoundingClientRect().bottom);
+        const r = last.getBoundingClientRect();
+        if (r.top < top || r.bottom > window.innerHeight) window.scrollBy(0, r.top - top - 16);
+        last.focus({preventScroll: true})
+      } else if (qrZoomOpener && document.contains(qrZoomOpener)) qrZoomOpener.focus({preventScroll: true});
+      qrZoomOpener = null
     }
     $('qrZoomClose').onclick = closeQrDialog;
     $('qrZoomModal').addEventListener('click', e => {if (e.target === $('qrZoomModal')) closeQrDialog()});
-    document.addEventListener('keydown', e => {if (e.key === 'Escape') closeQrDialog()});
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') return closeQrDialog();
+      // ← → で左右のQRコードへ（入力欄・選択欄の操作中は、カーソル移動などに使うので切り替えない）
+      if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && qrZoomId && !$('qrZoomModal').hidden && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        const t = e.target; if (t && t.closest && t.closest('input, select, textarea, [contenteditable]')) return;
+        e.preventDefault(); moveQrDialog(e.key === 'ArrowLeft' ? -1 : 1)
+      }
+    });
     $('manageBody').addEventListener('click', e => {const img = e.target.closest && e.target.closest('img.zoomQr'); if (img) openQrDialog(img.dataset.id, img)});
     $('manageBody').addEventListener('keydown', e => {if (e.key !== 'Enter' && e.key !== ' ') return; const img = e.target.closest && e.target.closest('img.zoomQr'); if (img) {e.preventDefault(); openQrDialog(img.dataset.id, img)}});
+    // ===== ドラッグ選択（③ QR生成/ラベル付与・④ 印刷準備・⑤ 印刷済み） =====
+    // チェックボックスを押したまま、他のQRコードのカードの上へなぞると、通ったカードをまとめて同じ状態にする。
+    //   押したチェックボックスが「未選択→選択」になる操作なら、通ったカードをすべて選択する
+    //   押したチェックボックスが「選択→未選択」になる操作なら、通ったカードをすべて解除する
+    // 動かさずに離したとき（ふつうのクリック）は、従来どおりの動作。パソコンのマウス操作だけが対象（タッチは画面のスクロールと区別できないため）。
+    // なぞっている間は一覧を作り直さず、離したときに1度だけ件数表示などを更新する。
+    (function () {
+      const TARGETS = [
+        {body: 'manageBody', cls: 'mcheck', bar: 'labelBar', set: () => selected, done: () => updateManageCount()},
+        {body: 'printBody', cls: 'pcheck', bar: 'printBar', set: () => printSelected, done: () => refreshPrint()},
+        {body: 'printedBody', cls: 'prcheck', bar: 'printedBar', set: () => printedSelected, done: () => updatePrintedCount()}
+      ];
+      const STEP = 12, EDGE = 56;
+      let drag = null, justDragged = false, raf = 0;
+      // 画面の上端：ヘッダーと、固定表示されている操作欄の下
+      function topEdge(t) {
+        const hdr = document.querySelector('header'), bar = $(t.bar);
+        let top = hdr ? hdr.getBoundingClientRect().bottom : 0;
+        if (bar && getComputedStyle(bar).position === 'sticky') top = Math.max(top, bar.getBoundingClientRect().bottom);
+        return top
+      }
+      function setCard(t, card, state) {
+        const cb = card && card.querySelector('input.' + t.cls); if (!cb || cb.checked === state) return;
+        cb.checked = state; state ? t.set().add(cb.dataset.id) : t.set().delete(cb.dataset.id); card.classList.toggle('sel', state); drag.changed = true
+      }
+      function cardAt(t, x, y) {
+        const el = document.elementFromPoint(x, y), card = el && el.closest && el.closest('.qritem');
+        return card && $(t.body).contains(card) ? card : null
+      }
+      function paintPath(x0, y0, x1, y1) {
+        // マウスを速く動かしても飛ばさないように、移動の経路を細かく区切って確認する
+        const dx = x1 - x0, dy = y1 - y0, n = Math.max(1, Math.ceil(Math.hypot(dx, dy) / STEP));
+        for (let i = 1; i <= n; i++) setCard(drag.t, cardAt(drag.t, x0 + dx * i / n, y0 + dy * i / n), drag.state)
+      }
+      function onDown(t, e) {
+        if (e.button !== 0 || e.pointerType !== 'mouse') return;
+        const cb = e.target.closest && e.target.closest('input.' + t.cls); if (!cb) return;
+        drag = {t, startCard: cb.closest('.qritem'), state: !cb.checked, active: false, changed: false, lastX: e.clientX, lastY: e.clientY};
+        document.addEventListener('pointermove', onMove); document.addEventListener('pointerup', onUp); document.addEventListener('pointercancel', onUp)
+      }
+      function onMove(e) {
+        if (!drag) return;
+        if (!drag.active) {
+          const card = cardAt(drag.t, e.clientX, e.clientY);
+          if (!card || card === drag.startCard) {drag.lastX = e.clientX; drag.lastY = e.clientY; return}
+          // 別のカードの上に来たら、なぞり始めたとみなす（最初のカードも同じ状態にする）
+          drag.active = true; document.body.classList.add('dragSel'); if (window.getSelection) window.getSelection().removeAllRanges();
+          setCard(drag.t, drag.startCard, drag.state);
+          raf = requestAnimationFrame(autoScroll)
+        }
+        paintPath(drag.lastX, drag.lastY, e.clientX, e.clientY); drag.lastX = e.clientX; drag.lastY = e.clientY
+      }
+      // 画面の上端・下端の近くでは、自動でスクロールして、遠くのQRコードまで選べるようにする
+      function autoScroll() {
+        raf = 0; if (!drag || !drag.active) return;
+        const top = topEdge(drag.t), bottom = window.innerHeight; let v = 0;
+        if (drag.lastY < top + EDGE) v = -Math.ceil((top + EDGE - drag.lastY) / 4);
+        else if (drag.lastY > bottom - EDGE) v = Math.ceil((drag.lastY - (bottom - EDGE)) / 4);
+        if (v) {
+          v = Math.max(-24, Math.min(24, v)); const before = window.scrollY; window.scrollBy(0, v);
+          if (window.scrollY !== before) setCard(drag.t, cardAt(drag.t, drag.lastX, drag.lastY), drag.state)
+        }
+        raf = requestAnimationFrame(autoScroll)
+      }
+      function onUp() {
+        document.removeEventListener('pointermove', onMove); document.removeEventListener('pointerup', onUp); document.removeEventListener('pointercancel', onUp);
+        const d = drag; drag = null; if (raf) {cancelAnimationFrame(raf); raf = 0}
+        document.body.classList.remove('dragSel');
+        if (d && d.active) {
+          // なぞったあとに、同じチェックボックスの上で離すと「クリック」が発生して二重に切り替わるので、直後の1回だけ無効にする
+          justDragged = true; setTimeout(() => {justDragged = false}, 0);
+          if (d.changed) d.t.done()
+        }
+      }
+      document.addEventListener('click', e => {if (justDragged && e.target.closest && e.target.closest('input.check')) {e.preventDefault(); e.stopPropagation()}}, true);
+      document.addEventListener('selectstart', e => {if (drag && drag.active) e.preventDefault()});
+      TARGETS.forEach(t => $(t.body).addEventListener('pointerdown', e => onDown(t, e)))
+    })();
+    // ===== v6.6 UI-5：QRカード全体タップで選択 =====
+    // チェックボックス以外の場所（ラベル・余白など）を押しても、選択を切り替えられるようにする。
+    // 画像（拡大表示）とチェックボックス自体は従来どおり。マウスのドラッグ選択と競合しないよう、
+    // チェックボックスから押し始めて別の場所で離したクリックは、ここでは扱わない。
+    (function () {
+      let cbDown = false, suppressUntil = 0;
+      document.addEventListener('pointerdown', e => {cbDown = !!(e.target.closest && e.target.closest('input.check'))}, true);
+      document.addEventListener('pointerup', e => {if (cbDown && !(e.target.closest && e.target.closest('input.check'))) suppressUntil = Date.now() + 100; cbDown = false}, true);
+      ['manageBody', 'printBody', 'printedBody'].forEach(id => {
+        const b = $(id); if (!b) return;
+        b.addEventListener('click', e => {
+          if (Date.now() < suppressUntil) return;
+          const card = e.target.closest && e.target.closest('.qritem'); if (!card || !b.contains(card)) return;
+          if (e.target.closest('input.check, button, a, img.zoomQr')) return;
+          const cb = card.querySelector('input.check'); if (!cb) return;
+          cb.checked = !cb.checked; cb.dispatchEvent(new Event('change', {bubbles: true}))
+        })
+      })
+    })();
     // うるう年：4で割り切れる年。ただし100で割り切れる年は平年、400で割り切れる年はうるう年
     function isLeapYear(y) {return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0}
     function daysInMonth(y, m) {return [31, isLeapYear(y) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1]}
@@ -2243,9 +2712,10 @@
       if (!val) return toast(`${FIELD_LABEL[field]}を入力してください。`, 'warn');
       const rows = selectedManage();
       if (!rows.length) return toast(NEED_ROWS, 'warn');
+      pushUndo(`${FIELD_LABEL[field]}の付与`);
       rows.forEach(x => x[field] = val);
       if (field === 'product') {const p = products(); if (!p.includes(val)) {p.push(val); localStorage.setItem(PRODUCTKEY, JSON.stringify(p))} }
-      commit(`${FIELD_LABEL[field]}を${rows.length}件に付与しました。`, rows, btnId);
+      commit(`${FIELD_LABEL[field]}を${rows.length}件に付与しました。`, rows, btnId, 'ok', true);
     }
     $('applyDate').onclick = () => bulk('date', 'bulkDate', 'applyDate'); $('applyProduct').onclick = () => bulk('product', 'bulkProduct', 'applyProduct');
     // 本社名とホール名は必ずセットで付与する（ホール名だけが付いて本社名が空になることを防ぐ）
@@ -2254,24 +2724,28 @@
       if (!m || !h) return toast('本社名とホール名の両方を選択してください。', 'warn');
       if (!hallsFor(m).includes(h)) return toast(`「${h}」は「${m}」のホールではありません。選び直してください。`, 'err');
       const rows = selectedManage(); if (!rows.length) return toast(NEED_ROWS, 'warn');
+      pushUndo('本社名・ホール名の付与');
       rows.forEach(x => {x.mainName = m; x.hall = h});
-      commit(`本社名・ホール名を${rows.length}件に付与しました。`, rows, 'applyLocation')
+      commit(`本社名・ホール名を${rows.length}件に付与しました。`, rows, 'applyLocation', 'ok', true)
     };
     // 付与完了にしたQRは③から④（印刷準備）へ移る（データは削除しない）
     $('markDone').onclick = () => {
       const rows = selectedManage(); if (!rows.length) return toast(NEED_ROWS, 'warn');
+      pushUndo('付与完了にする');
       rows.forEach(x => {x.assignmentCompleted = true; selected.delete(x.id)});
-      commit(`${rows.length}件を付与完了にしました（④ 印刷準備へ移動）。`, rows, 'markDone')
+      commit(`${rows.length}件を付与完了にしました（④ 印刷準備へ移動）。`, rows, 'markDone', 'ok', true)
     };
     $('clearLabels').onclick = async () => {
       const rows = selectedManage(); if (!rows.length) return toast(NEED_ROWS, 'warn');
       if (!await askConfirm({title: `選択した${rows.length}件のラベルを消去しますか？`, body: '納品日 / 本社名 / ホール名 / 商品名をすべて消去します。\n消去したラベルは元に戻せません。', ok: '消去する'})) return;
-      rows.forEach(x => {x.date = ''; x.mainName = ''; x.hall = ''; x.product = ''; x.assignmentCompleted = false}); commit(`${rows.length}件のラベルを消去しました。`, rows, 'clearLabels', 'err')
+      pushUndo('ラベルの消去');
+      rows.forEach(x => {x.date = ''; x.mainName = ''; x.hall = ''; x.product = ''; x.assignmentCompleted = false}); commit(`${rows.length}件のラベルを消去しました。`, rows, 'clearLabels', 'err', true)
     };
     $('deleteSelected').onclick = async () => {
       const ids = manageRows().filter(x => selected.has(x.id)).map(x => x.id); if (!ids.length) return toast(NEED_ROWS, 'warn');
       if (!await askConfirm({title: `選択した${ids.length}件のQRコードを削除しますか？`, body: DEL_NOTE})) return;
-      data = data.filter(x => !ids.includes(x.id)); ids.forEach(id => selected.delete(id)); const ok = save(); renderManage(); renderPending(); if (ok) toast(`${ids.length}件を削除しました。`, 'err')
+      pushUndo('QRコードの削除');
+      data = data.filter(x => !ids.includes(x.id)); ids.forEach(id => selected.delete(id)); const ok = save(); renderManage(); renderPending(); if (ok) toast(`${ids.length}件を削除しました。`, 'err', true)
     }
 
     function fillMainSelect() {const sel = $('bulkMain'), old = sel.value; sel.innerHTML = '<option value="">本社名を選択</option>' + mainNames().map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join(''); if (mainNames().includes(old)) sel.value = old; fillHallSelect()}
@@ -2391,12 +2865,28 @@
       let empty = '';
       if (!printView) empty = '検索条件を選んで「検索」を押すか、「全件表示」を押すと、付与完了のQRコードがここに表示されます。';
       else if (!rows.length) empty = !ready ? '<strong>0件</strong>：付与完了のQRコードがありません。③で「付与完了にする」を押してください。' : printView.mode === 'all' ? '<strong>0件</strong>：付与完了のQRコードはありません。' : '<strong>0件</strong>：条件に該当するQRコードはありません。検索条件を変更してもう一度検索してください。';
-      $('printBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${cardCls(x)}${flashIds.has(x.id) ? ' flash' : ''}"><input class="pcheck check" data-id="${x.id}" type="checkbox" ${printSelected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">取り込み：${fmtMin(importedAtOf(x)) || '不明'}</div></div>`).join('') : `<div class="empty">${empty}</div>`;
+      $('printBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${cardCls(x)}${flashIds.has(x.id) ? ' flash' : ''}${printSelected.has(x.id) ? ' sel' : ''}"><input class="pcheck check" data-id="${x.id}" type="checkbox" ${printSelected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">取り込み：${fmtMin(importedAtOf(x)) || '不明'}</div></div>`).join('') : `<div class="empty">${empty}</div>`;
       flashIds = new Set();
       document.querySelectorAll('.pcheck').forEach(e => e.onchange = () => {e.checked ? printSelected.add(e.dataset.id) : printSelected.delete(e.dataset.id); refreshPrint()});
       const targets = rows.filter(x => printSelected.has(x.id)).length;
       $('printRunInfo').textContent = targets ? `手順7で選択した${targets}件が印刷対象です。` : '手順7でQRコードを選択すると、ここから印刷できます。';
       $('makePdf').disabled = !targets;
+      updatePrintRunWarn(rows)
+    }
+    // v6.6 機能6：印刷で押し出される「印刷済み」の自動削除を、印刷する前に予告する（ホールごとに直近2回分だけ保持）
+    function updatePrintRunWarn(rows) {
+      const e = $('printRunWarn'); if (!e) return;
+      const halls = [...new Set(rows.filter(x => printSelected.has(x.id)).map(x => x.hall || ''))], msgs = [];
+      halls.forEach(h => {
+        const printed = data.filter(x => x.status === 'printed' && (x.hall || '') === h), key = x => x.printBatchId || ('legacy-' + x.printedAt);
+        const batches = [...new Set(printed.map(key))];
+        if (batches.length >= 2) {
+          const oldest = batches.map(b => ({b, t: Math.min(...printed.filter(x => key(x) === b).map(x => new Date(x.printedAt || 0).getTime()))})).sort((a, b) => a.t - b.t)[0].b;
+          msgs.push(`ホール「${h || '未設定'}」の最も古い1回分（${printed.filter(x => key(x) === oldest).length}件）`)
+        }
+      });
+      e.style.display = msgs.length ? 'block' : 'none';
+      e.textContent = msgs.length ? `印刷すると、印刷済みのうち${msgs.join('、')}が自動で削除されます（印刷済みは、ホールごとに直近2回分だけが残ります）。` : ''
     }
     // 検索は「検索」ボタンを押したときだけ実行する（条件を選んだだけでは一覧を変えない）
     function runPrintSearch() {
@@ -2413,9 +2903,10 @@
     // 付与完了を外して、③（手順6）に戻す。間違えて付与完了にしたときに使う（データは削除しない）
     $('backToLabel').onclick = () => {
       const rows = printRows().filter(x => printSelected.has(x.id)); if (!rows.length) return toast('付与未完了にするQRを選択してください。', 'warn');
+      pushUndo('付与未完了にする');
       rows.forEach(x => {x.assignmentCompleted = false; printSelected.delete(x.id)});
       const ok = save(true); refreshPrint(); renderManage();
-      if (ok) toast(`${rows.length}件を付与未完了にし、③ ラベル付与へ戻しました。`); else toast(`${rows.length}件の更新を保存できませんでした（容量不足の可能性）。`, 'err')
+      if (ok) toast(`${rows.length}件を付与未完了にし、③ ラベル付与へ戻しました。`, 'ok', true); else toast(`${rows.length}件の更新を保存できませんでした（容量不足の可能性）。`, 'err')
     };
     // 納品日の一括変更：選択したQRだけを変更し、印刷（PDF）には変更後の納品日を使う
     $('changePrintDate').onclick = () => {
@@ -2424,12 +2915,13 @@
       const rows = printRows().filter(x => printSelected.has(x.id)); if (!rows.length) return toast('納品日を変更するQRを選択してください。', 'warn');
       const changed = rows.filter(x => x.date !== v); if (!changed.length) return toast('選択したQRは、すでにその納品日です。', 'warn');
       const before = new Map(); changed.forEach(x => {const k = x.date ? dateLabel(x.date) : '未設定'; before.set(k, (before.get(k) || 0) + 1)});
+      pushUndo('納品日の一括変更');
       changed.forEach(x => {x.date = v});
       flashIds = new Set(changed.map(x => x.id));
       const ok = save(true), still = new Set(printRows().map(x => x.id)), gone = changed.filter(x => !still.has(x.id)).length;
       refreshPrint();
       const detail = [...before].map(([k, n]) => `${k} ${n}件`).join('、');
-      toast(`${changed.length}件の納品日を${dateLabel(v)}に変更しました（変更前：${detail}）。` + (gone ? `${gone}件は検索条件から外れました。` : '') + (ok ? '' : '保存できませんでした（容量不足の可能性）。'), !ok ? 'err' : gone ? 'warn' : 'ok')
+      toast(`${changed.length}件の納品日を${dateLabel(v)}に変更しました（変更前：${detail}）。` + (gone ? `${gone}件は検索条件から外れました。` : '') + (ok ? '' : '保存できませんでした（容量不足の可能性）。'), !ok ? 'err' : gone ? 'warn' : 'ok', true)
     };
 
     async function loadImage(src) {return new Promise((res, rej) => {const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src})}
@@ -2456,15 +2948,17 @@
       }
       const now = new Date().toISOString(), batchId = 'batch-' + now + '-' + Math.random().toString(36).slice(2, 8); const ds = [...new Set(rows.map(x => x.date || ''))], hs = [...new Set(rows.map(x => x.hall || ''))];
       const fileHall = hs.length === 1 ? (hs[0] || 'ホール未設定') : '複数ホール';
+      pushUndo('QRコードの印刷');
       doc.save(`納品資料_${fileHall}_${ds.length === 1 ? (ds[0] ? dateLabel(ds[0]) : '日付未設定') : '複数日'}.pdf`);
       rows.forEach(x => {x.status = 'printed'; x.printedAt = now; x.printBatchId = batchId; printSelected.delete(x.id)});
-      // ホールごとに直近2回分のPDF履歴を保持する。
+      // ホールごとに直近2回分のPDF履歴を保持する。自動で消した件数は、結果の通知に含める（v6.6 機能6）
+      let autoDel = 0;
       for (const hall of hs) {
         const batches = [...new Set(data.filter(x => x.status === 'printed' && (x.hall || '') === hall).sort((a, b) => (a.printedAt || '').localeCompare(b.printedAt || '')).map(x => x.printBatchId || ('legacy-' + x.printedAt)))];
-        while (batches.length > 2) {const old = batches.shift(); data = data.filter(x => !(x.status === 'printed' && (x.hall || '') === hall && (x.printBatchId || ('legacy-' + x.printedAt)) === old))}
+        while (batches.length > 2) {const old = batches.shift(); const before = data.length; data = data.filter(x => !(x.status === 'printed' && (x.hall || '') === hall && (x.printBatchId || ('legacy-' + x.printedAt)) === old)); autoDel += before - data.length}
       }
       const saved = save(true); renderManage(); refreshPrint(); renderPrinted();
-      if (saved) toast(`PDFを作成し、${rows.length}件を印刷済みへ移動しました。`);
+      if (saved) toast(`PDFを作成し、${rows.length}件を印刷済みへ移動しました。` + (autoDel ? `（保持回数を超えた印刷済みデータ${autoDel}件を自動削除しました）` : ''), 'ok', true);
       else toast(`PDFを作成しましたが、印刷済みへの移動を保存できませんでした（容量不足の可能性）。`, 'err');
     }
     $('makePdf').onclick = makePdf;
@@ -2483,10 +2977,10 @@
       note.textContent = notApplied ? (printedView ? '検索条件を変更しました。「検索」（または「全件表示」）を押すと反映されます。' : '「検索」を押すと、選んだ条件に一致するQRコードが表示されます。') : '';
       const rows = printedFiltered().sort((a, b) => (b.printedAt || '').localeCompare(a.printedAt || '')), groups = new Map();
       rows.forEach(x => {const h = hallOf(x); if (!groups.has(h)) groups.set(h, []); groups.get(h).push(x)});
-      const card = x => `<div class="qritem"><input class="prcheck check" data-id="${x.id}" type="checkbox" ${printedSelected.has(x.id) ? 'checked' : ''}><img src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">取り込み：${fmtMin(importedAtOf(x)) || '不明'}</div><div class="note">印刷：${x.printedAt ? new Date(x.printedAt).toLocaleString('ja-JP') : ''}</div></div>`;
+      const card = x => `<div class="qritem${printedSelected.has(x.id) ? ' sel' : ''}"><input class="prcheck check" data-id="${x.id}" type="checkbox" ${printedSelected.has(x.id) ? 'checked' : ''}><img src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">取り込み：${fmtMin(importedAtOf(x)) || '不明'}</div><div class="note">印刷：${x.printedAt ? new Date(x.printedAt).toLocaleString('ja-JP') : ''}</div></div>`;
       const empty = !printedView ? '検索条件を選んで「検索」を押すか、「全件表示」を押すと、印刷済みのQRコードがここに表示されます。' : all.length ? '条件に該当するQRコードはここに表示されます。' : '印刷済みのQRコードはここに表示されます。';
-      $('printedBody').innerHTML = groups.size ? [...groups.keys()].sort().map(h => `<div class="hallGroup"><div class="hallHead"><h3>${esc(h || 'ホール未設定')}</h3><span class="count">${groups.get(h).length}件</span><button class="secondary grpSel" data-hall="${esc(h)}">このホールを全選択</button></div><div class="qrgrid">${groups.get(h).map(card).join('')}</div></div>`).join('') : `<div class="empty">${empty}</div>`;
-      document.querySelectorAll('.prcheck').forEach(e => e.onchange = () => {e.checked ? printedSelected.add(e.dataset.id) : printedSelected.delete(e.dataset.id); updatePrintedCount()});
+      $('printedBody').innerHTML = groups.size ? [...groups.keys()].sort().map(h => `<div class="hallGroup"><div class="hallHead"><h3>${esc(h || 'ホール未設定')}</h3><span class="count">${groups.get(h).length}件（${new Set(groups.get(h).map(x => x.printBatchId || ('legacy-' + x.printedAt))).size}回分／直近2回分まで保持）</span><button class="secondary grpSel" data-hall="${esc(h)}">このホールを全選択</button></div><div class="qrgrid">${groups.get(h).map(card).join('')}</div></div>`).join('') : `<div class="empty">${empty}</div>`;
+      document.querySelectorAll('.prcheck').forEach(e => e.onchange = () => {e.checked ? printedSelected.add(e.dataset.id) : printedSelected.delete(e.dataset.id); const c = e.closest('.qritem'); if (c) c.classList.toggle('sel', e.checked); updatePrintedCount()});
       document.querySelectorAll('.grpSel').forEach(b => b.onclick = () => {printedFiltered().filter(x => hallOf(x) === b.dataset.hall).forEach(x => printedSelected.add(x.id)); renderPrinted()});
       updatePrintedCount()
     }
@@ -2501,7 +2995,7 @@
     $('selectPrintedAll').onclick = () => {printedFiltered().forEach(x => printedSelected.add(x.id)); renderPrinted()}
     $('unselectPrintedAll').onclick = () => {printedFiltered().forEach(x => printedSelected.delete(x.id)); renderPrinted()}
     // 印刷済みから戻すQRは、付与完了のまま手順7（④ 印刷準備）に戻す
-    $('restorePrinted').onclick = () => {const rows = printedFiltered().filter(x => printedSelected.has(x.id)); if (!rows.length) return toast('手順7に戻すQRを選択してください。', 'warn'); rows.forEach(x => {x.status = 'unprinted'; x.assignmentCompleted = true; delete x.printedAt; printedSelected.delete(x.id)}); const ok = save(true); renderPrinted(); renderManage(); if (ok) toast(`${rows.length}件を④ 印刷準備に戻しました。`); else toast(`${rows.length}件の更新を保存できませんでした（容量不足の可能性）。`, 'err')}
+    $('restorePrinted').onclick = () => {const rows = printedFiltered().filter(x => printedSelected.has(x.id)); if (!rows.length) return toast('手順7に戻すQRを選択してください。', 'warn'); pushUndo('印刷済みから手順7に戻す'); rows.forEach(x => {x.status = 'unprinted'; x.assignmentCompleted = true; delete x.printedAt; printedSelected.delete(x.id)}); const ok = save(true); renderPrinted(); renderManage(); if (ok) toast(`${rows.length}件を④ 印刷準備に戻しました。`, 'ok', true); else toast(`${rows.length}件の更新を保存できませんでした（容量不足の可能性）。`, 'err')}
 
 
     function loadSettings() {
@@ -2533,7 +3027,8 @@
     }
     $('wipeAll').onclick = async () => {
       if (!await askConfirm({title: 'QRデータをすべて削除しますか？', body: 'この端末に保存されているQRデータを、すべて削除します。\n' + DEL_NOTE, ok: 'すべて削除する'})) return;
-      data = []; selected.clear(); pendingSelected.clear(); printSelected.clear(); printedSelected.clear(); sessionIds.clear(); saveSession(); const ok = save(true); renderPending(); renderManage(); refreshPrint(); renderPrinted(); if (ok) toast('QRデータをすべて削除しました。', 'err'); else toast('削除しましたが、保存できませんでした。', 'err')
+      pushUndo('全データ削除');
+      data = []; selected.clear(); pendingSelected.clear(); printSelected.clear(); printedSelected.clear(); sessionIds.clear(); saveSession(); const ok = save(true); renderPending(); renderManage(); refreshPrint(); renderPrinted(); if (ok) toast('QRデータをすべて削除しました。', 'err', true); else toast('削除しましたが、保存できませんでした。', 'err')
     }
 
     // ===== D1への保存（localStorageの保存はそのまま。成功後にD1へも送る） =====
@@ -2611,14 +3106,14 @@
     };
     window.addEventListener('online', () => scheduleD1());
 
-    // 「使い方」ボタン：説明文を開閉する（閉じている間は、操作欄の高さを使わない）
-    document.querySelectorAll('.helpBtn').forEach(b => b.onclick = () => {const box = $(b.dataset.help); box.hidden = !box.hidden; b.textContent = box.hidden ? '使い方' : '使い方を閉じる'});
+    // 「使用方法」ボタン：説明文を開閉する（閉じている間は、操作欄の高さを使わない）
+    document.querySelectorAll('.helpBtn').forEach(b => b.onclick = () => {const box = $(b.dataset.help); box.hidden = !box.hidden; b.textContent = box.hidden ? '使用方法' : '使用方法を閉じる'; b.setAttribute('aria-expanded', String(!box.hidden))});
     data = data.map(normRec); const repaired = repairMainNames(); save(); purgeSent(); sessionIds = new Set([...sessionIds].filter(id => {const x = data.find(y => y.id === id); return x && !x.sentAt})); saveSession(); loadSettings(); renderPending(); renderSent(); renderManage(); refreshPrint(); renderPrinted(); checkLibs();
     if (repaired) toast(`ホール名だけが入力されていた${repaired}件に、本社名を補いました。`, 'warn');
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=616').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=617').catch(() => { }));
   </script>
 </body>
 
