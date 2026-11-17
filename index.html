@@ -1214,10 +1214,10 @@
       margin-left: auto
     }
 
-    /* 件数表示は見出しの行とは分け、その下に表示する（v6.13〜） */
-    .labelBarHead .count {
+    /* 件数表示は使用方法ボックスの下に置く（開いたときは説明の下、操作エリアの上）（v6.17） */
+    .helpBox + .count {
       display: block;
-      margin-top: 4px
+      margin: 0 0 8px
     }
 
     .helpBox {
@@ -1792,7 +1792,7 @@
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.16</h1>
+    <h1>物流管理支援システム v6.17</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -1937,8 +1937,9 @@
       </div>
 
       <div class="card" id="labelBar">
-        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">手順6</span><h2>納品日や本社名を付ける</h2></div><button type="button" class="secondary helpBtn" data-help="manageHelp" aria-expanded="false" aria-controls="manageHelp">使用方法</button></div><span id="manageCount" class="count"></span></div>
+        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">手順6</span><h2>納品日や本社名を付ける</h2></div><button type="button" class="secondary helpBtn" data-help="manageHelp" aria-expanded="false" aria-controls="manageHelp">使用方法</button></div></div>
         <div id="manageHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>QRコードに、納品日・本社名・ホール名・商品名を付けます。</li><li>付け終わったQRコードは、「④ 印刷準備」へ進めます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>付けたいQRコードのチェックを入れます。「全選択」でまとめて選べます。</li><li>納品日・本社名・ホール名・商品名を入力または選択します。</li><li>「納品日を付与」「本社名・ホール名を付与」「商品名を付与」のどれかを押します。</li><li>すべて付け終わったら、QRコードのチェックを入れて「付与完了にする」を押します。</li><li>付与完了にしたQRコードは、「④ 印刷準備」へ移ります。</li></ol><p class="sub">そのほかの操作</p><ul><li>QRコードの画像を押すと、そのQRコードだけを大きく表示します（専用の読み取り機で読むときに使います）。</li><li>大きく表示している間は、左右の矢印ボタン（またはキーボードの ← →）で、隣のQRコードに切り替えられます。</li><li>大きく表示している間のラベル付与は、いま表示している1件だけに付きます。「付与完了にする」は、閉じて一覧に戻ってから押します。</li><li>チェックボックスを押したまま、ほかのQRコードの上へなぞると、通ったQRコードをまとめて選べます（パソコンのマウス操作です）。</li><li>「未入力の項目で絞り込み」「QRコードの生成日で絞り込み」で、一覧を絞れます。</li></ul></div><div class="helpSec caution"><h4>注意点</h4><ul><li>本社名とホール名は、セットで付きます。ホール名を先に選ぶと、本社名が自動で入ります。</li><li>カードの背景が薄い緑のときは、4項目がすべて入っています。ただし、自動で付与完了にはなりません。4項目が空のままでも、「付与完了にする」は押せます。</li><li>「選択QRのラベルを消去」と「選択QR削除」は、実行直後の通知に出る「元に戻す」から戻せます。</li></ul></div></div>
+        <span id="manageCount" class="count"></span>
         <div class="bulkFields">
           <div class="field dateField" id="dateWrap">
             <label>納品日</label>
@@ -1994,8 +1995,9 @@
 
     <section id="print" class="page">
       <div class="card" id="printBar">
-        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">手順7</span><h2>印刷するQRコードを選ぶ</h2></div><button type="button" class="secondary helpBtn" data-help="printHelp" aria-expanded="false" aria-controls="printHelp">使用方法</button></div><span id="printCount" class="count"></span></div>
+        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">手順7</span><h2>印刷するQRコードを選ぶ</h2></div><button type="button" class="secondary helpBtn" data-help="printHelp" aria-expanded="false" aria-controls="printHelp">使用方法</button></div></div>
         <div id="printHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>印刷するQRコードを探して、選びます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>探す条件（納品日・本社名・ホール名・商品名・取り込み日時）を選びます。1つだけでも、組み合わせても使えます。</li><li>「検索」を押します。すべて見るときは「全件表示」、条件を消すときは「条件をクリア」を押します。</li><li>印刷するQRコードのチェックを入れます。</li><li>選び終わったら、一覧の下の「手順8」へ進みます。</li></ol><p class="sub">そのほかの操作</p><ul><li>間違えて付与完了にしたQRコードは、選んで「付与未完了にする」を押すと、③に戻ります。</li><li>納品日を変えたいときは、QRコードを選び、日付を入れて「選択QRの納品日を一括変更」を押します。チェックを入れたQRコードだけが変わり、印刷にも変更後の日付が使われます。</li><li>チェックボックスを押したまま、ほかのQRコードの上へなぞると、通ったQRコードをまとめて選べます（パソコンのマウス操作です）。</li></ul></div><div class="helpSec caution"><h4>注意点</h4><ul><li>条件を選んだだけでは、一覧は変わりません。必ず「検索」を押してください。</li><li>ここに出るのは、③で「付与完了にする」を押したQRコードだけです。</li><li>本社名を選ぶと、ホール名の候補がその本社のものに絞られます。ホール名を先に選ぶと、本社名が自動で入ります。</li></ul></div></div>
+        <span id="printCount" class="count"></span>
         <div class="toolbar">
           <div class="field"><label>納品日</label><select id="printDate">
               <option value="">指定しない</option>
@@ -2059,8 +2061,9 @@
 
     <section id="printed" class="page">
       <div class="card" id="printedBar">
-        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">手順9</span><h2>印刷済みQRを確認する</h2></div><button type="button" class="secondary helpBtn" data-help="printedHelp" aria-expanded="false" aria-controls="printedHelp">使用方法</button></div><span id="printedCount" class="count"></span></div>
+        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">手順9</span><h2>印刷済みQRを確認する</h2></div><button type="button" class="secondary helpBtn" data-help="printedHelp" aria-expanded="false" aria-controls="printedHelp">使用方法</button></div></div>
         <div id="printedHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>PDFにしたQRコードを、ホール名ごとに確認します。</li><li>もう一度印刷したいQRコードを、手順7に戻せます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>探す条件を選んで、「検索」を押します。すべて見るときは「全件表示」を押します。</li><li>戻したいQRコードのチェックを入れます。ホールごとにまとめて選ぶときは「このホールを全選択」を押します。</li><li>「手順7に戻す」を押します。</li><li>④ 印刷準備で選び直して、PDFを作ります。</li></ol><p class="sub">そのほかの操作</p><ul><li>チェックボックスを押したまま、ほかのQRコードの上へなぞると、通ったQRコードをまとめて選べます（パソコンのマウス操作です）。</li></ul></div><div class="helpSec caution"><h4>注意点</h4><ul><li>「検索」か「全件表示」を押すまで、一覧は出ません。</li><li>残るのは、ホールごとに最近の2回分だけです。それより古いものは、自動で消えます。</li><li>条件の選び方は、手順7と同じです。</li></ul></div></div>
+        <span id="printedCount" class="count"></span>
         <div class="toolbar">
           <div class="field"><label>納品日</label><select id="printedDate">
               <option value="">指定しない</option>
@@ -3222,7 +3225,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=627').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=628').catch(() => { }));
   </script>
 </body>
 
