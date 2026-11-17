@@ -1738,7 +1738,7 @@
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.8</h1>
+    <h1>物流管理支援システム v6.9</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -1842,12 +1842,10 @@
 
       <div class="card transferCard">
         <div class="labelBarHead"><h2>手順3：URL送信</h2><button type="button" class="secondary helpBtn" data-help="sendHelp" aria-expanded="false" aria-controls="sendHelp">使用方法</button></div>
-        <div id="sendHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>選んだURLを、メールでPCに送ります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>手順2で、送るURLを選びます。</li><li>「URL送信」を押します。</li><li>「送信完了」と出たら、PCでメールを確認します。</li><li>うまく送れないときは、「URL送信GAS接続テスト」を押して、接続を確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>先に「⚙ 設定」で、送信先などを入力して保存してください。</li><li>送ったURLは、手順2の一覧から「② 送信済み」へ移ります。</li><li>「GASの応答を確認できませんでした」と出たときは、メールが届いたか確認してください。届いていないときだけ、もう一度送ります。もう一度送ると、メールが二重に届くことがあります。</li></ul></div></div>
+        <div id="sendHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>選んだURLを、メールでPCに送ります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>手順2で、送るURLを選びます。</li><li>「URL送信」を押します。</li><li>「送信完了」と出たら、PCでメールを確認します。</li><li>うまく送れないときは、「接続テスト」を押して、接続を確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>先に「⚙ 設定」で、送信先などを入力して保存してください。</li><li>送ったURLは、手順2の一覧から「② 送信済み」へ移ります。</li><li>「GASの応答を確認できませんでした」と出たときは、メールが届いたか確認してください。届いていないときだけ、もう一度送ります。もう一度送ると、メールが二重に届くことがあります。</li></ul></div></div>
         <div class="actions">
           <button id="sendSelected">URL送信</button>
-          <button id="testGasStep3" class="secondary">
-            URL送信GAS接続テスト
-          </button>
+          <button id="testGasStep3" class="secondary">接続テスト</button>
         </div>
 
         <div id="transferConfigStatusStep3" class="status">未設定</div>
@@ -2000,6 +1998,7 @@
               <option value="4">4個（2行×2列）</option>
               <option value="6" selected>6個（3行×2列）</option>
             </select></div>
+          <span class="spacer"></span>
           <button id="makePdf" disabled>A4 PDF作成</button>
         </div>
       </div>
@@ -2047,7 +2046,7 @@
       <section id="settings" class="page">
       <div class="card settings">
         <div class="labelBarHead"><h2>Google Apps Script / 送信先メールアドレス設定</h2><button type="button" class="secondary helpBtn" data-help="gasHelp" aria-expanded="false" aria-controls="gasHelp">使用方法</button></div>
-        <div id="gasHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>スマホのURLを、メールでPCに送るための設定をします。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>「Google Apps Script URL」「転送トークン」「送信先Mail」を入力します。</li><li>「移行設定を保存」を押します。</li><li>「GAS接続テスト」を押して、「接続OK」と出るか確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>転送トークンは、システム管理者に確認してください。</li><li>ここが未設定だと、手順3でURLを送れません。</li></ul></div></div>
+        <div id="gasHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>スマホのURLを、メールでPCに送るための設定をします。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>「Google Apps Script URL」「転送トークン」「送信先Mail」を入力します。</li><li>「移行設定を保存」を押します。</li><li>「接続テスト」を押して、「接続OK」と出るか確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>転送トークンは、システム管理者に確認してください。</li><li>ここが未設定だと、手順3でURLを送れません。</li></ul></div></div>
         <div class="row">
           <div class="field"><label>Google Apps Script URL</label><input id="gasUrl" type="url"
               placeholder="https://script.google.com/.../.../exec"></div>
@@ -2057,7 +2056,7 @@
           </div>
         </div>
         <div class="actions"><button id="saveTransferSettings">移行設定を保存</button><button id="testGas"
-            class="secondary">GAS接続テスト</button></div>
+            class="secondary">接続テスト</button></div>
         <div id="transferConfigStatus" class="status">未設定</div>
       </div>
       <div class="card settings">
@@ -2401,7 +2400,7 @@
       }
       save(); renderPending(); btn.disabled = false;
       if (fail) tstatus(`送信失敗：${fail}${ok ? `（${ok}件は送信済み）` : ''}`, 'err');
-      else if (unconf) tstatus(`${ok ? ok + '件は送信確認済み。' : ''}${unconf}件は送信要求を出しましたが、GASの応答を確認できませんでした。メールが届いたか確認してください（届いていなければ「GAS接続テスト」を実行）。再送すると二重に届く場合があります。`, 'warn');
+      else if (unconf) tstatus(`${ok ? ok + '件は送信確認済み。' : ''}${unconf}件は送信要求を出しましたが、GASの応答を確認できませんでした。メールが届いたか確認してください（届いていなければ「接続テスト」を実行）。再送すると二重に届く場合があります。`, 'warn');
       else tstatus(`送信完了：${ok}件（GAS応答を確認済み）。${c.to} 宛のメールを確認してください。送信したURLは「② 送信済み」で確認できます。`, 'ok')
     }
     $('sendSelected').onclick = sendSelected;
@@ -2468,19 +2467,28 @@
           }
         };
       const urlIn = target === 'step3' ? c.url : ($('gasUrl').value.trim() || c.url);
+      const tokenIn = target === 'step3' ? c.token : ($('transferToken').value.trim() || c.token);
+      const toIn = target === 'step3' ? c.to : ($('transferTo').value.trim() || c.to);
       if (!urlIn) return out.set('GAS WebアプリURLが未設定です。設定で入力して保存してください。', 'warn');
+      if (!tokenIn) return out.set('転送トークンが未設定です。設定で入力して保存してください。', 'warn');
       out.set('接続確認中…', 'warn');
+      // 1) URL先が動いているか：GETで、GASの応答（バナー）が返るかを確認する。
+      // バージョン番号は問わない（GAS側のバージョンを変えても接続テストは通る）。
+      // 「<システム名> v<番号> URL transfer endpoint is running.」の形であればGASの応答とみなす。
+      let banner = '';
       try {
         const r = await fetchTimeout(urlIn, {method: 'GET', redirect: 'follow'}, 15000), t = (await r.text()).trim();
-        // バージョン番号は問わない（GAS側のバージョンを変えても接続テストは通る）。
-        // 「<システム名> v<番号> URL transfer endpoint is running.」の形であればGASの応答とみなす。
-        const m = t.match(/^(?:logistics-system|qr-regen-print) (v\d+(?:\.\d+)*) URL transfer endpoint is running\.$/);
-        if (m) {
-          out.set(`接続OK：${t}`, 'ok');
-        } else {
-          out.set('応答がGASのものではありません。URLとデプロイ設定を確認してください。', 'err');
-        }
-      } catch (e) {out.set('接続できませんでした（URL誤り / オフライン / アクセス権の可能性）。', 'err')}
+        if (!t.match(/^(?:logistics-system|qr-regen-print) (v\d+(?:\.\d+)*) URL transfer endpoint is running\.$/)) return out.set('応答がGASのものではありません。URLとデプロイ設定を確認してください。', 'err');
+        banner = t;
+      } catch (e) {return out.set('接続できませんでした（URL誤り / オフライン / アクセス権の可能性）。', 'err')}
+      // 2) トークンが一致しているか：URLを1件も付けないPOSTで確認する。
+      // GAS(Code.gs)は、トークン不一致なら unauthorized、一致すれば（URLが無いので）no urls を返す。どちらもメールは送られない。
+      const res = await postGas(urlIn, {token: tokenIn, to: toIn, test: true, urls: []});
+      if (res.unconfirmed) return out.set('URL先は応答しましたが、トークンの確認はできませんでした。通信状態を確認して、もう一度お試しください。', 'warn');
+      const e2 = String(res.error || '');
+      if (res.ok || e2 === 'no urls' || e2 === 'no valid URLs') return out.set(`接続OK：${banner}／転送トークンも一致しています。`, 'ok');
+      if (e2 === 'unauthorized') return out.set('URL先は応答しましたが、転送トークンがGAS側(Code.gs)と一致していません。設定とCode.gsのTRANSFER_TOKENを確認してください。', 'err');
+      return out.set('URL先は応答しましたが、トークンを確認できませんでした：' + explainErr(res), 'err')
     }
     $('testGasStep3').onclick = () => testGas('step3'); $('testGas').onclick = () => testGas('settings');
 
@@ -3161,7 +3169,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=619').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=620').catch(() => { }));
   </script>
 </body>
 
