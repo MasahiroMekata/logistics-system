@@ -1693,12 +1693,26 @@
         height: 28px
       }
     }
+
+    /* ===== v6.7：付与ボタン（手順6）と検索ボタン（手順7・手順9）を、横一列・同じ大きさに並べる ===== */
+    .barActions.equalRow {
+      flex-wrap: nowrap
+    }
+
+    .barActions.equalRow button,
+    .barActions.equalRow #searchPrint,
+    .barActions.equalRow #searchPrinted {
+      flex: 1 1 0;
+      min-width: 0;
+      padding-left: 6px;
+      padding-right: 6px
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.6</h1>
+    <h1>物流管理支援システム v6.7</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -1846,7 +1860,7 @@
 
       <div class="card" id="labelBar">
         <div class="labelBarHead"><h2>手順6：ラベルの付与</h2><button type="button" class="secondary helpBtn" data-help="manageHelp" aria-expanded="false" aria-controls="manageHelp">使用方法</button><span id="manageCount" class="count"></span></div>
-        <div id="manageHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>QRコードに、納品日・本社名・ホール名・商品名を付けます。</li><li>付け終わったQRコードは、「④ 印刷準備」へ進めます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>付けたいQRコードのチェックを入れます。「全選択」でまとめて選べます。</li><li>納品日・本社名・ホール名・商品名を入力または選択します。</li><li>「納品日を付与」「本社名・ホール名を付与」「商品名を付与」のどれかを押します。</li><li>すべて付け終わったら、QRコードのチェックを入れて「付与完了にする」を押します。</li><li>付与完了にしたQRコードは、「④ 印刷準備」へ移ります。</li></ol><p class="sub">そのほかの操作</p><ul><li>QRコードの画像を押すと、そのQRコードだけを大きく表示します（専用の読み取り機で読むときに使います）。</li><li>大きく表示している間は、左右の矢印ボタン（またはキーボードの ← →）で、隣のQRコードに切り替えられます。</li><li>大きく表示している間のラベル付与は、いま表示している1件だけに付きます。「付与完了にする」は、閉じて一覧に戻ってから押します。</li><li>チェックボックスを押したまま、ほかのQRコードの上へなぞると、通ったQRコードをまとめて選べます（パソコンのマウス操作です）。</li><li>「未入力の項目で絞り込み」「QRコードの生成日で絞り込み」で、一覧を絞れます。</li></ul></div><div class="helpSec caution"><h4>注意点</h4><ul><li>本社名とホール名は、セットで付きます。ホール名を先に選ぶと、本社名が自動で入ります。</li><li>カードの背景が薄い緑のときは、4項目がすべて入っています。ただし、自動で付与完了にはなりません。4項目が空のままでも、「付与完了にする」は押せます。</li><li>「選択QRのラベルを消去」と「選択QR削除」は、元に戻せません。</li></ul></div></div>
+        <div id="manageHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>QRコードに、納品日・本社名・ホール名・商品名を付けます。</li><li>付け終わったQRコードは、「④ 印刷準備」へ進めます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>付けたいQRコードのチェックを入れます。「全選択」でまとめて選べます。</li><li>納品日・本社名・ホール名・商品名を入力または選択します。</li><li>「納品日を付与」「本社名・ホール名を付与」「商品名を付与」のどれかを押します。</li><li>すべて付け終わったら、QRコードのチェックを入れて「付与完了にする」を押します。</li><li>付与完了にしたQRコードは、「④ 印刷準備」へ移ります。</li></ol><p class="sub">そのほかの操作</p><ul><li>QRコードの画像を押すと、そのQRコードだけを大きく表示します（専用の読み取り機で読むときに使います）。</li><li>大きく表示している間は、左右の矢印ボタン（またはキーボードの ← →）で、隣のQRコードに切り替えられます。</li><li>大きく表示している間のラベル付与は、いま表示している1件だけに付きます。「付与完了にする」は、閉じて一覧に戻ってから押します。</li><li>チェックボックスを押したまま、ほかのQRコードの上へなぞると、通ったQRコードをまとめて選べます（パソコンのマウス操作です）。</li><li>「未入力の項目で絞り込み」「QRコードの生成日で絞り込み」で、一覧を絞れます。</li></ul></div><div class="helpSec caution"><h4>注意点</h4><ul><li>本社名とホール名は、セットで付きます。ホール名を先に選ぶと、本社名が自動で入ります。</li><li>カードの背景が薄い緑のときは、4項目がすべて入っています。ただし、自動で付与完了にはなりません。4項目が空のままでも、「付与完了にする」は押せます。</li><li>「選択QRのラベルを消去」と「選択QR削除」は、実行直後の通知に出る「元に戻す」から戻せます。</li></ul></div></div>
         <div class="bulkFields">
           <div class="field dateField" id="dateWrap">
             <label>納品日</label>
@@ -1868,7 +1882,7 @@
               id="productList"></datalist></div>
         </div>
         <div id="hallLinkStatus" class="status" style="display:none"></div>
-        <div class="barActions">
+        <div class="barActions equalRow">
           <button id="applyDate">納品日を付与</button>
           <button id="applyLocation">本社名・ホール名を付与</button>
           <button id="applyProduct">商品名を付与</button>
@@ -1921,7 +1935,7 @@
               <option value="">指定しない</option>
             </select></div>
         </div>
-        <div class="barActions">
+        <div class="barActions equalRow">
           <button id="searchPrint">検索</button>
           <button id="showAllPrint" class="secondary">全件表示</button>
           <button id="clearPrintSearch" class="secondary">条件をクリア</button>
@@ -1986,7 +2000,7 @@
               <option value="">指定しない</option>
             </select></div>
         </div>
-        <div class="barActions">
+        <div class="barActions equalRow">
           <button id="searchPrinted">検索</button>
           <button id="showAllPrinted" class="secondary">全件表示</button>
           <button id="clearPrinted" class="secondary">条件をクリア</button>
@@ -2046,7 +2060,7 @@
       </div>
       <div class="card">
         <div class="labelBarHead"><h2>データ管理</h2><button type="button" class="secondary helpBtn" data-help="dataHelp" aria-expanded="false" aria-controls="dataHelp">使用方法</button></div>
-        <div id="dataHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>QRコードのデータを、ファイルに保存したり、読み込んだり、すべて消したりします。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>保存するとき：「バックアップを書き出す」を押します。</li><li>元に戻すとき：「バックアップを読み込む」を押して、保存したファイルを選びます。</li><li>すべて消すとき：「全データ削除」を押し、確認の画面で「すべて削除する」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>「バックアップを読み込む」と、いまのQRコードのデータが、ファイルの内容に置き換わります。</li><li>読み込めなかったときは、いまのデータは変わりません。</li><li>「全データ削除」は、元に戻せません。先にバックアップを書き出してください。</li></ul></div></div>
+        <div id="dataHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>QRコードのデータを、ファイルに保存したり、読み込んだり、すべて消したりします。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>保存するとき：「バックアップを書き出す」を押します。</li><li>元に戻すとき：「バックアップを読み込む」を押して、保存したファイルを選びます。</li><li>すべて消すとき：「全データ削除」を押し、確認の画面で「すべて削除する」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>「バックアップを読み込む」と、いまのQRコードのデータが、ファイルの内容に置き換わります。</li><li>読み込めなかったときは、いまのデータは変わりません。</li><li>「全データ削除」も、実行直後の通知に出る「元に戻す」から戻せますが、念のため先にバックアップを書き出してください。</li></ul></div></div>
         <div class="actions"><button id="exportData" class="secondary">バックアップを書き出す</button><label
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
@@ -2470,20 +2484,25 @@
       if ([...sel.options].some(o => o.value === old)) sel.value = old
     }
     function updateManageCount() {const all = data.filter(isWorking).length, ready = data.filter(isReady).length, rows = manageRows(); $('manageCount').textContent = `選択 ${rows.filter(x => selected.has(x.id)).length}件 / 表示 ${rows.length}件 / 付与完了 ${ready}件 / 付与未完了 ${all}件`}
-    // 最後に拡大表示したQRコードのID（そのカードを光らせる）。次に別のQRコードを開くまで残す。一覧から無くなったら消す
+    // 最後に拡大表示したQRコードのID（そのカードを光らせる）。次に別のQRコードを開くまで残す。
+    // v6.7：ページをリロードしても枠が残るよう、localStorageにも保存する。データ自体が無くなったときだけ消す
+    const LASTVIEWKEY = 'logistics_v4_lastview';
     let lastViewId = null;
+    try {lastViewId = localStorage.getItem(LASTVIEWKEY) || null} catch (e) { }
     function setLastView(id) {
       lastViewId = id;
+      try {localStorage.setItem(LASTVIEWKEY, id)} catch (e) { }
       document.querySelectorAll('#manageBody .qritem.lastView').forEach(e => e.classList.remove('lastView'));
       const img = [...document.querySelectorAll('#manageBody img.zoomQr')].find(e => e.dataset.id === id), card = img && img.closest('.qritem');
-      if (card) card.classList.add('lastView'); else lastViewId = null
+      if (card) card.classList.add('lastView')
     }
+    function clearLastView() {lastViewId = null; try {localStorage.removeItem(LASTVIEWKEY)} catch (e) { }}
     function renderManage() {
       fillImportedSelect(data.filter(isWorking));
       const rows = manageRows();
       $('manageBody').innerHTML = rows.length ? rows.map(x => `<div class="qritem${cardCls(x)}${flashIds.has(x.id) ? ' flash' : ''}${x.id === lastViewId ? ' lastView' : ''}${selected.has(x.id) ? ' sel' : ''}"><input class="mcheck check" data-id="${x.id}" type="checkbox" ${selected.has(x.id) ? 'checked' : ''}>${doneBadge(x)}<img class="zoomQr" data-id="${x.id}" role="button" tabindex="0" title="押すとこのQRコードだけを拡大表示します" src="${x.image}"><div class="note cardLbl">納品日：${x.date ? dateLabel(x.date) : '未設定'}</div><div class="note cardLbl">本社：${esc(x.mainName) || '未設定'}</div><div class="note cardLbl">ホール：${esc(x.hall) || '未設定'}</div><div class="note cardLbl">商品：${esc(x.product) || '未設定'}</div><div class="note">生成：${x.createdAt && !isNaN(new Date(x.createdAt)) ? fmtSent(x.createdAt) : '不明'}</div></div>`).join('') : `<div class="empty">${data.some(isWorking) ? '条件に該当するQRコードはここに表示されます。' : data.some(isReady) ? '付与が未完了のQRコードはありません。付与完了のQRコードは「④ 印刷準備」に表示されます。' : '再生成したQRコードはここに表示されます。'}</div>`;
       flashIds = new Set();
-      if (lastViewId && !rows.some(x => x.id === lastViewId)) lastViewId = null;
+      if (lastViewId && !data.some(x => x.id === lastViewId)) clearLastView();
       document.querySelectorAll('.mcheck').forEach(e => e.onchange = () => {e.checked ? selected.add(e.dataset.id) : selected.delete(e.dataset.id); const c = e.closest('.qritem'); if (c) c.classList.toggle('sel', e.checked); updateManageCount()});
       updateManageCount()
     }
@@ -2543,6 +2562,9 @@
       const lastId = qrZoomId, moved = qrZoomMoved;
       m.hidden = true; $('qrZoomImg').removeAttribute('src'); document.body.classList.remove('modalOpen'); qrZoomId = null; qrZoomList = []; qrZoomMoved = false;
       if (qrZoomSlot) {qrZoomSlot.replaceWith($('labelBar')); qrZoomSlot = null}
+      // v6.7：ダイアログで使った付与の設定（納品日・本社名・ホール名・商品名）は、一覧に戻ったときにクリアする
+      $('bulkDateText').value = ''; $('bulkDate').value = ''; $('bulkMain').value = ''; $('bulkHall').value = ''; $('bulkProduct').value = '';
+      $('hallLinkStatus').style.display = 'none';
       window.scrollTo(0, qrZoomY);
       // 左右に切り替えた場合は、最後に見ていたQRコードのカードに戻る（画面の外にあれば、固定の操作欄の下に見える位置までスクロール）
       const last = moved && lastId ? [...document.querySelectorAll('#manageBody img.zoomQr')].find(e => e.dataset.id === lastId) : null;
@@ -2737,7 +2759,7 @@
     };
     $('clearLabels').onclick = async () => {
       const rows = selectedManage(); if (!rows.length) return toast(NEED_ROWS, 'warn');
-      if (!await askConfirm({title: `選択した${rows.length}件のラベルを消去しますか？`, body: '納品日 / 本社名 / ホール名 / 商品名をすべて消去します。\n消去したラベルは元に戻せません。', ok: '消去する'})) return;
+      if (!await askConfirm({title: `選択した${rows.length}件のラベルを消去しますか？`, body: '納品日 / 本社名 / ホール名 / 商品名をすべて消去します。\n消去しても、実行直後の通知から「元に戻す」で戻せます。', ok: '消去する'})) return;
       pushUndo('ラベルの消去');
       rows.forEach(x => {x.date = ''; x.mainName = ''; x.hall = ''; x.product = ''; x.assignmentCompleted = false}); commit(`${rows.length}件のラベルを消去しました。`, rows, 'clearLabels', 'err', true)
     };
@@ -3113,7 +3135,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=617').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=618').catch(() => { }));
   </script>
 </body>
 
