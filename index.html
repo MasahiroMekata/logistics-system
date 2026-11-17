@@ -1873,12 +1873,18 @@
     #settings textarea {
       margin-top: 8px
     }
+
+    /* ===== v6.22：メニューの設定アイコンを線画SVGに合わせる ===== */
+    .navBtn svg {
+      vertical-align: -2px;
+      margin-right: 4px
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.21</h1>
+    <h1>物流管理支援システム v6.22</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -1933,7 +1939,7 @@
       </div>
       <div class="navGroup">
         <div class="navTitle">共通作業</div>
-        <div class="navButtons"><button class="navBtn" data-page="settings">⚙ 設定</button></div>
+        <div class="navButtons"><button class="navBtn" data-page="settings"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>設定</button></div>
       </div>
     </div>
         <button type="button" class="navArrow right" id="navNext" aria-label="右のメニューを表示">›</button>
@@ -1982,7 +1988,7 @@
 
       <div class="card transferCard">
         <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">手順3</span><h2>URLをメールで送信する</h2></div><button type="button" class="secondary helpBtn" data-help="sendHelp" aria-expanded="false" aria-controls="sendHelp">使用方法</button></div></div>
-        <div id="sendHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>選んだURLを、メールでPCに送ります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>手順2で、送るURLを選びます。</li><li>「URL送信」を押します。</li><li>「送信完了」と出たら、PCでメールを確認します。</li><li>うまく送れないときは、「接続テスト」を押して、接続を確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>先に「⚙ 設定」で、送信先などを入力して保存してください。</li><li>送ったURLは、手順2の一覧から「② 送信済み」へ移ります。</li><li>「GASの応答を確認できませんでした」と出たときは、メールが届いたか確認してください。届いていないときだけ、もう一度送ります。もう一度送ると、メールが二重に届くことがあります。</li></ul></div></div>
+        <div id="sendHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>選んだURLを、メールでPCに送ります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>手順2で、送るURLを選びます。</li><li>「URL送信」を押します。</li><li>「送信完了」と出たら、PCでメールを確認します。</li><li>うまく送れないときは、「接続テスト」を押して、接続を確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>先に「設定」で、送信先などを入力して保存してください。</li><li>送ったURLは、手順2の一覧から「② 送信済み」へ移ります。</li><li>「GASの応答を確認できませんでした」と出たときは、メールが届いたか確認してください。届いていないときだけ、もう一度送ります。もう一度送ると、メールが二重に届くことがあります。</li></ul></div></div>
         <div class="actions">
           <button id="sendSelected">URL送信</button>
           <button id="testGasStep3" class="secondary">接続テスト</button>
@@ -3307,7 +3313,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=632').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=633').catch(() => { }));
   </script>
 </body>
 
