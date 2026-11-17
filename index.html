@@ -1878,7 +1878,7 @@
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.20</h1>
+    <h1>物流管理支援システム v6.21</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -1919,16 +1919,16 @@
       <div class="navGroup">
         <div class="navTitle">スマホ作業</div>
         <div class="navButtons">
-          <button class="navBtn active" data-page="scan">① QRコード読取 / URL送信</button>
-          <button class="navBtn" data-page="sent">② 送信済み</button>
+          <button class="navBtn active" data-page="scan">① QR読取 / URL送信</button>
+          <button class="navBtn" data-page="sent">② 送信済みURL</button>
         </div>
       </div>
       <div class="navGroup">
         <div class="navTitle">PC作業</div>
         <div class="navButtons">
-          <button class="navBtn" data-page="manage">③ QRコード生成 / ラベル付与</button>
+          <button class="navBtn" data-page="manage">③ QR作成 / ラベル付与</button>
           <button class="navBtn" data-page="print">④ 印刷準備</button>
-          <button class="navBtn" data-page="printed">⑤ 印刷済み</button>
+          <button class="navBtn" data-page="printed">⑤ 印刷済みQR</button>
         </div>
       </div>
       <div class="navGroup">
@@ -3307,7 +3307,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=631').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=632').catch(() => { }));
   </script>
 </body>
 
