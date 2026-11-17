@@ -1446,6 +1446,18 @@
         min-width: 0
       }
 
+      /* 手順3の「URL送信」は基本CSSの flex:0 0 auto（ID指定）が優先されるため、同じ詳細度で上書きして半分ずつにする（v6.18） */
+      .transferCard #sendSelected {
+        flex: 1 1 0;
+        min-width: 0
+      }
+
+      /* 納品日欄の中の入力は、スマホ用入力ルール（min-height:48px）の対象から外す（v6.18） */
+      .dateBox input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="date"]) {
+        min-height: 0;
+        font-size: 16px
+      }
+
       .actions>.actBtn,
       .barActions>.actBtn,
       .selRow>.actBtn {
@@ -1787,12 +1799,79 @@
     select {
       color: var(--c-sel-text)
     }
+
+    /* ===== v6.18：納品日欄は他のラベル欄と同じ枠にし、カレンダーアイコンを枠内の左に埋め込む。設定のボタン間隔とバックアップボタンのサイズも統一 ===== */
+    .dateBox {
+      position: relative;
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--c-line2);
+      border-radius: var(--r-sm);
+      background: #fff;
+      min-height: 42px
+    }
+
+    .dateBox .calBtn {
+      background: transparent;
+      border: 0;
+      min-width: 0;
+      min-height: 0;
+      padding: 8px 2px 8px 10px;
+      font-size: 16px;
+      line-height: 1
+    }
+
+    .dateBox input[type="text"] {
+      border: 0;
+      background: transparent;
+      flex: 1;
+      min-width: 0;
+      width: auto;
+      padding: 8px 8px 8px 4px
+    }
+
+    .dateBox input[type="date"] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none
+    }
+
+    .bulkDateBox .dateBox {
+      flex: 1 1 200px
+    }
+
+    #settings .actions {
+      margin-top: 8px
+    }
+
+    .backupRow>#exportData,
+    .backupRow>label.fileBtn {
+      flex: 1 1 0
+    }
+
+    .backupRow>label.fileBtn {
+      justify-content: center
+    }
+
+    @media (max-width: 760px) {
+      .dateBox {
+        min-height: 48px
+      }
+
+      .actions>label.fileBtn {
+        flex: 1 1 0;
+        min-width: 0;
+        justify-content: center
+      }
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.17</h1>
+    <h1>物流管理支援システム v6.18</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -1943,12 +2022,10 @@
         <div class="bulkFields">
           <div class="field dateField" id="dateWrap">
             <label>納品日</label>
-            <div class="dateInputRow">
+            <div class="dateBox">
+              <button type="button" id="openBulkDate" class="calBtn" aria-label="カレンダーから納品日を選択">📅</button>
               <input id="bulkDateText" type="text" placeholder="YYYY/MM/DD" inputmode="numeric" aria-label="納品日を入力">
-              <div class="datePickerWrap">
-                <button type="button" id="openBulkDate" class="secondary">カレンダー</button>
-                <input id="bulkDate" type="date" aria-label="カレンダーから納品日を選択">
-              </div>
+              <input id="bulkDate" type="date" aria-label="カレンダーから納品日を選択">
             </div>
           </div>
           <div class="field"><label>本社名</label><select id="bulkMain">
@@ -2025,18 +2102,16 @@
           <button id="selectPrintAll" class="secondary selBtn">全選択</button>
           <button id="unselectPrintAll" class="secondary selBtn">選択解除</button>
           <span class="spacer"></span>
-          <button id="backToLabel" class="secondary actBtn">付与未完了にする</button>
+          <button id="backToLabel" class="success actBtn">付与未完了にする</button>
         </div>
         <div class="toolbar" style="margin-top:8px">
           <div class="inlineFilter bulkDateBox" style="flex-wrap:wrap">
             <button id="changePrintDate">選択QRの納品日を一括変更</button>
             <label for="shipDateText">納品日の一括変更（選択したQRだけ）</label>
-            <div class="dateInputRow">
-              <input id="shipDateText" type="text" placeholder="YYYY/MM/DD" inputmode="numeric" aria-label="変更後の納品日を入力" style="width:140px">
-              <div class="datePickerWrap">
-                <button type="button" id="openShipDate" class="secondary">カレンダー</button>
-                <input id="shipDate" type="date" aria-label="カレンダーから変更後の納品日を選択">
-              </div>
+            <div class="dateBox">
+              <button type="button" id="openShipDate" class="calBtn" aria-label="カレンダーから変更後の納品日を選択">📅</button>
+              <input id="shipDateText" type="text" placeholder="YYYY/MM/DD" inputmode="numeric" aria-label="変更後の納品日を入力">
+              <input id="shipDate" type="date" aria-label="カレンダーから変更後の納品日を選択">
             </div>
           </div>
         </div>
@@ -2133,16 +2208,16 @@
 本社名A,ホールA2
 本社名B,ホールB1
 本社名B,ホールB2</div>
-        <div class="actions" style="margin-bottom:8px"><button id="copyHallSample" type="button"
+        <div class="actions"><button id="copyHallSample" type="button"
             class="secondary">サンプルをコピー</button></div>
         <textarea id="hallMaster"
-          placeholder="本社名A,ホールA1&#10;本社名A,ホールA2&#10;本社名B,ホールB1&#10;本社名B,ホールB2"></textarea><button id="saveSettings">本社名
-          / ホール名リストを保存</button>
+          placeholder="本社名A,ホールA1&#10;本社名A,ホールA2&#10;本社名B,ホールB1&#10;本社名B,ホールB2"></textarea>
+        <div class="actions"><button id="saveSettings">本社名 / ホール名リストを保存</button></div>
       </div>
       <div class="card">
         <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">設定</span><h2>バックアップと初期化をする</h2></div><button type="button" class="secondary helpBtn" data-help="dataHelp" aria-expanded="false" aria-controls="dataHelp">使用方法</button></div></div>
         <div id="dataHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>QRコードのデータを、ファイルに保存したり、読み込んだり、すべて消したりします。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>保存するとき：「バックアップを書き出す」を押します。</li><li>元に戻すとき：「バックアップを読み込む」を押して、保存したファイルを選びます。</li><li>すべて消すとき：「全データ削除」を押し、確認の画面で「すべて削除する」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>「バックアップを読み込む」と、いまのQRコードのデータが、ファイルの内容に置き換わります。</li><li>読み込めなかったときは、いまのデータは変わりません。</li><li>「全データ削除」も、実行直後の通知に出る「元に戻す」から戻せますが、念のため先にバックアップを書き出してください。</li></ul></div></div>
-        <div class="actions"><button id="exportData" class="secondary">バックアップを書き出す</button><label
+        <div class="actions backupRow"><button id="exportData" class="secondary">バックアップを書き出す</button><label
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
@@ -2216,7 +2291,7 @@
     function save(quiet) {
       scheduleD1(); // D1へも保存（トークン未設定なら何もしない）
       try {localStorage.setItem(KEY, JSON.stringify(data)); return true}
-      catch (e) {if (!quiet) toast('保存できません。容量不足の可能性があります。バックアップを書き出し、不要なQRを削除してください。', 'err'); return false}
+      catch (e) {if (!quiet) toast('保存できません（容量不足の可能性）。バックアップを書き出してください。', 'err'); return false}
     }
     // 付与結果の共通処理：保存→表示更新→通知（件数は実際の処理結果）
     function commit(msg, rows, btnId, type = 'ok', undoable = false) {
@@ -3018,7 +3093,7 @@
       pushUndo('付与未完了にする');
       rows.forEach(x => {x.assignmentCompleted = false; printSelected.delete(x.id)});
       const ok = save(true); refreshPrint(); renderManage();
-      if (ok) toast(`${rows.length}件を付与未完了にし、③ ラベル付与へ戻しました。`, 'ok', true); else toast(`${rows.length}件の更新を保存できませんでした（容量不足の可能性）。`, 'err')
+      if (ok) toast(`${rows.length}件を付与未完了に戻しました。`, 'ok', true); else toast(`${rows.length}件の更新を保存できませんでした（容量不足の可能性）。`, 'err')
     };
     // 納品日の一括変更：選択したQRだけを変更し、印刷（PDF）には変更後の納品日を使う
     $('changePrintDate').onclick = () => {
@@ -3038,7 +3113,7 @@
 
     async function loadImage(src) {return new Promise((res, rej) => {const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src})}
     async function makePdf() {
-      if (!window.jspdf) {checkLibs(); return toast('PDF作成用の部品を読み込めません。通信状態を確認して再読み込みしてください。', 'err')}
+      if (!window.jspdf) {checkLibs(); return toast('PDF作成部品を読み込めません。再読み込みしてください。', 'err')}
       const rows = printRows().filter(x => printSelected.has(x.id)); if (!rows.length) return toast('印刷するQRを選択してください。', 'warn');
       const per = Number($('perPage').value), rpp = per === 4 ? 2 : 3, {jsPDF} = window.jspdf, doc = new jsPDF({orientation: 'portrait', unit: 'mm', format: 'a4'});
       const PW = 1240, PH = 1754, margin = 36, gap = 14, header = 170, cellW = (PW - margin * 2 - gap) / 2, cellH = (PH - header - margin - gap * (rpp - 1)) / rpp;
@@ -3070,7 +3145,7 @@
         while (batches.length > 2) {const old = batches.shift(); const before = data.length; data = data.filter(x => !(x.status === 'printed' && (x.hall || '') === hall && (x.printBatchId || ('legacy-' + x.printedAt)) === old)); autoDel += before - data.length}
       }
       const saved = save(true); renderManage(); refreshPrint(); renderPrinted();
-      if (saved) toast(`PDFを作成し、${rows.length}件を印刷済みへ移動しました。` + (autoDel ? `（保持回数を超えた印刷済みデータ${autoDel}件を自動削除しました）` : ''), 'ok', true);
+      if (saved) toast(`PDFを作成し、${rows.length}件を印刷済みへ移動しました。` + (autoDel ? `（保持上限を超えた${autoDel}件を自動削除）` : ''), 'ok', true);
       else toast(`PDFを作成しましたが、印刷済みへの移動を保存できませんでした（容量不足の可能性）。`, 'err');
     }
     $('makePdf').onclick = makePdf;
@@ -3114,11 +3189,11 @@
       const c = cfg(); $('gasUrl').value = c.url || ''; $('transferTo').value = c.to || ''; $('transferToken').value = c.token || '';
       const cfgOk = !!(c.url && c.to && c.token), cfgText = cfgOk ? 'Mail移行設定済み' : '未設定'; for (const id of ['transferConfigStatus', 'transferConfigStatusStep3']) {$(id).textContent = cfgText; $(id).className = 'status ' + (cfgOk ? 'ok' : '')} $('hallMaster').value = hallEntries().map(x => `${x.main},${x.hall}`).join('\n'); fillMainSelect(); renderLists(); loadD1Settings()
     }
-    $('saveTransferSettings').onclick = () => {try {localStorage.setItem(CFGKEY, JSON.stringify({url: $('gasUrl').value.trim(), to: $('transferTo').value.trim(), token: $('transferToken').value.trim()}))} catch (e) {return toast('設定を保存できません。容量不足の可能性があります。', 'err')} loadSettings(); const c = cfg(); if (c.url && c.to && c.token) toast('移行設定を保存しました。'); else toast('保存しました。GAS URL・転送トークン・送信先Mailに未入力があります。', 'warn')}
+    $('saveTransferSettings').onclick = () => {try {localStorage.setItem(CFGKEY, JSON.stringify({url: $('gasUrl').value.trim(), to: $('transferTo').value.trim(), token: $('transferToken').value.trim()}))} catch (e) {return toast('設定を保存できません。容量不足の可能性があります。', 'err')} loadSettings(); const c = cfg(); if (c.url && c.to && c.token) toast('移行設定を保存しました。'); else toast('保存しました（未入力の項目があります）。', 'warn')}
     $('copyHallSample').onclick = async () => {
       const t = $('hallSample').textContent;
       try {await navigator.clipboard.writeText(t); toast('サンプルをコピーしました。')}
-      catch (e) {const r = document.createRange(); r.selectNodeContents($('hallSample')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast('コピーできませんでした。選択した部分を手動でコピーしてください。', 'warn')}
+      catch (e) {const r = document.createRange(); r.selectNodeContents($('hallSample')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast('コピーできませんでした。手動でコピーしてください。', 'warn')}
     };
     $('saveSettings').onclick = () => {const a = $('hallMaster').value.split(/\n/).map(x => x.split(',').map(v => v.trim())).filter(x => x.length >= 2 && x[0] && x[1]).map(x => ({main: x[0], hall: x.slice(1).join(',')})); if (!a.length) return toast('「本社名,ホール名」の形式で1行以上入力してください。', 'warn'); try {localStorage.setItem(HALLKEY, JSON.stringify(a))} catch (e) {return toast('リストを保存できません。容量不足の可能性があります。', 'err')} loadSettings(); scheduleD1(); toast('本社名・ホール名リストを保存しました。')}
     $('exportData').onclick = () => {const blob = new Blob([JSON.stringify({data, halls: hallEntries(), products: products()}, null, 2)], {type: 'application/json'}), a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'logistics_v4_backup.json'; a.click(); URL.revokeObjectURL(a.href)}
@@ -3134,7 +3209,7 @@
         if (Array.isArray(o.products)) localStorage.setItem(PRODUCTKEY, JSON.stringify(o.products));
         const ok = save(true); loadSettings(); renderPending(); renderManage(); refreshPrint(); renderPrinted();
         if (ok) toast(`バックアップを読み込みました（QR ${data.length}件）。`); else toast('バックアップを読み込みましたが、保存できませんでした（容量不足の可能性）。', 'err')
-      } catch (err) {toast('バックアップを読み込めません。ファイルを確認してください。現在のデータは変更していません。', 'err')}
+      } catch (err) {toast('バックアップを読み込めません（データは変更していません）。', 'err')}
       e.target.value = ''
     }
     $('wipeAll').onclick = async () => {
@@ -3202,12 +3277,12 @@
     $('saveD1Settings').onclick = async () => {
       const t = $('d1Token').value.trim();
       try {localStorage.setItem(D1CFGKEY, JSON.stringify({token: t}))} catch (e) {return toast('設定を保存できません。容量不足の可能性があります。', 'err')}
-      if (!t) {d1State = {type: '', msg: ''}; loadD1Settings(); return toast('D1保存を無効にしました。この端末には引き続き保存されます。', 'warn')}
+      if (!t) {d1State = {type: '', msg: ''}; loadD1Settings(); return toast('D1保存を無効にしました（端末内には保存されます）。', 'warn')}
       d1State = {type: '', msg: ''}; const ok = await syncD1(); if (ok) toast('D1に保存しました。')
     };
-    $('syncD1Now').onclick = async () => {if (!d1Token()) return toast('先にD1保存用トークンを入力し、「D1設定を保存」を押してください。', 'warn'); const ok = await syncD1(true); if (ok) toast('全データをD1に保存しました。')};
+    $('syncD1Now').onclick = async () => {if (!d1Token()) return toast('D1保存用トークンを入力して、設定を保存してください。', 'warn'); const ok = await syncD1(true); if (ok) toast('全データをD1に保存しました。')};
     $('checkD1').onclick = async () => {
-      const t = d1Token(); if (!t) return toast('先にD1保存用トークンを入力し、「D1設定を保存」を押してください。', 'warn');
+      const t = d1Token(); if (!t) return toast('D1保存用トークンを入力して、設定を保存してください。', 'warn');
       d1SetStatus('', 'D1の件数を確認しています…');
       try {
         const res = await fetch('/api/records?summary=1', {headers: {'Authorization': 'Bearer ' + t}}); const j = await res.json().catch(() => null);
@@ -3221,11 +3296,11 @@
     // 「使用方法」ボタン：説明文を開閉する（閉じている間は、操作欄の高さを使わない）
     document.querySelectorAll('.helpBtn').forEach(b => b.onclick = () => {const box = $(b.dataset.help); box.hidden = !box.hidden; b.textContent = box.hidden ? '使用方法' : '閉じる'; b.setAttribute('aria-expanded', String(!box.hidden))});
     data = data.map(normRec); const repaired = repairMainNames(); save(); purgeSent(); sessionIds = new Set([...sessionIds].filter(id => {const x = data.find(y => y.id === id); return x && !x.sentAt})); saveSession(); loadSettings(); renderPending(); renderSent(); renderManage(); refreshPrint(); renderPrinted(); checkLibs();
-    if (repaired) toast(`ホール名だけが入力されていた${repaired}件に、本社名を補いました。`, 'warn');
+    if (repaired) toast(`${repaired}件の本社名を自動で補いました。`, 'warn');
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=628').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=629').catch(() => { }));
   </script>
 </body>
 
