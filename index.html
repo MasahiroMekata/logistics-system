@@ -1014,7 +1014,7 @@
       justify-content: flex-end
     }
 
-    /* ③ QR拡大ダイアログ：背景は不透明（後ろの一覧のQRコードを映さない）。QRの周囲に十分な白い余白（クワイエットゾーン）を取る */
+    /* ③ QR拡大ダイアログ：QRの周囲に十分な白い余白（クワイエットゾーン）を取る。背景は当初、不透明だったが、v6.8で透過に変更（末尾の上書きルール参照） */
     .qrZoom {
       background: var(--c-ink);
       overflow-y: auto;
@@ -1707,12 +1707,38 @@
       padding-left: 6px;
       padding-right: 6px
     }
+
+    /* ===== v6.8：QR拡大ダイアログを少し小さくし、背景を透過して後ろの画面が見えるようにする ===== */
+    /* 背景（.qrZoom）は半透明の暗色にして、後ろの一覧が見えるようにする。ダイアログの外側を押しても閉じられる（従来の背景クリックで閉じる処理のまま） */
+    .qrZoom {
+      background: rgba(34, 34, 34, .55)
+    }
+
+    .qrZoomBox {
+      max-width: min(1180px, 100%)
+    }
+
+    #qrZoomImg {
+      width: min(56vw, clamp(180px, calc(100vh - 400px), 400px))
+    }
+
+    @media (min-width: 1280px) {
+      .qrZoomMain #qrZoomImg {
+        width: min(26vw, clamp(180px, calc(100vh - 400px), 400px))
+      }
+    }
+
+    @media (max-width: 760px) {
+      #qrZoomImg {
+        width: min(calc(100vw - 90px), clamp(180px, calc(100vh - 400px), 400px))
+      }
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.7</h1>
+    <h1>物流管理支援システム v6.8</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -2049,9 +2075,9 @@
         <div class="labelBarHead"><h2>本社名 / ホール名設定</h2><button type="button" class="secondary helpBtn" data-help="hallHelp" aria-expanded="false" aria-controls="hallHelp">使用方法</button></div>
         <div id="hallHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>本社名とホール名の一覧を登録します。登録すると、ラベル付与や検索で選べるようになります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>下の入力欄に、1行ずつ「本社名,ホール名」の形で入力します。</li><li>同じ本社に複数のホールがあるときは、本社名を同じにして、行を分けます。</li><li>「本社名 / ホール名リストを保存」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>本社名とホール名は、「,」（カンマ）で区切ります。</li><li>形が違う行は、登録されません。</li><li>保存すると、いまの一覧が、入力した内容に置き換わります。</li></ul></div></div>
         <div class="sampleBox" id="hallSample">本社名A,ホールA1
-          本社名A,ホールA2
-          本社名B,ホールB1
-          本社名B,ホールB2</div>
+本社名A,ホールA2
+本社名B,ホールB1
+本社名B,ホールB2</div>
         <div class="actions" style="margin-bottom:8px"><button id="copyHallSample" type="button"
             class="secondary">サンプルをコピー</button></div>
         <textarea id="hallMaster"
@@ -3135,7 +3161,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=618').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=619').catch(() => { }));
   </script>
 </body>
 
