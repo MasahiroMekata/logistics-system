@@ -1179,7 +1179,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
       margin-bottom: 8px
     }
 
@@ -1190,9 +1190,14 @@
       min-width: 0
     }
 
-    .labelBarHead .helpBtn,
-    .labelBarHead .count {
+    .labelBarHead .helpBtn {
       flex: 0 0 auto
+    }
+
+    /* 件数表示は見出し＋使用方法の行には入れず、必ず次の行に全幅で出す（v6.13） */
+    .labelBarHead .count {
+      flex: 1 1 100%;
+      order: 10
     }
 
     .helpBox {
@@ -1406,6 +1411,19 @@
         min-width: 0;
         padding-left: 8px;
         padding-right: 8px
+      }
+
+      /* .barActions.mixed のボタンは基本CSSの flex:0 0 auto が優先されてしまうため、同じ詳細度で上書きする（v6.13） */
+      .barActions.mixed>button {
+        flex: 1 1 0;
+        min-width: 0;
+        padding-left: 8px;
+        padding-right: 8px
+      }
+
+      .modalActions>button {
+        flex: 1 1 0;
+        min-width: 0
       }
 
       .actions>.actBtn,
@@ -1754,7 +1772,7 @@
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.12</h1>
+    <h1>物流管理支援システム v6.13</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -3184,7 +3202,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=623').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=624').catch(() => { }));
   </script>
 </body>
 
