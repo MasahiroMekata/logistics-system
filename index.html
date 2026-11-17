@@ -38,6 +38,7 @@
       --c-sel-bg: #eef5ff;
       --c-sel-line: #7aa7ff;
       --c-sel-line-soft: #d9e7ff;
+      --c-sel-text: #007aff;
       --r-sm: 8px;
       --r-md: 12px;
       --r-pill: 99px;
@@ -1178,12 +1179,20 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       margin-bottom: 8px
     }
 
+    /* 見出しが長いセクションでも、「使用方法」ボタンは常に見出しの横に置く（v6.12） */
     .labelBarHead h2 {
-      margin: 0
+      margin: 0;
+      flex: 0 1 auto;
+      min-width: 0
+    }
+
+    .labelBarHead .helpBtn,
+    .labelBarHead .count {
+      flex: 0 0 auto
     }
 
     .helpBox {
@@ -1393,8 +1402,10 @@
       .actions>button,
       .barActions>button,
       .selRow>button {
-        flex: 1 1 calc(50% - 8px);
-        min-width: max-content
+        flex: 1 1 0;
+        min-width: 0;
+        padding-left: 8px;
+        padding-right: 8px
       }
 
       .actions>.actBtn,
@@ -1733,12 +1744,17 @@
         width: min(calc(100vw - 90px), clamp(180px, calc(100vh - 400px), 400px))
       }
     }
+
+    /* ===== v6.12：選択リスト（プルダウン）の文字色を、スマホで見える青に合わせてPCでも青にする ===== */
+    select {
+      color: var(--c-sel-text)
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.11</h1>
+    <h1>物流管理支援システム v6.12</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -1973,6 +1989,7 @@
         </div>
         <div class="toolbar" style="margin-top:8px">
           <div class="inlineFilter bulkDateBox" style="flex-wrap:wrap">
+            <button id="changePrintDate">選択QRの納品日を一括変更</button>
             <label for="shipDateText">納品日の一括変更（選択したQRだけ）</label>
             <div class="dateInputRow">
               <input id="shipDateText" type="text" placeholder="YYYY/MM/DD" inputmode="numeric" aria-label="変更後の納品日を入力" style="width:140px">
@@ -1981,7 +1998,6 @@
                 <input id="shipDate" type="date" aria-label="カレンダーから変更後の納品日を選択">
               </div>
             </div>
-            <button id="changePrintDate">選択QRの納品日を一括変更</button>
           </div>
         </div>
       </div>
@@ -3168,7 +3184,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=622').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=623').catch(() => { }));
   </script>
 </body>
 
