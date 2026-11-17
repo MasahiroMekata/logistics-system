@@ -1176,28 +1176,30 @@
 
     /* ラベル付与の操作欄（PC画面では上部に固定） */
     .labelBarHead {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
       margin-bottom: 8px
     }
 
-    /* 見出しが長いセクションでも、「使用方法」ボタンは常に見出しの横に置く（v6.12） */
-    .labelBarHead h2 {
+    /* 見出し＋使用方法は全セクション共通で必ず1行にまとめる（v6.14）。見出しが長い場合は見出しの文字側が折り返し、ボタンは横に残る */
+    .headMain {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .headMain h2 {
       margin: 0;
       flex: 0 1 auto;
       min-width: 0
     }
 
-    .labelBarHead .helpBtn {
+    .headMain .helpBtn {
       flex: 0 0 auto
     }
 
-    /* 件数表示は見出し＋使用方法の行には入れず、必ず次の行に全幅で出す（v6.13） */
+    /* 件数表示は見出しの行とは分け、その下に表示する（v6.13〜） */
     .labelBarHead .count {
-      flex: 1 1 100%;
-      order: 10
+      display: block;
+      margin-top: 4px
     }
 
     .helpBox {
@@ -1772,7 +1774,7 @@
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.13</h1>
+    <h1>物流管理支援システム v6.14</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -1837,7 +1839,7 @@
 
     <section id="scan" class="page active">
       <div class="card">
-        <div class="labelBarHead"><h2>手順1：QRコード読取</h2><button type="button" class="secondary helpBtn" data-help="scanHelp" aria-expanded="false" aria-controls="scanHelp">使用方法</button></div>
+        <div class="labelBarHead"><div class="headMain"><h2>手順1：QRコード読取</h2><button type="button" class="secondary helpBtn" data-help="scanHelp" aria-expanded="false" aria-controls="scanHelp">使用方法</button></div></div>
         <div id="scanHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>スマホのカメラでQRコードを読み取り、URLを一覧に保存します。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>「スキャン開始」を押します。</li><li>QRコードをカメラに向けます。</li><li>読み取れると、画面に緑の表示が出ます。</li><li>終わったら「停止」を押します。</li><li>次は、手順2でURLを確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>初めて使うときは、カメラの使用を「許可」してください。</li><li>決められたサイトのURLだけを保存します。ほかのQRコードは保存しません。</li><li>同じURLは、二重に保存しません。</li><li>暗いときは「ライトON」、小さいときは「拡大」のバーを使えます（スマホによっては表示されません）。</li></ul></div></div>
         <div class="actions">
           <button id="startScan">スキャン開始</button>
@@ -1862,7 +1864,7 @@
       </div>
 
       <div class="card">
-        <div class="labelBarHead"><h2>手順2：URL確認</h2><button type="button" class="secondary helpBtn" data-help="pendingHelp" aria-expanded="false" aria-controls="pendingHelp">使用方法</button></div>
+        <div class="labelBarHead"><div class="headMain"><h2>手順2：URL確認</h2><button type="button" class="secondary helpBtn" data-help="pendingHelp" aria-expanded="false" aria-controls="pendingHelp">使用方法</button></div></div>
         <div id="pendingHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>読み取ったURLを一覧で確認し、送るURLを選びます。</li><li>要らないURLを削除できます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>送るURLの行を押して、チェックを入れます。行のどこを押しても選べます。</li><li>すべて選ぶときは「全選択」、やめるときは「選択解除」を押します。</li><li>要らないURLは、チェックを入れて「選択URL削除」を押します。</li><li>選び終わったら、手順3へ進みます。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>手順3で送られるのは、チェックを入れたURLだけです。</li><li>削除すると、一覧から消えます。消す前に、もう一度確認してください。</li></ul></div></div>
         <div class="actions">
           <button id="selectPendingAll" class="secondary selBtn">全選択</button>
@@ -1875,7 +1877,7 @@
       </div>
 
       <div class="card transferCard">
-        <div class="labelBarHead"><h2>手順3：URL送信</h2><button type="button" class="secondary helpBtn" data-help="sendHelp" aria-expanded="false" aria-controls="sendHelp">使用方法</button></div>
+        <div class="labelBarHead"><div class="headMain"><h2>手順3：URL送信</h2><button type="button" class="secondary helpBtn" data-help="sendHelp" aria-expanded="false" aria-controls="sendHelp">使用方法</button></div></div>
         <div id="sendHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>選んだURLを、メールでPCに送ります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>手順2で、送るURLを選びます。</li><li>「URL送信」を押します。</li><li>「送信完了」と出たら、PCでメールを確認します。</li><li>うまく送れないときは、「接続テスト」を押して、接続を確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>先に「⚙ 設定」で、送信先などを入力して保存してください。</li><li>送ったURLは、手順2の一覧から「② 送信済み」へ移ります。</li><li>「GASの応答を確認できませんでした」と出たときは、メールが届いたか確認してください。届いていないときだけ、もう一度送ります。もう一度送ると、メールが二重に届くことがあります。</li></ul></div></div>
         <div class="actions">
           <button id="sendSelected">URL送信</button>
@@ -1889,7 +1891,7 @@
 
     <section id="sent" class="page">
       <div class="card">
-        <div class="labelBarHead"><h2>手順4：送信済みURL確認</h2><button type="button" class="secondary helpBtn" data-help="sentHelp" aria-expanded="false" aria-controls="sentHelp">使用方法</button></div>
+        <div class="labelBarHead"><div class="headMain"><h2>手順4：送信済みURL確認</h2><button type="button" class="secondary helpBtn" data-help="sentHelp" aria-expanded="false" aria-controls="sentHelp">使用方法</button></div></div>
         <div id="sentHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>メールで送ったURLの記録を見ます。</li><li>メールが届かなかったとき、手順2に戻して、もう一度送れます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>やり直したいURLの行を押して、チェックを入れます。</li><li>「手順2に戻す」を押します。</li><li>手順3で、もう一度「URL送信」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>送ってから24時間たつと、記録は自動で消えます。元に戻せません。</li><li>「全選択」「選択解除」でまとめて選べます。</li></ul></div></div>
         <div class="actions">
           <button id="selectSentAll" class="secondary selBtn">全選択</button>
@@ -1906,7 +1908,7 @@
 
     <section id="manage" class="page">
       <div class="card">
-        <div class="labelBarHead"><h2>手順5：QRコード生成</h2><button type="button" class="secondary helpBtn" data-help="importHelp" aria-expanded="false" aria-controls="importHelp">使用方法</button></div>
+        <div class="labelBarHead"><div class="headMain"><h2>手順5：QRコード生成</h2><button type="button" class="secondary helpBtn" data-help="importHelp" aria-expanded="false" aria-controls="importHelp">使用方法</button></div></div>
         <div id="importHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>URLが書かれたファイルを読み込んで、QRコードを作ります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>「URL一覧を一括読込」を押します。</li><li>URLが書かれたファイル（txtまたはcsv）を選びます。ファイルは、まとめて何個でも選べます。</li><li>「読み込み完了」と出たら、手順6へ進みます。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>同じURLのQRコードは、二重に作りません。</li><li>表示された「追加・重複・読み取り不可」の件数を確認してください。「読み取り不可」は、URLが見つからなかったファイルの数です。</li></ul></div></div>
         <label class="fileBtn">
           URL一覧を一括読込
@@ -1917,7 +1919,7 @@
       </div>
 
       <div class="card" id="labelBar">
-        <div class="labelBarHead"><h2>手順6：ラベルの付与</h2><button type="button" class="secondary helpBtn" data-help="manageHelp" aria-expanded="false" aria-controls="manageHelp">使用方法</button><span id="manageCount" class="count"></span></div>
+        <div class="labelBarHead"><div class="headMain"><h2>手順6：ラベルの付与</h2><button type="button" class="secondary helpBtn" data-help="manageHelp" aria-expanded="false" aria-controls="manageHelp">使用方法</button></div><span id="manageCount" class="count"></span></div>
         <div id="manageHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>QRコードに、納品日・本社名・ホール名・商品名を付けます。</li><li>付け終わったQRコードは、「④ 印刷準備」へ進めます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>付けたいQRコードのチェックを入れます。「全選択」でまとめて選べます。</li><li>納品日・本社名・ホール名・商品名を入力または選択します。</li><li>「納品日を付与」「本社名・ホール名を付与」「商品名を付与」のどれかを押します。</li><li>すべて付け終わったら、QRコードのチェックを入れて「付与完了にする」を押します。</li><li>付与完了にしたQRコードは、「④ 印刷準備」へ移ります。</li></ol><p class="sub">そのほかの操作</p><ul><li>QRコードの画像を押すと、そのQRコードだけを大きく表示します（専用の読み取り機で読むときに使います）。</li><li>大きく表示している間は、左右の矢印ボタン（またはキーボードの ← →）で、隣のQRコードに切り替えられます。</li><li>大きく表示している間のラベル付与は、いま表示している1件だけに付きます。「付与完了にする」は、閉じて一覧に戻ってから押します。</li><li>チェックボックスを押したまま、ほかのQRコードの上へなぞると、通ったQRコードをまとめて選べます（パソコンのマウス操作です）。</li><li>「未入力の項目で絞り込み」「QRコードの生成日で絞り込み」で、一覧を絞れます。</li></ul></div><div class="helpSec caution"><h4>注意点</h4><ul><li>本社名とホール名は、セットで付きます。ホール名を先に選ぶと、本社名が自動で入ります。</li><li>カードの背景が薄い緑のときは、4項目がすべて入っています。ただし、自動で付与完了にはなりません。4項目が空のままでも、「付与完了にする」は押せます。</li><li>「選択QRのラベルを消去」と「選択QR削除」は、実行直後の通知に出る「元に戻す」から戻せます。</li></ul></div></div>
         <div class="bulkFields">
           <div class="field dateField" id="dateWrap">
@@ -1974,7 +1976,7 @@
 
     <section id="print" class="page">
       <div class="card" id="printBar">
-        <div class="labelBarHead"><h2>手順7：印刷するQRコード選択</h2><button type="button" class="secondary helpBtn" data-help="printHelp" aria-expanded="false" aria-controls="printHelp">使用方法</button><span id="printCount" class="count"></span></div>
+        <div class="labelBarHead"><div class="headMain"><h2>手順7：印刷するQRコード選択</h2><button type="button" class="secondary helpBtn" data-help="printHelp" aria-expanded="false" aria-controls="printHelp">使用方法</button></div><span id="printCount" class="count"></span></div>
         <div id="printHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>印刷するQRコードを探して、選びます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>探す条件（納品日・本社名・ホール名・商品名・取り込み日時）を選びます。1つだけでも、組み合わせても使えます。</li><li>「検索」を押します。すべて見るときは「全件表示」、条件を消すときは「条件をクリア」を押します。</li><li>印刷するQRコードのチェックを入れます。</li><li>選び終わったら、一覧の下の「手順8」へ進みます。</li></ol><p class="sub">そのほかの操作</p><ul><li>間違えて付与完了にしたQRコードは、選んで「付与未完了にする」を押すと、③に戻ります。</li><li>納品日を変えたいときは、QRコードを選び、日付を入れて「選択QRの納品日を一括変更」を押します。チェックを入れたQRコードだけが変わり、印刷にも変更後の日付が使われます。</li><li>チェックボックスを押したまま、ほかのQRコードの上へなぞると、通ったQRコードをまとめて選べます（パソコンのマウス操作です）。</li></ul></div><div class="helpSec caution"><h4>注意点</h4><ul><li>条件を選んだだけでは、一覧は変わりません。必ず「検索」を押してください。</li><li>ここに出るのは、③で「付与完了にする」を押したQRコードだけです。</li><li>本社名を選ぶと、ホール名の候補がその本社のものに絞られます。ホール名を先に選ぶと、本社名が自動で入ります。</li></ul></div></div>
         <div class="toolbar">
           <div class="field"><label>納品日</label><select id="printDate">
@@ -2023,7 +2025,7 @@
         <div id="printBody" class="qrgrid"></div>
       </div>
       <div class="card" id="printRun">
-        <div class="labelBarHead"><h2>手順8：QRコードの印刷</h2><button type="button" class="secondary helpBtn" data-help="runHelp" aria-expanded="false" aria-controls="runHelp">使用方法</button></div>
+        <div class="labelBarHead"><div class="headMain"><h2>手順8：QRコードの印刷</h2><button type="button" class="secondary helpBtn" data-help="runHelp" aria-expanded="false" aria-controls="runHelp">使用方法</button></div></div>
         <div id="runHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>手順7で選んだQRコードを、A4のPDFにします。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>手順7で、印刷するQRコードにチェックを入れます。</li><li>「1ページあたりのQRコード数」を、4個か6個から選びます。</li><li>「A4 PDF作成」を押します。</li><li>保存されたPDFを、印刷します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>QRコードを選ぶまで、「A4 PDF作成」は押せません。</li><li>ページは、納品日とホール名ごとに分かれます。</li><li>PDFを作ると、選んだQRコードは「⑤ 印刷済み」へ移ります。</li><li>「⑤ 印刷済み」に残るのは、ホールごとに最近の2回分だけです。それより古いものは、自動で消えます。</li></ul></div></div>
         <p id="printRunInfo" class="note" style="margin-bottom:8px"></p>
         <div id="printRunWarn" class="status warn" style="display:none"></div>
@@ -2039,7 +2041,7 @@
 
     <section id="printed" class="page">
       <div class="card" id="printedBar">
-        <div class="labelBarHead"><h2>手順9：印刷済みQRコード確認</h2><button type="button" class="secondary helpBtn" data-help="printedHelp" aria-expanded="false" aria-controls="printedHelp">使用方法</button><span id="printedCount" class="count"></span></div>
+        <div class="labelBarHead"><div class="headMain"><h2>手順9：印刷済みQRコード確認</h2><button type="button" class="secondary helpBtn" data-help="printedHelp" aria-expanded="false" aria-controls="printedHelp">使用方法</button></div><span id="printedCount" class="count"></span></div>
         <div id="printedHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>PDFにしたQRコードを、ホール名ごとに確認します。</li><li>もう一度印刷したいQRコードを、手順7に戻せます。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>探す条件を選んで、「検索」を押します。すべて見るときは「全件表示」を押します。</li><li>戻したいQRコードのチェックを入れます。ホールごとにまとめて選ぶときは「このホールを全選択」を押します。</li><li>「手順7に戻す」を押します。</li><li>④ 印刷準備で選び直して、PDFを作ります。</li></ol><p class="sub">そのほかの操作</p><ul><li>チェックボックスを押したまま、ほかのQRコードの上へなぞると、通ったQRコードをまとめて選べます（パソコンのマウス操作です）。</li></ul></div><div class="helpSec caution"><h4>注意点</h4><ul><li>「検索」か「全件表示」を押すまで、一覧は出ません。</li><li>残るのは、ホールごとに最近の2回分だけです。それより古いものは、自動で消えます。</li><li>条件の選び方は、手順7と同じです。</li></ul></div></div>
         <div class="toolbar">
           <div class="field"><label>納品日</label><select id="printedDate">
@@ -2078,7 +2080,7 @@
 
       <section id="settings" class="page">
       <div class="card settings">
-        <div class="labelBarHead"><h2>Google Apps Script / 送信先メールアドレス設定</h2><button type="button" class="secondary helpBtn" data-help="gasHelp" aria-expanded="false" aria-controls="gasHelp">使用方法</button></div>
+        <div class="labelBarHead"><div class="headMain"><h2>Google Apps Script / 送信先メールアドレス設定</h2><button type="button" class="secondary helpBtn" data-help="gasHelp" aria-expanded="false" aria-controls="gasHelp">使用方法</button></div></div>
         <div id="gasHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>スマホのURLを、メールでPCに送るための設定をします。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>「Google Apps Script URL」「転送トークン」「送信先Mail」を入力します。</li><li>「移行設定を保存」を押します。</li><li>「接続テスト」を押して、「接続OK」と出るか確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>転送トークンは、システム管理者に確認してください。</li><li>ここが未設定だと、手順3でURLを送れません。</li></ul></div></div>
         <div class="row">
           <div class="field"><label>Google Apps Script URL</label><input id="gasUrl" type="url"
@@ -2093,7 +2095,7 @@
         <div id="transferConfigStatus" class="status">未設定</div>
       </div>
       <div class="card settings">
-        <div class="labelBarHead"><h2>D1保存（サーバーへの自動バックアップ）</h2><button type="button" class="secondary helpBtn" data-help="d1Help" aria-expanded="false" aria-controls="d1Help">使用方法</button></div>
+        <div class="labelBarHead"><div class="headMain"><h2>D1保存（サーバーへの自動バックアップ）</h2><button type="button" class="secondary helpBtn" data-help="d1Help" aria-expanded="false" aria-controls="d1Help">使用方法</button></div></div>
         <div id="d1Help" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>データを、この端末のブラウザだけでなく、サーバー（Cloudflare D1）にも自動で保存します。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>「D1保存用トークン」を入力します。</li><li>「D1設定を保存」を押します。</li><li>すぐに保存したいときは「今すぐD1に保存」、保存されている件数を見たいときは「D1の件数を確認」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>トークンは、システム管理者に確認してください。</li><li>トークンを入れないときは、この端末のブラウザにだけ保存します。</li><li>QRコードの画像は保存しません。URLなどの情報だけを保存します。</li><li>トークンを空にして保存すると、D1への保存をやめます。</li></ul></div></div>
         <div class="row">
           <div class="field"><label>D1保存用トークン</label><input id="d1Token" type="password" autocomplete="off"
@@ -2104,7 +2106,7 @@
         <div id="d1Status" class="status">未設定（この端末のブラウザにだけ保存）</div>
       </div>
       <div class="card settings">
-        <div class="labelBarHead"><h2>本社名 / ホール名設定</h2><button type="button" class="secondary helpBtn" data-help="hallHelp" aria-expanded="false" aria-controls="hallHelp">使用方法</button></div>
+        <div class="labelBarHead"><div class="headMain"><h2>本社名 / ホール名設定</h2><button type="button" class="secondary helpBtn" data-help="hallHelp" aria-expanded="false" aria-controls="hallHelp">使用方法</button></div></div>
         <div id="hallHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>本社名とホール名の一覧を登録します。登録すると、ラベル付与や検索で選べるようになります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>下の入力欄に、1行ずつ「本社名,ホール名」の形で入力します。</li><li>同じ本社に複数のホールがあるときは、本社名を同じにして、行を分けます。</li><li>「本社名 / ホール名リストを保存」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>本社名とホール名は、「,」（カンマ）で区切ります。</li><li>形が違う行は、登録されません。</li><li>保存すると、いまの一覧が、入力した内容に置き換わります。</li></ul></div></div>
         <div class="sampleBox" id="hallSample">本社名A,ホールA1
 本社名A,ホールA2
@@ -2117,7 +2119,7 @@
           / ホール名リストを保存</button>
       </div>
       <div class="card">
-        <div class="labelBarHead"><h2>データ管理</h2><button type="button" class="secondary helpBtn" data-help="dataHelp" aria-expanded="false" aria-controls="dataHelp">使用方法</button></div>
+        <div class="labelBarHead"><div class="headMain"><h2>データ管理</h2><button type="button" class="secondary helpBtn" data-help="dataHelp" aria-expanded="false" aria-controls="dataHelp">使用方法</button></div></div>
         <div id="dataHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>QRコードのデータを、ファイルに保存したり、読み込んだり、すべて消したりします。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>保存するとき：「バックアップを書き出す」を押します。</li><li>元に戻すとき：「バックアップを読み込む」を押して、保存したファイルを選びます。</li><li>すべて消すとき：「全データ削除」を押し、確認の画面で「すべて削除する」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>「バックアップを読み込む」と、いまのQRコードのデータが、ファイルの内容に置き換わります。</li><li>読み込めなかったときは、いまのデータは変わりません。</li><li>「全データ削除」も、実行直後の通知に出る「元に戻す」から戻せますが、念のため先にバックアップを書き出してください。</li></ul></div></div>
         <div class="actions"><button id="exportData" class="secondary">バックアップを書き出す</button><label
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
@@ -3202,7 +3204,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=624').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=625').catch(() => { }));
   </script>
 </body>
 
