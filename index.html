@@ -1886,12 +1886,23 @@
       align-items: flex-start;
       gap: 8px
     }
+
+    /* ===== v6.26：カレンダー選択をiPhoneでも開けるようにする ===== */
+    /* 日付入力を1pxに隠すと、iPhoneではタップしてもカレンダーが開かない。
+       アイコンの上に透明のまま重ねて、アイコンへのタップが日付入力自体に届くようにする */
+    .dateBox input[type="date"] {
+      top: 0;
+      right: 0;
+      width: 44px;
+      height: 100%;
+      pointer-events: auto
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.25</h1>
+    <h1>物流管理支援システム v6.26</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -3318,7 +3329,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=636').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=637').catch(() => { }));
   </script>
 </body>
 
