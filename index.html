@@ -1914,12 +1914,94 @@
     html {
       scrollbar-gutter: stable
     }
+
+    /* ===== v6.28：トースト短縮と閉じるボタン／日付欄のカーソル／手順7の日付欄と付与未完了ボタンの色／絞り込みリストの幅／ダイアログ内の大きさ揃え ===== */
+    /* トーストの閉じるボタン（「元に戻す」付きのときだけ付く） */
+    #toast .toastClose {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      min-width: 0;
+      min-height: 0;
+      padding: 6px 10px;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1
+    }
+
+    /* 納品日テキスト欄：入力カーソル（キャレット）の色を明示して見えるようにする */
+    .dateBox input[type="text"] {
+      caret-color: var(--c-ink);
+      cursor: text
+    }
+
+    /* 手順7「選択QRの納品日を一括変更」の日付欄：行いっぱいに広げず、固定幅にする */
+    .bulkDateBox .dateBox {
+      flex: 0 1 240px;
+      max-width: 100%
+    }
+
+    /* 手順6の絞り込みリスト2つ：「未入力の項目で絞り込み」側に合わせて同じ幅にする */
+    #manageMissing,
+    #manageImported {
+      width: 168px;
+      max-width: 58vw
+    }
+
+    /* ダイアログ内：QR画像を少し小さくする（最大400px→320px） */
+    #qrZoomImg {
+      width: min(56vw, clamp(160px, calc(100vh - 400px), 320px))
+    }
+
+    @media (min-width: 1280px) {
+      .qrZoomMain #qrZoomImg {
+        width: min(26vw, clamp(160px, calc(100vh - 400px), 320px))
+      }
+    }
+
+    @media (max-width: 760px) {
+      #qrZoomImg {
+        width: min(calc(100vw - 90px), clamp(160px, calc(100vh - 400px), 320px))
+      }
+    }
+
+    /* ダイアログ内：入力欄の高さを48pxに揃える */
+    .qrZoom .bulkFields .field select,
+    .qrZoom .bulkFields .field input:not([type="date"]) {
+      height: 48px
+    }
+
+    .qrZoom .bulkFields .dateBox {
+      height: 48px;
+      min-height: 48px
+    }
+
+    /* ダイアログ内（横並びにならない幅）：入力欄は1列にし、幅をそろえる */
+    @media (max-width: 1279px) {
+      .qrZoom .bulkFields .field {
+        flex: 1 1 100%;
+        min-width: 0
+      }
+    }
+
+    /* ダイアログ内：付与ボタン3つを少し大きくし、文字が切れないよう折り返しを許可する */
+    .qrZoom .barActions.equalRow>button {
+      min-width: 0;
+      min-height: 56px;
+      white-space: normal;
+      line-height: 1.35;
+      font-size: 15px
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.27</h1>
+    <h1>物流管理支援システム v6.28</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -2150,7 +2232,7 @@
           <button id="selectPrintAll" class="secondary selBtn">全選択</button>
           <button id="unselectPrintAll" class="secondary selBtn">選択解除</button>
           <span class="spacer"></span>
-          <button id="backToLabel" class="success actBtn">付与未完了にする</button>
+          <button id="backToLabel" class="secondary actBtn">付与未完了にする</button>
         </div>
         <div class="toolbar" style="margin-top:8px">
           <div class="inlineFilter bulkDateBox" style="flex-wrap:wrap">
@@ -2306,13 +2388,19 @@
     function toast(msg, type = 'ok', undoable = false) {
       const e = $('toast'); e.innerHTML = '';
       const span = document.createElement('span'); span.textContent = msg; e.appendChild(span);
-      if (undoable && undoStack.length) {
+      const withUndo = undoable && undoStack.length;
+      if (withUndo) {
         const b = document.createElement('button'); b.type = 'button'; b.className = 'toastUndo'; b.textContent = '元に戻す';
         b.onclick = () => {clearTimeout(toastTimer); e.classList.remove('show'); doUndo()};
-        e.appendChild(b)
+        e.appendChild(b);
+        // v6.28：長いと邪魔だという指摘で、表示は3秒に短縮。待たずに消せるよう閉じるボタンも付ける
+        const x = document.createElement('button'); x.type = 'button'; x.className = 'toastClose'; x.textContent = '×'; x.setAttribute('aria-label', '通知を閉じる');
+        x.onclick = () => {clearTimeout(toastTimer); e.classList.remove('show')};
+        e.appendChild(x)
       }
+      e.style.paddingRight = withUndo ? '44px' : '';
       e.className = 'show ' + (type === 'ok' ? '' : type);
-      clearTimeout(toastTimer); toastTimer = setTimeout(() => e.classList.remove('show'), undoable ? 9000 : type === 'ok' ? 2600 : 4500)
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => e.classList.remove('show'), undoable ? 3000 : type === 'ok' ? 2600 : 4500)
     }
     // ===== v6.6 機能1：「元に戻す」 =====
     // 取り返しのつかない操作（削除・ラベル消去・付与・印刷・全削除など）の直前に、データ全体の控えを取る。
@@ -2922,8 +3010,19 @@
     // 「YYYY/MM/DD」入力欄＋カレンダーの組み合わせ
     function bindDateField(textId, pickerId, openId) {
       $(textId).addEventListener('input', () => {
-        const input = $(textId), digits = input.value.replace(/\D/g, '').slice(0, 8);
-        input.value = digits.length <= 4 ? digits : digits.length <= 6 ? `${digits.slice(0, 4)}/${digits.slice(4)}` : `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6)}`;
+        const input = $(textId);
+        // v6.28：値を書き直すと入力カーソル（キャレット）の位置が飛んで見えなくなるため、
+        // 書き直す前に「カーソルより前にある数字の数」を数え、書き直後に同じ数字の後ろへ戻す
+        const start = input.selectionStart, digitsBefore = start == null ? 0 : input.value.slice(0, start).replace(/\D/g, '').length;
+        const digits = input.value.replace(/\D/g, '').slice(0, 8);
+        const formatted = digits.length <= 4 ? digits : digits.length <= 6 ? `${digits.slice(0, 4)}/${digits.slice(4)}` : `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6)}`;
+        if (input.value !== formatted) {
+          input.value = formatted;
+          let pos = 0, seen = 0;
+          while (pos < formatted.length && seen < digitsBefore) {if (/\d/.test(formatted[pos])) seen++; pos++}
+          if (formatted[pos] === '/') pos++;
+          try {input.setSelectionRange(pos, pos)} catch (e) { }
+        }
         $(pickerId).value = normalizeBulkDate(input.value) || '';
       });
       $(openId).onclick = () => {
@@ -3002,7 +3101,7 @@
     // 本社名が未選択、または自動入力のときは全ホールを候補にし、手動で選択したときはその本社のホールだけを候補にする
     function fillHallSelect(notify) {
       const m = $('bulkMain').value, sel = $('bulkHall'), old = sel.value, narrow = m && !autoMain, list = narrow ? hallsFor(m) : allHallNames();
-      sel.innerHTML = `<option value="">${narrow ? 'ホール名を選択' : 'ホール名を選択（本社名の選択は省略可）'}</option>` + list.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
+      sel.innerHTML = `<option value="">ホール名を選択</option>` + list.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
       if (list.includes(old)) sel.value = old;
       else if (old && notify) hallLinkMsg(`本社名の変更に伴い、選択済みのホール名「${esc(old)}」を解除しました（選んだ本社に属さないため）。`, 'warn')
     }
@@ -3355,7 +3454,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=638').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=639').catch(() => { }));
   </script>
 </body>
 
