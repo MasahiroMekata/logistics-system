@@ -2039,12 +2039,20 @@
         min-width: 0
       }
     }
+
+    /* ===== v6.30：日付欄のI字ポインターを常に黒くする ===== */
+    /* OS標準のI字ポインターは、背景との反転表示で白っぽく見える瞬間がある。
+       ページ側で黒いI字の画像カーソルを指定し、日付欄の上では常に黒で出す（読み込めない環境では通常のI字に戻る） */
+    .dateBox,
+    .dateBox input[type="text"] {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M3 2h10M8 2v20M3 22h10' stroke='white' stroke-width='3.4' fill='none' stroke-linecap='round'/%3E%3Cpath d='M3 2h10M8 2v20M3 22h10' stroke='black' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 8 12, text
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.29</h1>
+    <h1>物流管理支援システム v6.30</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -3497,7 +3505,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=640').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=641').catch(() => { }));
   </script>
 </body>
 
