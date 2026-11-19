@@ -1897,12 +1897,29 @@
       height: 100%;
       pointer-events: auto
     }
+
+    /* ===== v6.27：トーストの「元に戻す」を押せるようにする／ダイアログを開いても背景がズレないようにする ===== */
+    /* トースト本体は pointer-events:none（消えている間のクリック透過）のため、表示中は戻さないと
+       「元に戻す」ボタンにタップ・クリックが届かなかった */
+    #toast.show {
+      pointer-events: auto
+    }
+
+    #toast .toastUndo {
+      pointer-events: auto
+    }
+
+    /* ダイアログ表示で body のスクロールを止めたとき、スクロールバーが消えて
+       背景の幅が変わり、画面が横にズレて見えるのを防ぐ（バーの分の幅を常に確保する） */
+    html {
+      scrollbar-gutter: stable
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.26</h1>
+    <h1>物流管理支援システム v6.27</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -2339,15 +2356,20 @@
     // ホール名だけが設定されて本社名が空のQRを補修する（ホールが1つの本社にだけ属する場合のみ）。補修した件数を返す
     function repairMainNames() {let n = 0; data.forEach(x => {if (x.hall && !x.mainName) {const m = mainsOfHall(x.hall); if (m.length === 1) {x.mainName = m[0]; n++}}}); return n}
     const DEL_NOTE = '削除しても、実行直後の通知の「元に戻す」からは戻せます。\n念のため、必要なデータかどうか確認してください。';
+    // ダイアログ表示中のスクロール固定。QR拡大ダイアログの上に確認ダイアログが重なることがあるため、
+    // 開いた数だけ数え、全部閉じたときだけ解除する（途中で解除すると背景が動いて見える）
+    let scrollLockCount = 0;
+    function lockScroll() {if (scrollLockCount++ === 0) document.body.classList.add('modalOpen')}
+    function unlockScroll() {if (scrollLockCount > 0 && --scrollLockCount === 0) document.body.classList.remove('modalOpen')}
     // 確認ダイアログ。「実行する」なら true を返す（初期位置は誤操作を防ぐため「キャンセル」）
     function askConfirm({title, body, ok = '削除する', danger = true}) {
       return new Promise(resolve => {
         const m = $('confirmModal'), okB = $('confirmOk'), cancelB = $('confirmCancel');
         $('confirmTitle').textContent = title; $('confirmBody').textContent = body; okB.textContent = ok; okB.className = danger ? 'danger' : '';
-        const done = v => {m.hidden = true; okB.onclick = cancelB.onclick = m.onclick = null; document.removeEventListener('keydown', onKey); resolve(v)};
+        const done = v => {m.hidden = true; unlockScroll(); okB.onclick = cancelB.onclick = m.onclick = null; document.removeEventListener('keydown', onKey); resolve(v)};
         const onKey = e => {if (e.key === 'Escape') done(false)};
         okB.onclick = () => done(true); cancelB.onclick = () => done(false); m.onclick = e => {if (e.target === m) done(false)};
-        document.addEventListener('keydown', onKey); m.hidden = false; cancelB.focus()
+        document.addEventListener('keydown', onKey); m.hidden = false; lockScroll(); cancelB.focus({preventScroll: true})
       })
     }
     function fmtMin(iso, sec = false) {const t = new Date(iso); if (!iso || isNaN(t)) return ''; const p = n => String(n).padStart(2, '0'); return `${t.getFullYear()}/${p(t.getMonth() + 1)}/${p(t.getDate())} ${p(t.getHours())}:${p(t.getMinutes())}${sec ? ':' + p(t.getSeconds()) : ''}`}
@@ -2726,9 +2748,13 @@
       qrZoomList = manageRows().filter(r => r.image).map(r => r.id); if (!qrZoomList.includes(id)) qrZoomList.push(id);
       // 手順6の「ラベルの付与」操作欄を、ダイアログの中へ移して表示する（同じ要素なので、ボタン・入力欄・処理はそのまま使える）。
       // 閉じたときは元の位置へ戻す。ダイアログ表示中の付与の対象は、表示中のQR1件だけ（selectedManage で切り替え）。
-      const bar = $('labelBar'); qrZoomSlot = document.createElement('div'); bar.before(qrZoomSlot); $('qrZoomLabelArea').appendChild(bar);
+      const bar = $('labelBar'); qrZoomSlot = document.createElement('div');
+      // v6.27：操作欄をダイアログへ移す間、元の場所に同じ高さの空きを残す。
+      // 残さないと、その分だけ背景の画面が詰まってズレて見えるため
+      qrZoomSlot.style.height = bar.getBoundingClientRect().height + 'px'; qrZoomSlot.style.marginBottom = getComputedStyle(bar).marginBottom;
+      bar.before(qrZoomSlot); $('qrZoomLabelArea').appendChild(bar);
       qrZoomY = window.scrollY; qrZoomOpener = opener || null;
-      $('qrZoomModal').hidden = false; document.body.classList.add('modalOpen'); updateQrNav(); $('qrZoomClose').focus()
+      $('qrZoomModal').hidden = false; lockScroll(); updateQrNav(); $('qrZoomClose').focus({preventScroll: true})
     }
     // 切り替えられるQR：保存した一覧のうち、いまも付与未完了で、画像があるもの
     function qrZoomValid() {const m = new Map(data.map(r => [r.id, r])); return qrZoomList.filter(id => {const x = m.get(id); return x && isWorking(x) && x.image})}
@@ -2756,7 +2782,7 @@
     function closeQrDialog() {
       const m = $('qrZoomModal'); if (m.hidden) return;
       const lastId = qrZoomId, moved = qrZoomMoved;
-      m.hidden = true; $('qrZoomImg').removeAttribute('src'); document.body.classList.remove('modalOpen'); qrZoomId = null; qrZoomList = []; qrZoomMoved = false;
+      m.hidden = true; $('qrZoomImg').removeAttribute('src'); unlockScroll(); qrZoomId = null; qrZoomList = []; qrZoomMoved = false;
       if (qrZoomSlot) {qrZoomSlot.replaceWith($('labelBar')); qrZoomSlot = null}
       // v6.7：ダイアログで使った付与の設定（納品日・本社名・ホール名・商品名）は、一覧に戻ったときにクリアする
       $('bulkDateText').value = ''; $('bulkDate').value = ''; $('bulkMain').value = ''; $('bulkHall').value = ''; $('bulkProduct').value = '';
@@ -3329,7 +3355,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=637').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=638').catch(() => { }));
   </script>
 </body>
 
