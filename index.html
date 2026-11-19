@@ -1996,12 +1996,55 @@
       line-height: 1.35;
       font-size: 15px
     }
+
+    /* ===== v6.29：日付欄の透明な重なりをマウス操作では無効化／ダイアログの付与ボタンは高さでなく横幅で直す ===== */
+    /* カレンダー用の透明な日付入力（v6.26）が必要なのはタッチ操作（iPhone）だけ。
+       マウス操作では、欄の右側をクリックしたときにこの透明入力がフォーカスを奪い、
+       テキスト入力のカーソルが出なくなる。マウスではボタン経由のカレンダー表示（showPicker）を使うので、
+       重なりは原則オフにし、タッチ専用端末（hover不可＋粗いポインタ）でのみオンにする */
+    .dateBox input[type="date"] {
+      pointer-events: none
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      .dateBox input[type="date"] {
+        pointer-events: auto
+      }
+    }
+
+    /* ダイアログ内の付与ボタン：v6.28で変えた高さ・文字サイズ・折り返しを通常に戻す */
+    .qrZoom .barActions.equalRow>button {
+      min-height: 40px;
+      font-size: 16px;
+      line-height: 24px;
+      white-space: nowrap
+    }
+
+    @media (max-width: 760px) {
+      .qrZoom .barActions.equalRow>button {
+        min-height: 48px
+      }
+    }
+
+    /* ダイアログ内（横並びにならない幅）：付与ボタンは1列に積んで横幅いっぱいにし、文字が読めるようにする */
+    @media (max-width: 1279px) {
+      .qrZoom .barActions.equalRow {
+        flex-direction: column;
+        align-items: stretch
+      }
+
+      .qrZoom .barActions.equalRow>button {
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: 0
+      }
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.28</h1>
+    <h1>物流管理支援システム v6.29</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -3454,7 +3497,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=639').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=640').catch(() => { }));
   </script>
 </body>
 
