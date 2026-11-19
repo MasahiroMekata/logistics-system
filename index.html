@@ -2081,12 +2081,38 @@
         min-width: 0
       }
     }
+
+    /* ===== v6.32：ダイアログ内の入力欄は、元の手順6カードと同じ横一列の並びに戻す ===== */
+    /* v6.31の2列グリッドと、v6.28の「横並びにならない幅では縦積み」をやめ、
+       本体の手順6カードと同じ flex の横並びにする。文字が入りきらない場合はそのまま（ユーザー了承済み） */
+    @media (max-width: 1279px) {
+      .qrZoom .bulkFields {
+        flex-direction: row
+      }
+
+      .qrZoom .bulkFields .field {
+        flex: 1;
+        width: auto;
+        min-width: 190px
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .qrZoom .bulkFields {
+        display: flex
+      }
+
+      /* 納品日だけ広い（2.2倍）指定もやめ、本体カードと同じ均等な幅にする */
+      .qrZoom .bulkFields .dateField {
+        flex: 1 1 0
+      }
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.31</h1>
+    <h1>物流管理支援システム v6.32</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -3539,7 +3565,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=642').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=643').catch(() => { }));
   </script>
 </body>
 
