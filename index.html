@@ -2047,12 +2047,46 @@
     .dateBox input[type="text"] {
       cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M3 2h10M8 2v20M3 22h10' stroke='white' stroke-width='3.4' fill='none' stroke-linecap='round'/%3E%3Cpath d='M3 2h10M8 2v20M3 22h10' stroke='black' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 8 12, text
     }
+
+    /* ===== v6.31：ダイアログ内の手順6カードの枠を揃え、QRの占有スペースを少し小さくする ===== */
+    /* QR画像の上限を320px→280pxにし、まわりの余白も詰めて、操作欄に幅を回す */
+    #qrZoomImg {
+      width: min(56vw, clamp(160px, calc(100vh - 400px), 280px))
+    }
+
+    @media (max-width: 760px) {
+      #qrZoomImg {
+        width: min(calc(100vw - 90px), clamp(160px, calc(100vh - 400px), 280px))
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .qrZoomMain #qrZoomImg {
+        width: min(22vw, clamp(160px, calc(100vh - 400px), 280px))
+      }
+
+      .qrZoomImgWrap {
+        padding: 16px
+      }
+
+      /* 入力欄（納品日・本社名・ホール名・商品名）は2列×2行の均等グリッドにして枠の大きさを揃える。
+         納品日だけ広くする指定（flex 2.2倍）もここでは効かせない */
+      .qrZoom .bulkFields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px
+      }
+
+      .qrZoom .bulkFields .field {
+        min-width: 0
+      }
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.30</h1>
+    <h1>物流管理支援システム v6.31</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -3505,7 +3539,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=641').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=642').catch(() => { }));
   </script>
 </body>
 
