@@ -2439,6 +2439,20 @@
         line-height: 1.3
       }
     }
+
+    /* ===== v6.39：手順6の絞り込みリストがカードからはみ出す問題の修正 ===== */
+    /* 絞り込みの段（.inlineFilter）は「ラベル＋幅168pxのリスト」の組み合わせで、スマホでは
+       カードの幅より広くなり、リストの枠がカードの外まで出ていた（実ブラウザ計測で最大65px）。
+       段もリストも、幅が足りないときは縮むようにして、カードの中に収める */
+    .inlineFilter {
+      min-width: 0;
+      max-width: 100%
+    }
+
+    .inlineFilter select {
+      flex: 0 1 auto;
+      min-width: 0
+    }
 </style>
 </head>
 
@@ -2798,7 +2812,7 @@
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
-      <p class="appVersion">物流管理支援システム v6.38</p>
+      <p class="appVersion">物流管理支援システム v6.39</p>
     </section>
   </div>
 
@@ -3902,7 +3916,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=649').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=650').catch(() => { }));
   </script>
 </body>
 
