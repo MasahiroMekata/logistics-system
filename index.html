@@ -2114,6 +2114,178 @@
       font-size: 13px;
       margin: 16px 0 0
     }
+
+    /* ===== v6.34：メニューをデジタル庁式ステップ表示に変更 ===== */
+    /* 番号の丸と線で作業の流れを示す。線は「スマホ作業（1-2）」と「PC作業（3-5）」の2本に分け、間はつながない。
+       完了チェックは付けない（端末・担当が分かれ、途中停止も普通のため）。今開いているページだけ丸を黒く塗る。
+       設定は手順ではないので線につなげず、歯車の丸＋「設定」で右端に置く。
+       スマホでは今まで通り横スクロール（カルーセル）で、各ステップに固定幅を持たせる */
+    #navScroll {
+      background: #fff;
+      border: 1px solid var(--c-line);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-card);
+      padding: 16px
+    }
+
+    .stepScroll {
+      display: flex;
+      flex: 1;
+      gap: 16px;
+      align-items: flex-start
+    }
+
+    .stepMain {
+      flex: 1;
+      min-width: 0
+    }
+
+    .stepGroups {
+      display: flex;
+      margin-bottom: 8px
+    }
+
+    .stepGroups span {
+      text-align: center;
+      font-size: 11px;
+      color: var(--c-faint);
+      font-weight: 700;
+      letter-spacing: .08em
+    }
+
+    .stepGroups .sgPhone {
+      flex: 2
+    }
+
+    .stepGroups .sgPc {
+      flex: 3
+    }
+
+    .stepTrack {
+      display: flex;
+      position: relative
+    }
+
+    .stepTrack::before,
+    .stepTrack::after {
+      content: '';
+      position: absolute;
+      top: 19px;
+      height: 2px;
+      background: var(--c-line2)
+    }
+
+    /* 1→2 の線 */
+    .stepTrack::before {
+      left: 10%;
+      width: 20%
+    }
+
+    /* 3→5 の線（2と3の間はつながない） */
+    .stepTrack::after {
+      left: 50%;
+      width: 40%
+    }
+
+    .stepBtn {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      background: transparent;
+      color: var(--c-ink);
+      border: none;
+      border-radius: 0;
+      padding: 0 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      white-space: normal;
+      position: relative;
+      z-index: 1;
+      box-shadow: none
+    }
+
+    .stepBtn.active {
+      background: transparent;
+      color: var(--c-ink)
+    }
+
+    .navBtn.stepBtn:hover {
+      box-shadow: none
+    }
+
+    .stepCircle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--c-ink);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 1;
+      flex: 0 0 auto
+    }
+
+    .stepBtn.active .stepCircle {
+      background: var(--c-ink);
+      color: #fff;
+      box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--c-ink)
+    }
+
+    .stepBtn .stepCircle svg {
+      width: 20px;
+      height: 20px;
+      margin: 0;
+      vertical-align: middle
+    }
+
+    .stepLabel {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.4;
+      text-align: center;
+      width: 100%;
+      overflow-wrap: anywhere;
+      white-space: normal
+    }
+
+    .stepSettingsBtn {
+      flex: 0 0 76px;
+      margin-top: 23px
+    }
+
+    @media (max-width: 760px) {
+      #navScroll {
+        padding: 12px 8px
+      }
+
+      .stepScroll {
+        min-width: min-content;
+        gap: 8px
+      }
+
+      .stepMain {
+        flex: 0 0 auto;
+        width: 380px
+      }
+
+      .stepTrack .stepBtn {
+        flex: 0 0 76px;
+        padding: 0 2px
+      }
+
+      .stepSettingsBtn {
+        flex: 0 0 76px
+      }
+
+      .stepLabel {
+        font-size: 12px
+      }
+    }
 </style>
 </head>
 
@@ -2157,24 +2329,18 @@
       <div class="navRail" id="navRail">
         <button type="button" class="navArrow left" id="navPrev" aria-label="左のメニューを表示">‹</button>
     <div class="nav" id="navScroll">
-      <div class="navGroup">
-        <div class="navTitle">スマホ作業</div>
-        <div class="navButtons">
-          <button class="navBtn active" data-page="scan">① QR読取 / URL送信</button>
-          <button class="navBtn" data-page="sent">② 送信済みURL</button>
+      <div class="stepScroll">
+        <div class="stepMain">
+          <div class="stepGroups"><span class="sgPhone">スマホ作業</span><span class="sgPc">PC作業</span></div>
+          <div class="stepTrack">
+            <button class="navBtn stepBtn active" data-page="scan"><span class="stepCircle">1</span><span class="stepLabel">QR読取 / URL送信</span></button>
+            <button class="navBtn stepBtn" data-page="sent"><span class="stepCircle">2</span><span class="stepLabel">送信済みURL</span></button>
+            <button class="navBtn stepBtn" data-page="manage"><span class="stepCircle">3</span><span class="stepLabel">QR作成 / ラベル付与</span></button>
+            <button class="navBtn stepBtn" data-page="print"><span class="stepCircle">4</span><span class="stepLabel">印刷準備</span></button>
+            <button class="navBtn stepBtn" data-page="printed"><span class="stepCircle">5</span><span class="stepLabel">印刷済みQR</span></button>
+          </div>
         </div>
-      </div>
-      <div class="navGroup">
-        <div class="navTitle">PC作業</div>
-        <div class="navButtons">
-          <button class="navBtn" data-page="manage">③ QR作成 / ラベル付与</button>
-          <button class="navBtn" data-page="print">④ 印刷準備</button>
-          <button class="navBtn" data-page="printed">⑤ 印刷済みQR</button>
-        </div>
-      </div>
-      <div class="navGroup">
-        <div class="navTitle">共通作業</div>
-        <div class="navButtons"><button class="navBtn" data-page="settings"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>設定</button></div>
+        <button class="navBtn stepBtn stepSettingsBtn" data-page="settings"><span class="stepCircle"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="stepLabel">設定</span></button>
       </div>
     </div>
         <button type="button" class="navArrow right" id="navNext" aria-label="右のメニューを表示">›</button>
@@ -2469,7 +2635,7 @@
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
-      <p class="appVersion">物流管理支援システム v6.33</p>
+      <p class="appVersion">物流管理支援システム v6.34</p>
     </section>
   </div>
 
@@ -3573,7 +3739,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=644').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=645').catch(() => { }));
   </script>
 </body>
 
