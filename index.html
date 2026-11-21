@@ -2286,6 +2286,117 @@
         font-size: 12px
       }
     }
+
+    /* ===== v6.35：メニューのグループを背景パネルで示す ===== */
+    /* v6.34 のステップ表示を土台に、グループ分けを「見出し文字」から「パネル（背景）」に変更。
+       各パネルの上部にグループ名、下部に丸ボタンを置く。設定も「共通作業」パネルに入れて3グループで揃える。
+       パネルは小さめ・強めの丸み（28px）で、メニュー全体の高さは元の長方形メニューと同程度に抑える。
+       丸は 32px、ラベルは折り返さず1行（横幅は文字に合わせ、スマホではその分スクロールが伸びる）。
+       線はボタン同士の間だけに引く方式に変更（各ボタンが左右半分ずつを担うため、幅がバラバラでも中心同士がつながる） */
+    #navScroll {
+      padding: 12px 16px
+    }
+
+    .stepScroll {
+      gap: 24px
+    }
+
+    .stepGroup {
+      background: #e9ebee;
+      border-radius: 28px;
+      padding: 8px 14px;
+      min-width: 0
+    }
+
+    .sgPhoneG {
+      flex: 2
+    }
+
+    .sgPcG {
+      flex: 3
+    }
+
+    .sgCommonG {
+      flex: 1
+    }
+
+    .stepGroupName {
+      text-align: center;
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--c-ink);
+      letter-spacing: .08em;
+      margin-bottom: 6px
+    }
+
+    /* v6.34 のトラック全体の線は使わない */
+    .stepTrack::before,
+    .stepTrack::after {
+      display: none
+    }
+
+    .stepTrack .stepBtn::before,
+    .stepTrack .stepBtn::after {
+      content: '';
+      position: absolute;
+      top: 16px;
+      width: 50%;
+      height: 2px;
+      background: #aeb4bc;
+      z-index: -1
+    }
+
+    .stepTrack .stepBtn::before {
+      left: 0
+    }
+
+    .stepTrack .stepBtn::after {
+      left: 50%
+    }
+
+    .stepTrack .stepBtn:first-child::before {
+      display: none
+    }
+
+    .stepTrack .stepBtn:last-child::after {
+      display: none
+    }
+
+    .stepBtn {
+      gap: 6px
+    }
+
+    .stepCircle {
+      width: 32px;
+      height: 32px;
+      font-size: 14px
+    }
+
+    .stepLabel {
+      font-size: 12px;
+      white-space: nowrap
+    }
+
+    @media (max-width: 760px) {
+      #navScroll {
+        padding: 12px 8px
+      }
+
+      .stepScroll {
+        gap: 24px
+      }
+
+      .sgPhoneG,
+      .sgPcG,
+      .sgCommonG {
+        flex: 0 0 auto
+      }
+
+      .stepTrack .stepBtn {
+        flex: 0 0 auto;
+        padding: 0 6px
+      }
+    }
 </style>
 </head>
 
@@ -2330,17 +2441,27 @@
         <button type="button" class="navArrow left" id="navPrev" aria-label="左のメニューを表示">‹</button>
     <div class="nav" id="navScroll">
       <div class="stepScroll">
-        <div class="stepMain">
-          <div class="stepGroups"><span class="sgPhone">スマホ作業</span><span class="sgPc">PC作業</span></div>
-          <div class="stepTrack">
+        <div class="stepGroup sgPhoneG">
+          <div class="stepGroupName">スマホ作業</div>
+          <div class="stepTrack trackPhone">
             <button class="navBtn stepBtn active" data-page="scan"><span class="stepCircle">1</span><span class="stepLabel">QR読取 / URL送信</span></button>
             <button class="navBtn stepBtn" data-page="sent"><span class="stepCircle">2</span><span class="stepLabel">送信済みURL</span></button>
+          </div>
+        </div>
+        <div class="stepGroup sgPcG">
+          <div class="stepGroupName">PC作業</div>
+          <div class="stepTrack trackPc">
             <button class="navBtn stepBtn" data-page="manage"><span class="stepCircle">3</span><span class="stepLabel">QR作成 / ラベル付与</span></button>
             <button class="navBtn stepBtn" data-page="print"><span class="stepCircle">4</span><span class="stepLabel">印刷準備</span></button>
             <button class="navBtn stepBtn" data-page="printed"><span class="stepCircle">5</span><span class="stepLabel">印刷済みQR</span></button>
           </div>
         </div>
-        <button class="navBtn stepBtn stepSettingsBtn" data-page="settings"><span class="stepCircle"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="stepLabel">設定</span></button>
+        <div class="stepGroup sgCommonG">
+          <div class="stepGroupName">共通作業</div>
+          <div class="stepTrack trackCommon">
+            <button class="navBtn stepBtn" data-page="settings"><span class="stepCircle"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="stepLabel">設定</span></button>
+          </div>
+        </div>
       </div>
     </div>
         <button type="button" class="navArrow right" id="navNext" aria-label="右のメニューを表示">›</button>
@@ -2635,7 +2756,7 @@
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
-      <p class="appVersion">物流管理支援システム v6.34</p>
+      <p class="appVersion">物流管理支援システム v6.35</p>
     </section>
   </div>
 
@@ -3739,7 +3860,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=645').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=646').catch(() => { }));
   </script>
 </body>
 
