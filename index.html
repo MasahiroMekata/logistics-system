@@ -2782,7 +2782,7 @@
         <div id="transferConfigStatus" class="status">未設定</div>
       </div>
       <div class="card settings">
-        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">保存設定</span><h2>データをサーバーに保存する</h2></div><button type="button" class="secondary helpBtn" data-help="d1Help" aria-expanded="false" aria-controls="d1Help">使用方法</button></div></div>
+        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">保存設定</span><h2>サーバーに保存する</h2></div><button type="button" class="secondary helpBtn" data-help="d1Help" aria-expanded="false" aria-controls="d1Help">使用方法</button></div></div>
         <div id="d1Help" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>データを、この端末のブラウザだけでなく、サーバー（Cloudflare D1）にも自動で保存します。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>「D1保存用トークン」を入力します。</li><li>「D1設定を保存」を押します。</li><li>すぐに保存したいときは「今すぐD1に保存」、保存されている件数を見たいときは「D1の件数を確認」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>トークンは、システム管理者に確認してください。</li><li>トークンを入れないときは、この端末のブラウザにだけ保存します。</li><li>QRコードの画像は保存しません。URLなどの情報だけを保存します。</li><li>トークンを空にして保存すると、D1への保存をやめます。</li></ul></div></div>
         <div class="row">
           <div class="field"><label>D1保存用トークン</label><input id="d1Token" type="password" autocomplete="off"
@@ -2793,7 +2793,7 @@
         <div id="d1Status" class="status">未設定（この端末のブラウザにだけ保存）</div>
       </div>
       <div class="card settings">
-        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">マスタ設定</span><h2>本社名・ホール名を登録する</h2></div><button type="button" class="secondary helpBtn" data-help="hallHelp" aria-expanded="false" aria-controls="hallHelp">使用方法</button></div></div>
+        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">マスタ設定</span><h2>本社名・ホール名リストを登録する</h2></div><button type="button" class="secondary helpBtn" data-help="hallHelp" aria-expanded="false" aria-controls="hallHelp">使用方法</button></div></div>
         <div id="hallHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>本社名とホール名の一覧を登録します。登録すると、ラベル付与や検索で選べるようになります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>下の入力欄に、1行ずつ「本社名,ホール名」の形で入力します。</li><li>同じ本社に複数のホールがあるときは、本社名を同じにして、行を分けます。</li><li>「本社名 / ホール名リストを保存」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>本社名とホール名は、「,」（カンマ）で区切ります。</li><li>形が違う行は、登録されません。</li><li>保存すると、いまの一覧が、入力した内容に置き換わります。</li></ul></div></div>
         <div class="sampleBox" id="hallSample">本社名A,ホールA1
 本社名A,ホールA2
@@ -2806,13 +2806,13 @@
         <div class="actions"><button id="saveSettings">本社名 / ホール名リストを保存</button></div>
       </div>
       <div class="card">
-        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">データ設定</span><h2>バックアップと初期化をする</h2></div><button type="button" class="secondary helpBtn" data-help="dataHelp" aria-expanded="false" aria-controls="dataHelp">使用方法</button></div></div>
+        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">データ設定</span><h2>バックアップの書き出しと読み込み、初期化をする</h2></div><button type="button" class="secondary helpBtn" data-help="dataHelp" aria-expanded="false" aria-controls="dataHelp">使用方法</button></div></div>
         <div id="dataHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>QRコードのデータを、ファイルに保存したり、読み込んだり、すべて消したりします。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>保存するとき：「バックアップを書き出す」を押します。</li><li>元に戻すとき：「バックアップを読み込む」を押して、保存したファイルを選びます。</li><li>すべて消すとき：「全データ削除」を押し、確認の画面で「すべて削除する」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>「バックアップを読み込む」と、いまのQRコードのデータが、ファイルの内容に置き換わります。</li><li>読み込めなかったときは、いまのデータは変わりません。</li><li>「全データ削除」も、実行直後の通知に出る「元に戻す」から戻せますが、念のため先にバックアップを書き出してください。</li></ul></div></div>
         <div class="actions backupRow"><button id="exportData" class="secondary">バックアップを書き出す</button><label
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
-      <p class="appVersion">物流管理支援システム v6.40</p>
+      <p class="appVersion">物流管理支援システム v6.41</p>
     </section>
   </div>
 
@@ -3916,7 +3916,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=651').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=652').catch(() => { }));
   </script>
 </body>
 
