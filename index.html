@@ -2397,6 +2397,27 @@
         padding: 0 6px
       }
     }
+
+    /* ===== v6.36：線のつなぎ目の切れ目を直し、スマホのステップ間隔を統一 ===== */
+    /* 線は左右のボタンが半分ずつ描く方式のため、ボタン幅の端数（小数px）によっては
+       境界に1pxの空白ができ、線が切れて見えることがあった（③④間で再現）。
+       両側を1pxずつ重ねて描くことで、端数が出ても切れ目にならないようにする */
+    .stepTrack .stepBtn::before {
+      left: -1px;
+      width: calc(50% + 1px)
+    }
+
+    .stepTrack .stepBtn::after {
+      width: calc(50% + 1px)
+    }
+
+    @media (max-width: 760px) {
+      /* スマホではステップ幅を固定し、①〜⑤すべての間隔（線の長さ）を統一する。
+         幅は一番長いラベル（QR作成 / ラベル付与）が1行で収まる大きさに合わせる */
+      .stepTrack .stepBtn {
+        flex: 0 0 128px
+      }
+    }
 </style>
 </head>
 
@@ -2756,7 +2777,7 @@
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
-      <p class="appVersion">物流管理支援システム v6.35</p>
+      <p class="appVersion">物流管理支援システム v6.36</p>
     </section>
   </div>
 
@@ -3860,7 +3881,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=646').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=647').catch(() => { }));
   </script>
 </body>
 
