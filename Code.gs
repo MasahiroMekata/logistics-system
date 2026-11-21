@@ -1,5 +1,5 @@
 /**
- * 物流システム v6.0 - URL一覧のGmail転送用 Google Apps Script
+ * 物流管理支援システム v6.41 - URL一覧のGmail転送用 Google Apps Script
  *
  * 受信データ:
  * { token, to, date, batchId, urls: ["https://...", ...] }
@@ -12,12 +12,12 @@
  * 1. このコードを貼り付けて、TRANSFER_TOKEN と DEFAULT_TO を自分の値に書き換えて保存
  * 2. 関数 authorizeOnce を選んで「実行」→ 権限を承認（テストメールが届きます）
  * 3. デプロイ → デプロイを管理 → 編集（鉛筆）→ バージョン「新しいバージョン」→ デプロイ
- * 4. アプリの「設定」→「GAS接続テスト」で「接続OK：... v6.0 ...」と出れば完了
+ * 4. アプリの「設定」→「接続テスト」で「接続OK：... v6.41 ...」と出れば完了
  *
  * ※ GitHubなどに公開する場合は、TRANSFER_TOKEN と DEFAULT_TO を必ずダミーの値にしてください。
  */
 
-const VERSION = 'v6.0';
+const VERSION = 'v6.41';
 
 const CONFIG = {
   TRANSFER_TOKEN: '*****',

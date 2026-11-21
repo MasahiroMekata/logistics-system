@@ -1,4 +1,4 @@
-const CACHE_NAME = 'logistics-v6-1-cache-6';
+const CACHE_NAME = 'logistics-v6-41-cache-1';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 // 外部ライブラリ（バージョン固定）。オフライン／通信不良でも使えるようにキャッシュする。
 const CDN = [
