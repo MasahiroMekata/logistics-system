@@ -2565,7 +2565,7 @@
       </div>
 
       <div class="card transferCard">
-        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">手順3</span><h2>URLをメール経由で送信する</h2></div><button type="button" class="secondary helpBtn" data-help="sendHelp" aria-expanded="false" aria-controls="sendHelp">使用方法</button></div></div>
+        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">手順3</span><h2>URLをメールで送信する</h2></div><button type="button" class="secondary helpBtn" data-help="sendHelp" aria-expanded="false" aria-controls="sendHelp">使用方法</button></div></div>
         <div id="sendHelp" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>選んだURLを、メールでPCに送ります。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>手順2で、送るURLを選びます。</li><li>「URL送信」を押します。</li><li>「送信完了」と出たら、PCでメールを確認します。</li><li>うまく送れないときは、「接続テスト」を押して、接続を確認します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>先に「設定」で、送信先などを入力して保存してください。</li><li>送ったURLは、手順2の一覧から「② 送信済み」へ移ります。</li><li>「GASの応答を確認できませんでした」と出たときは、メールが届いたか確認してください。届いていないときだけ、もう一度送ります。もう一度送ると、メールが二重に届くことがあります。</li></ul></div></div>
         <div class="actions">
           <button id="sendSelected">URL送信</button>
@@ -2782,7 +2782,7 @@
         <div id="transferConfigStatus" class="status">未設定</div>
       </div>
       <div class="card settings">
-        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">保存設定</span><h2>データを自動で保存する</h2></div><button type="button" class="secondary helpBtn" data-help="d1Help" aria-expanded="false" aria-controls="d1Help">使用方法</button></div></div>
+        <div class="labelBarHead"><div class="headMain"><div class="headTitle"><span class="stepTag">保存設定</span><h2>データをサーバーに保存する</h2></div><button type="button" class="secondary helpBtn" data-help="d1Help" aria-expanded="false" aria-controls="d1Help">使用方法</button></div></div>
         <div id="d1Help" class="helpBox" hidden><div class="helpSec can"><h4>できること</h4><ul><li>データを、この端末のブラウザだけでなく、サーバー（Cloudflare D1）にも自動で保存します。</li></ul></div><div class="helpSec how"><h4>操作方法</h4><ol><li>「D1保存用トークン」を入力します。</li><li>「D1設定を保存」を押します。</li><li>すぐに保存したいときは「今すぐD1に保存」、保存されている件数を見たいときは「D1の件数を確認」を押します。</li></ol></div><div class="helpSec caution"><h4>注意点</h4><ul><li>トークンは、システム管理者に確認してください。</li><li>トークンを入れないときは、この端末のブラウザにだけ保存します。</li><li>QRコードの画像は保存しません。URLなどの情報だけを保存します。</li><li>トークンを空にして保存すると、D1への保存をやめます。</li></ul></div></div>
         <div class="row">
           <div class="field"><label>D1保存用トークン</label><input id="d1Token" type="password" autocomplete="off"
@@ -2812,7 +2812,7 @@
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
-      <p class="appVersion">物流管理支援システム v6.39</p>
+      <p class="appVersion">物流管理支援システム v6.40</p>
     </section>
   </div>
 
@@ -3916,7 +3916,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=650').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=651').catch(() => { }));
   </script>
 </body>
 
