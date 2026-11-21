@@ -2812,7 +2812,7 @@
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
-      <p class="appVersion">物流管理支援システム v6.41</p>
+      <p class="appVersion">物流管理支援システム v6.42</p>
     </section>
   </div>
 
@@ -3209,18 +3209,17 @@
       // 1) URL先が動いているか：GETで、GASの応答（バナー）が返るかを確認する。
       // バージョン番号は問わない（GAS側のバージョンを変えても接続テストは通る）。
       // 「<システム名> v<番号> URL transfer endpoint is running.」の形であればGASの応答とみなす。
-      let banner = '';
+      // 応答文字列そのものは利用者には見せない（成功時は「接続OK／転送トークン一致」だけを出す）。
       try {
         const r = await fetchTimeout(urlIn, {method: 'GET', redirect: 'follow'}, 15000), t = (await r.text()).trim();
         if (!t.match(/^(?:logistics-system|qr-regen-print) (v\d+(?:\.\d+)*) URL transfer endpoint is running\.$/)) return out.set('応答がGASのものではありません。URLとデプロイ設定を確認してください。', 'err');
-        banner = t;
       } catch (e) {return out.set('接続できませんでした（URL誤り / オフライン / アクセス権の可能性）。', 'err')}
       // 2) トークンが一致しているか：URLを1件も付けないPOSTで確認する。
       // GAS(Code.gs)は、トークン不一致なら unauthorized、一致すれば（URLが無いので）no urls を返す。どちらもメールは送られない。
       const res = await postGas(urlIn, {token: tokenIn, to: toIn, test: true, urls: []});
       if (res.unconfirmed) return out.set('URL先は応答しましたが、トークンの確認はできませんでした。通信状態を確認して、もう一度お試しください。', 'warn');
       const e2 = String(res.error || '');
-      if (res.ok || e2 === 'no urls' || e2 === 'no valid URLs') return out.set(`接続OK：${banner}／転送トークンも一致しています。`, 'ok');
+      if (res.ok || e2 === 'no urls' || e2 === 'no valid URLs') return out.set('接続OK：転送トークンも一致しています。', 'ok');
       if (e2 === 'unauthorized') return out.set('URL先は応答しましたが、転送トークンがGAS側(Code.gs)と一致していません。設定とCode.gsのTRANSFER_TOKENを確認してください。', 'err');
       return out.set('URL先は応答しましたが、トークンを確認できませんでした：' + explainErr(res), 'err')
     }
@@ -3916,7 +3915,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=652').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=653').catch(() => { }));
   </script>
 </body>
 
