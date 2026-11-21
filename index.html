@@ -2107,12 +2107,19 @@
         flex: 1 1 0
       }
     }
+
+    /* ===== v6.33：バージョン表示はヘッダーから設定画面の末尾へ移す ===== */
+    .appVersion {
+      color: var(--c-faint);
+      font-size: 13px;
+      margin: 16px 0 0
+    }
 </style>
 </head>
 
 <body>
   <header>
-    <h1>物流管理支援システム v6.32</h1>
+    <h1>物流管理支援システム</h1>
   </header>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
@@ -2462,6 +2469,7 @@
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
+      <p class="appVersion">物流管理支援システム v6.33</p>
     </section>
   </div>
 
@@ -3565,7 +3573,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=643').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=644').catch(() => { }));
   </script>
 </body>
 
