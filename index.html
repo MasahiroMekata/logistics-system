@@ -2812,7 +2812,7 @@
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
-      <p class="appVersion">物流管理支援システム v6.42</p>
+      <p class="appVersion">物流管理支援システム v6.43</p>
     </section>
   </div>
 
@@ -3018,10 +3018,20 @@
     $('startScan').onclick = startScan; $('stopScan').onclick = stopScan;
     document.addEventListener('visibilitychange', () => {if (document.hidden && scanning) stopScan()});
 
-    function tryJsQR(v, sx, sy, sw, sh, maxW) {
+    // 薄く写ったQR向け：明暗の幅を広げてから解析する（元がほぼ単色なら何もしない）
+    function enhanceContrast(im) {
+      const d = im.data; let mn = 255, mx = 0;
+      for (let i = 0; i < d.length; i += 16) {const g = (d[i] + d[i + 1] + d[i + 2]) / 3; if (g < mn) mn = g; if (g > mx) mx = g}
+      if (mx - mn < 24) return;
+      const sc = 255 / (mx - mn);
+      for (let i = 0; i < d.length; i += 4) {for (let k = 0; k < 3; k++) {const x = (d[i + k] - mn) * sc; d[i + k] = x < 0 ? 0 : x > 255 ? 255 : x}}
+    }
+    function tryJsQR(v, sx, sy, sw, sh, maxW, enhance) {
       const sc = Math.min(1, maxW / sw), w = Math.max(1, Math.round(sw * sc)), h = Math.max(1, Math.round(sh * sc));
       work.width = w; work.height = h; wctx.drawImage(v, sx, sy, sw, sh, 0, 0, w, h);
-      const im = wctx.getImageData(0, 0, w, h), code = window.jsQR(im.data, w, h, {inversionAttempts: 'attemptBoth'});
+      const im = wctx.getImageData(0, 0, w, h);
+      if (enhance) enhanceContrast(im);
+      const code = window.jsQR(im.data, w, h, {inversionAttempts: 'attemptBoth'});
       if (!code || !code.data) return null;
       const L = code.location, pts = [L.topLeftCorner, L.topRightCorner, L.bottomRightCorner, L.bottomLeftCorner].map(p => ({x: sx + p.x / sc, y: sy + p.y / sc}));
       return {data: code.data, points: pts}
@@ -3031,12 +3041,25 @@
         const codes = await detector.detect(v);
         return codes.filter(c => c.rawValue).map(c => {let pts = c.cornerPoints; if (!pts || pts.length < 4) {const b = c.boundingBox; pts = [{x: b.x, y: b.y}, {x: b.x + b.width, y: b.y}, {x: b.x + b.width, y: b.y + b.height}, {x: b.x, y: b.y + b.height}]} return {data: c.rawValue, points: pts}})
       }
-      // jsQR: 1回に1パス。全体→中央60%→中央40%(等倍)の順に切り替えて小さなQRも拾う。
-      const vw = v.videoWidth, vh = v.videoHeight, pass = missCount % 3; let r = null;
-      if (pass === 0) r = tryJsQR(v, 0, 0, vw, vh, 800);
-      else if (pass === 1) {const cw = vw * .6, ch = vh * .6; r = tryJsQR(v, (vw - cw) / 2, (vh - ch) / 2, cw, ch, 800)}
-      else {const cw = vw * .4, ch = vh * .4; r = tryJsQR(v, (vw - cw) / 2, (vh - ch) / 2, cw, ch, 800)}
-      return r ? [r] : []
+      // jsQR: 1回の解析で複数の範囲・方法を試す（時間上限60ms）。中央60%→全体→中央40%→四隅（巡回）→コントラスト強調（全体・中央60%）。
+      // 解析幅も800→1024に上げ、小さい・端にある・薄いQRも拾いやすくする。開始位置は毎回ずらし、上限で後ろの方法が飢えないようにする（最低2つは必ず試す）。
+      const vw = v.videoWidth, vh = v.videoHeight, deadline = performance.now() + 60;
+      const quads = [[0, 0], [vw / 2, 0], [0, vh / 2], [vw / 2, vh / 2]], q = quads[missCount % 4];
+      const passes = [
+        () => tryJsQR(v, vw * .2, vh * .2, vw * .6, vh * .6, 1024),
+        () => tryJsQR(v, 0, 0, vw, vh, 1024),
+        () => tryJsQR(v, vw * .3, vh * .3, vw * .4, vh * .4, 1024),
+        () => tryJsQR(v, q[0], q[1], vw / 2, vh / 2, 1024),
+        () => tryJsQR(v, 0, 0, vw, vh, 1024, true),
+        () => tryJsQR(v, vw * .2, vh * .2, vw * .6, vh * .6, 1024, true)
+      ];
+      const start = missCount % passes.length;
+      for (let i = 0; i < passes.length; i++) {
+        const r = passes[(start + i) % passes.length]();
+        if (r) return [r];
+        if (i >= 1 && performance.now() > deadline) break
+      }
+      return []
     }
     function drawOverlay(list, v) {
       const svg = $('overlay'), vw = v.videoWidth, vh = v.videoHeight;
@@ -3062,7 +3085,7 @@
     async function tick(ts) {
       if (!scanning) return;
       rafId = requestAnimationFrame(tick);
-      if (scanBusy || ts - lastRun < 90) return;
+      if (scanBusy || ts - lastRun < 50) return;
       const v = $('video'); if (v.readyState < 2 || !v.videoWidth) return;
       scanBusy = true; lastRun = ts;
       try {
@@ -3915,7 +3938,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=653').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=654').catch(() => { }));
   </script>
 </body>
 
