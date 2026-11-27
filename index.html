@@ -2453,6 +2453,25 @@
       flex: 0 1 auto;
       min-width: 0
     }
+
+    /* ===== v6.44：スマホでも3つのグレーパネルを保ち、間隔をそろえる ===== */
+    /* パネルが分かれている以上、グループをまたぐ間隔は「ボタンの半分＋パネルの余白＋パネル間の隙間＋
+       パネルの余白＋ボタンの半分」になり、パネル内（128px）より広くなってしまう（実測180px）。
+       余白と隙間を詰め、設定ボタン（中身は歯車＋「設定」だけ）を細くして、またぐ間隔をパネル内に近づける。
+       パネル内の間隔とボタン幅は変えない。PC表示も変えない */
+    @media (max-width: 760px) {
+      .stepScroll {
+        gap: 12px
+      }
+
+      .stepGroup {
+        padding: 8px 8px
+      }
+
+      .trackCommon .stepBtn {
+        flex: 0 0 84px
+      }
+    }
 </style>
 </head>
 
@@ -2812,7 +2831,7 @@
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
-      <p class="appVersion">物流管理支援システム v6.43</p>
+      <p class="appVersion">物流管理支援システム v6.44</p>
     </section>
   </div>
 
@@ -3938,7 +3957,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=654').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=655').catch(() => { }));
   </script>
 </body>
 
