@@ -2472,6 +2472,57 @@
         flex: 0 0 84px
       }
     }
+
+    /* ===== v6.46：Safariでメニューが崩れる問題の修正 ===== */
+    /* 実機Safariのスクリーンショットで確認した実態：パネル（.stepGroup）の幅が中身より
+       小さく計算され、ボタンがパネルの外にはみ出し、次のパネルがその上に重なって
+       描かれていた（⑤の丸が歯車に隠れる、②と③のラベルが重なる）。パネル同士の
+       隙間（flexのgap）もSafariでは潰れていた。原因は、帯とパネルの幅をflexの伸縮と
+       min-contentというブラウザ任せの計算に頼っていたこと。
+       対策として、スマホでは帯・パネル・ボタンの幅をすべて固定値で明示し、
+       隙間もgapではなくmarginで取る。ブラウザが計算する余地をなくす */
+    @media (max-width: 760px) {
+      .stepScroll {
+        flex: none;
+        width: 824px;
+        min-width: 824px;
+        gap: 0
+      }
+
+      .stepGroup {
+        flex: none;
+        padding: 8px 10px
+      }
+
+      .sgPhoneG {
+        width: 276px;
+        min-width: 276px
+      }
+
+      .sgPcG {
+        width: 404px;
+        min-width: 404px
+      }
+
+      .sgCommonG {
+        width: 112px;
+        min-width: 112px
+      }
+
+      .stepGroup+.stepGroup {
+        margin-left: 16px
+      }
+
+      .stepTrack .stepBtn {
+        flex: 0 0 128px;
+        width: 128px
+      }
+
+      .trackCommon .stepBtn {
+        flex: 0 0 92px;
+        width: 92px
+      }
+    }
 </style>
 </head>
 
@@ -2831,7 +2882,7 @@
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
-      <p class="appVersion">物流管理支援システム v6.44</p>
+      <p class="appVersion">物流管理支援システム v6.46</p>
     </section>
   </div>
 
@@ -3957,7 +4008,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=655').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=657').catch(() => { }));
   </script>
 </body>
 
