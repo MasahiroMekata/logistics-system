@@ -2523,6 +2523,14 @@
         width: 92px
       }
     }
+
+    /* ===== v6.47：手順3カードの青い枠を消し、他のカードに揃える ===== */
+    /* .transferCard だけに付いていた水色（--c-sel-line-soft）の2px枠を外す。
+       青は「選択中」専用の色というルールにも反していた。他のカードと同じく
+       枠なし（白背景＋影）にする */
+    .transferCard {
+      border: none
+    }
 </style>
 </head>
 
@@ -2882,7 +2890,7 @@
             class="fileBtn secondary">バックアップを読み込む<input id="importData" type="file" accept="application/json"
               style="display:none"></label><span class="spacer"></span><button id="wipeAll" class="danger">全データ削除</button></div>
       </div>
-      <p class="appVersion">物流管理支援システム v6.46</p>
+      <p class="appVersion">物流管理支援システム v6.47</p>
     </section>
   </div>
 
@@ -4008,7 +4016,7 @@
     // PC画面で操作欄を固定表示するとき、ヘッダーの高さの分だけ下げる
     function setHdrH() {const h = document.querySelector('header'); if (h) document.documentElement.style.setProperty('--hdrH', h.offsetHeight + 'px')}
     setHdrH(); window.addEventListener('resize', setHdrH);
-    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=657').catch(() => { }));
+    if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?ver=658').catch(() => { }));
   </script>
 </body>
 
